@@ -158,3 +158,19 @@ create policy "Users manage own subtasks" on subtasks
 alter table tasks add column if not exists tags text[] default '{}';
 alter table tasks add column if not exists recurrence text default 'none';
 alter table tasks add column if not exists importance text default 'normal';
+
+-- 13. GOALS ENHANCEMENTS (category, progress, milestones, template, new statuses)
+-- Drop old status check and add new one that includes 'active' and 'paused'
+alter table goals drop constraint if exists goals_status_check;
+alter table goals add constraint goals_status_check
+  check (status in ('in-progress', 'active', 'completed', 'paused'));
+-- New columns
+alter table goals add column if not exists category text default 'personal';
+alter table goals add column if not exists progress integer default 0 check (progress between 0 and 100);
+alter table goals add column if not exists milestones text[] default '{}';
+alter table goals add column if not exists template text;
+
+-- 14. JOURNAL ENHANCEMENTS (mood, word_count, images)
+alter table journal_entries add column if not exists mood integer check (mood between 1 and 5);
+alter table journal_entries add column if not exists word_count integer default 0;
+alter table journal_entries add column if not exists images text[] default '{}';

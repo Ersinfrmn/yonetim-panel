@@ -5,9 +5,9 @@ import { Play, Pause, RotateCcw, Settings, X, Timer } from 'lucide-react'
 import toast from 'react-hot-toast'
 
 const MODES = [
-  { key: 'work', label: 'Work', defaultMin: 25, color: 'text-red-500' },
-  { key: 'short', label: 'Short Break', defaultMin: 5, color: 'text-green-500' },
-  { key: 'long', label: 'Long Break', defaultMin: 15, color: 'text-blue-500' },
+  { key: 'work',  label: 'Çalışma',       defaultMin: 25, color: 'text-red-500' },
+  { key: 'short', label: 'Kısa Mola',     defaultMin: 5,  color: 'text-green-500' },
+  { key: 'long',  label: 'Uzun Mola',     defaultMin: 15, color: 'text-blue-500' },
 ]
 
 function pad(n) { return String(n).padStart(2, '0') }
@@ -41,7 +41,6 @@ export default function Pomodoro() {
   const startedAtRef = useRef(null)
 
   useEffect(() => {
-    // Load today's sessions
     const today = new Date().toISOString().split('T')[0]
     supabase.from('pomodoro_sessions')
       .select('*')
@@ -76,7 +75,6 @@ export default function Pomodoro() {
   async function handleTimerEnd() {
     playBeep()
     if (modeIdx === 0) {
-      // work session completed
       const dur = durations.work
       const { data } = await supabase
         .from('pomodoro_sessions')
@@ -84,9 +82,9 @@ export default function Pomodoro() {
         .select().single()
       if (data) setSessionLog(l => [data, ...l])
       setSessions(s => s + 1)
-      toast.success(`Work session done! 🍅 Total: ${sessions + 1}`)
+      toast.success(`Çalışma seansı tamamlandı! 🍅 Toplam: ${sessions + 1}`)
     } else {
-      toast.success('Break over! Time to focus.')
+      toast.success('Mola bitti! Çalışmaya devam edin.')
     }
   }
 
@@ -126,7 +124,7 @@ export default function Pomodoro() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Pomodoro Timer</h2>
+        <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Pomodoro Zamanlayıcı</h2>
         <button
           onClick={() => setShowSettings(true)}
           className="p-2 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 transition-colors"
@@ -135,7 +133,7 @@ export default function Pomodoro() {
         </button>
       </div>
 
-      {/* Mode selector */}
+      {/* Mod seçici */}
       <div className="flex gap-2 mb-8">
         {MODES.map((m, i) => (
           <button
@@ -144,7 +142,7 @@ export default function Pomodoro() {
             className={`flex-1 py-2 rounded-xl text-sm font-medium transition-colors ${
               modeIdx === i
                 ? 'bg-primary-600 text-white'
-                : 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-750'
+                : 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50'
             }`}
           >
             {m.label}
@@ -152,7 +150,7 @@ export default function Pomodoro() {
         ))}
       </div>
 
-      {/* Circular timer */}
+      {/* Dairesel zamanlayıcı */}
       <div className="flex flex-col items-center mb-8">
         <div className="relative">
           <svg width="220" height="220" className="-rotate-90">
@@ -185,12 +183,12 @@ export default function Pomodoro() {
             onClick={running ? pause : start}
             className="px-8 py-3 rounded-full bg-primary-600 hover:bg-primary-700 text-white text-lg font-semibold flex items-center gap-2 transition-colors shadow-lg"
           >
-            {running ? <><Pause size={22} /> Pause</> : <><Play size={22} /> Start</>}
+            {running ? <><Pause size={22} /> Duraklat</> : <><Play size={22} /> Başlat</>}
           </button>
         </div>
       </div>
 
-      {/* Session counter */}
+      {/* Seans sayacı */}
       <div className="flex justify-center gap-2 mb-8">
         {Array.from({ length: Math.max(4, sessions + 1) }).map((_, i) => (
           <div
@@ -200,22 +198,22 @@ export default function Pomodoro() {
             }`}
           />
         ))}
-        <span className="text-sm text-slate-500 dark:text-slate-400 ml-2">{sessions} sessions today</span>
+        <span className="text-sm text-slate-500 dark:text-slate-400 ml-2">Bugün {sessions} seans</span>
       </div>
 
-      {/* Session log */}
+      {/* Seans günlüğü */}
       {sessionLog.length > 0 && (
         <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 p-4">
-          <h3 className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-3">Today's Log</h3>
+          <h3 className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-3">Bugünkü Seanslar</h3>
           <div className="space-y-2">
             {sessionLog.slice(0, 5).map((s, i) => (
               <div key={s.id || i} className="flex items-center justify-between text-sm">
                 <div className="flex items-center gap-2 text-slate-600 dark:text-slate-300">
                   <Timer size={14} className="text-red-400" />
-                  <span>{s.duration_minutes}min work session</span>
+                  <span>{s.duration_minutes} dk çalışma seansı</span>
                 </div>
                 <span className="text-slate-400 text-xs">
-                  {new Date(s.started_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  {new Date(s.started_at).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}
                 </span>
               </div>
             ))}
@@ -223,19 +221,19 @@ export default function Pomodoro() {
         </div>
       )}
 
-      {/* Settings modal */}
+      {/* Ayarlar modalı */}
       {showSettings && (
         <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
           <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 w-full max-w-sm shadow-xl">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-bold text-slate-800 dark:text-white">Timer Settings</h3>
+              <h3 className="text-lg font-bold text-slate-800 dark:text-white">Zamanlayıcı Ayarları</h3>
               <button onClick={() => setShowSettings(false)} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
                 <X size={20} />
               </button>
             </div>
             {MODES.map(m => (
               <div key={m.key} className="flex items-center justify-between mb-3">
-                <label className="text-sm text-slate-600 dark:text-slate-300">{m.label} (min)</label>
+                <label className="text-sm text-slate-600 dark:text-slate-300">{m.label} (dk)</label>
                 <input
                   type="number"
                   min={1}
@@ -250,7 +248,7 @@ export default function Pomodoro() {
               onClick={applySettings}
               className="w-full mt-4 bg-primary-600 hover:bg-primary-700 text-white py-2.5 rounded-xl font-medium transition-colors"
             >
-              Apply
+              Uygula
             </button>
           </div>
         </div>

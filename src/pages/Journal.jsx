@@ -2,15 +2,16 @@ import { useEffect, useState, useRef } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
 import { format, parseISO } from 'date-fns'
+import { tr } from 'date-fns/locale'
 import { BookOpen, Save, ChevronLeft, ChevronRight } from 'lucide-react'
 import toast from 'react-hot-toast'
 
 const fmt = d => format(d, 'yyyy-MM-dd')
-const display = d => format(typeof d === 'string' ? parseISO(d) : d, 'MMMM d, yyyy')
+const display = d => format(typeof d === 'string' ? parseISO(d) : d, 'd MMMM yyyy', { locale: tr })
 
 export default function Journal() {
   const { user } = useAuth()
-  const [entries, setEntries] = useState({}) // keyed by date string
+  const [entries, setEntries] = useState({})
   const [selectedDate, setSelectedDate] = useState(fmt(new Date()))
   const [content, setContent] = useState('')
   const [saving, setSaving] = useState(false)
@@ -53,7 +54,7 @@ export default function Journal() {
     }
     if (result) {
       setEntries(e => ({ ...e, [selectedDate]: result }))
-      toast.success('Saved!', { duration: 1000 })
+      toast.success('Kaydedildi!', { duration: 1000 })
     }
     setSaving(false)
   }
@@ -69,9 +70,9 @@ export default function Journal() {
 
   return (
     <div>
-      <h2 className="text-2xl font-bold text-slate-800 dark:text-white mb-6">Daily Journal</h2>
+      <h2 className="text-2xl font-bold text-slate-800 dark:text-white mb-6">Günlük</h2>
 
-      {/* Date navigation */}
+      {/* Tarih gezinme */}
       <div className="flex items-center gap-3 mb-4">
         <button onClick={() => changeDay(-1)} className="p-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-slate-50 transition-colors">
           <ChevronLeft size={18} />
@@ -95,15 +96,15 @@ export default function Journal() {
         </button>
       </div>
 
-      {/* Editor */}
+      {/* Editör */}
       <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 overflow-hidden mb-6">
         <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between">
           <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
             <BookOpen size={16} />
             <span className="text-sm">
               {entries[selectedDate]?.content?.trim()
-                ? `${entries[selectedDate].content.trim().split(/\s+/).length} words`
-                : 'Start writing...'}
+                ? `${entries[selectedDate].content.trim().split(/\s+/).length} kelime`
+                : 'Yazmaya başlayın...'}
             </span>
           </div>
           <button
@@ -111,21 +112,21 @@ export default function Journal() {
             className="flex items-center gap-1.5 px-3 py-1.5 bg-primary-600 hover:bg-primary-700 text-white text-sm rounded-lg transition-colors"
           >
             <Save size={14} />
-            {saving ? 'Saving...' : 'Save'}
+            {saving ? 'Kaydediliyor...' : 'Kaydet'}
           </button>
         </div>
         <textarea
           value={content}
           onChange={e => scheduleAutosave(e.target.value)}
-          placeholder={`How was ${display(selectedDate)}?`}
+          placeholder={`${display(selectedDate)} nasıl geçti?`}
           className="w-full min-h-[400px] p-4 bg-transparent text-slate-700 dark:text-slate-200 placeholder-slate-300 dark:placeholder-slate-600 focus:outline-none resize-none text-base leading-relaxed"
         />
       </div>
 
-      {/* Past entries list */}
+      {/* Geçmiş kayıtlar */}
       {entryDates.length > 0 && (
         <div>
-          <h3 className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-3">Past Entries</h3>
+          <h3 className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-3">Geçmiş Kayıtlar</h3>
           <div className="space-y-2">
             {entryDates
               .sort((a, b) => b.localeCompare(a))

@@ -2,16 +2,22 @@ import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
 import { format, isToday, parseISO } from 'date-fns'
+import { tr } from 'date-fns/locale'
 import { Plus, Trash2, CheckSquare, Square, Calendar, Flag } from 'lucide-react'
 import toast from 'react-hot-toast'
 
 const PRIORITY = {
-  low: { label: 'Low', color: 'text-blue-500', bg: 'bg-blue-50 dark:bg-blue-900/20' },
-  medium: { label: 'Medium', color: 'text-yellow-500', bg: 'bg-yellow-50 dark:bg-yellow-900/20' },
-  high: { label: 'High', color: 'text-red-500', bg: 'bg-red-50 dark:bg-red-900/20' },
+  low:    { label: 'Düşük',  color: 'text-blue-500',   bg: 'bg-blue-50 dark:bg-blue-900/20' },
+  medium: { label: 'Orta',   color: 'text-yellow-500', bg: 'bg-yellow-50 dark:bg-yellow-900/20' },
+  high:   { label: 'Yüksek', color: 'text-red-500',    bg: 'bg-red-50 dark:bg-red-900/20' },
 }
 
-const FILTERS = ['all', 'active', 'completed', 'today']
+const FILTERS = [
+  { key: 'all',       label: 'Tümü' },
+  { key: 'active',    label: 'Aktif' },
+  { key: 'completed', label: 'Tamamlanan' },
+  { key: 'today',     label: 'Bugün' },
+]
 
 export default function Todos() {
   const { user } = useAuth()
@@ -31,10 +37,10 @@ export default function Todos() {
       .from('tasks')
       .insert({ ...form, user_id: user.id, completed: false, title: form.title.trim() })
       .select().single()
-    if (error) { toast.error('Failed to add task'); return }
+    if (error) { toast.error('Görev eklenemedi'); return }
     setTasks(t => [data, ...t])
     setForm({ title: '', due_date: '', priority: 'medium' })
-    toast.success('Task added!')
+    toast.success('Görev eklendi!')
   }
 
   async function toggleTask(task) {
@@ -55,19 +61,19 @@ export default function Todos() {
     return true
   })
 
-  if (loading) return <div className="text-center py-20 text-slate-400">Loading...</div>
+  if (loading) return <div className="text-center py-20 text-slate-400">Yükleniyor...</div>
 
   return (
     <div>
-      <h2 className="text-2xl font-bold text-slate-800 dark:text-white mb-6">To-Do List</h2>
+      <h2 className="text-2xl font-bold text-slate-800 dark:text-white mb-6">Görev Listesi</h2>
 
-      {/* Add form */}
+      {/* Görev ekleme formu */}
       <div className="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-100 dark:border-slate-700 mb-6 space-y-3">
         <input
           value={form.title}
           onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
           onKeyDown={e => e.key === 'Enter' && addTask()}
-          placeholder="Task title..."
+          placeholder="Görev başlığı..."
           className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500"
         />
         <div className="flex gap-2 flex-wrap">
@@ -80,46 +86,46 @@ export default function Todos() {
           <select
             value={form.priority}
             onChange={e => setForm(f => ({ ...f, priority: e.target.value }))}
-            className="flex-1 min-w-[120px] px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+            className="flex-1 min-w-[140px] px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
           >
-            <option value="low">Low Priority</option>
-            <option value="medium">Medium Priority</option>
-            <option value="high">High Priority</option>
+            <option value="low">Düşük Öncelik</option>
+            <option value="medium">Orta Öncelik</option>
+            <option value="high">Yüksek Öncelik</option>
           </select>
           <button
             onClick={addTask}
             className="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 text-sm transition-colors"
           >
-            <Plus size={16} /> Add
+            <Plus size={16} /> Ekle
           </button>
         </div>
       </div>
 
-      {/* Filters */}
+      {/* Filtreler */}
       <div className="flex gap-2 mb-4 overflow-x-auto pb-1">
-        {FILTERS.map(f => (
+        {FILTERS.map(({ key, label }) => (
           <button
-            key={f}
-            onClick={() => setFilter(f)}
-            className={`px-3 py-1.5 rounded-lg text-sm font-medium capitalize transition-colors whitespace-nowrap ${
-              filter === f
+            key={key}
+            onClick={() => setFilter(key)}
+            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
+              filter === key
                 ? 'bg-primary-600 text-white'
                 : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700'
             }`}
           >
-            {f}
+            {label}
           </button>
         ))}
         <span className="ml-auto text-sm text-slate-400 self-center whitespace-nowrap">
-          {filtered.filter(t => !t.completed).length} remaining
+          {filtered.filter(t => !t.completed).length} kalan
         </span>
       </div>
 
-      {/* Task list */}
+      {/* Görev listesi */}
       {filtered.length === 0 ? (
         <div className="text-center py-12 text-slate-400">
           <CheckSquare size={36} className="mx-auto mb-2 opacity-40" />
-          <p>No tasks here!</p>
+          <p>Burada görev yok!</p>
         </div>
       ) : (
         <div className="space-y-2">
@@ -148,7 +154,7 @@ export default function Todos() {
                     {task.due_date && (
                       <span className={`flex items-center gap-1 text-xs ${isToday(parseISO(task.due_date)) ? 'text-orange-500' : 'text-slate-400'}`}>
                         <Calendar size={12} />
-                        {format(parseISO(task.due_date), 'MMM d')}
+                        {format(parseISO(task.due_date), 'd MMM', { locale: tr })}
                       </span>
                     )}
                     <span className={`flex items-center gap-1 text-xs px-1.5 py-0.5 rounded-md ${p.color} ${p.bg}`}>

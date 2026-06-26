@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
-import { format, subDays, parseISO, differenceInCalendarDays } from 'date-fns'
+import { format, subDays, parseISO } from 'date-fns'
 import { Plus, Trash2, Flame, Check } from 'lucide-react'
 import toast from 'react-hot-toast'
 
@@ -75,10 +75,10 @@ export default function Habits() {
       .insert({ user_id: user.id, name: newName.trim() })
       .select()
       .single()
-    if (error) { toast.error('Failed to add habit'); return }
+    if (error) { toast.error('Alışkanlık eklenemedi'); return }
     setHabits(h => [...h, data])
     setNewName('')
-    toast.success('Habit added!')
+    toast.success('Alışkanlık eklendi!')
   }
 
   async function deleteHabit(id) {
@@ -86,7 +86,7 @@ export default function Habits() {
     await supabase.from('habits').delete().eq('id', id)
     setHabits(h => h.filter(x => x.id !== id))
     setLogs(l => l.filter(x => x.habit_id !== id))
-    toast.success('Habit deleted')
+    toast.success('Alışkanlık silindi')
   }
 
   async function toggleToday(habit) {
@@ -104,33 +104,33 @@ export default function Habits() {
     }
   }
 
-  if (loading) return <div className="text-center py-20 text-slate-400">Loading...</div>
+  if (loading) return <div className="text-center py-20 text-slate-400">Yükleniyor...</div>
 
   return (
     <div>
-      <h2 className="text-2xl font-bold text-slate-800 dark:text-white mb-6">Habit Tracker</h2>
+      <h2 className="text-2xl font-bold text-slate-800 dark:text-white mb-6">Alışkanlık Takibi</h2>
 
-      {/* Add habit */}
+      {/* Alışkanlık ekle */}
       <div className="flex gap-2 mb-6">
         <input
           value={newName}
           onChange={e => setNewName(e.target.value)}
           onKeyDown={e => e.key === 'Enter' && addHabit()}
-          placeholder="New habit name..."
+          placeholder="Yeni alışkanlık adı..."
           className="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-800 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500"
         />
         <button
           onClick={addHabit}
           className="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2.5 rounded-xl flex items-center gap-2 transition-colors"
         >
-          <Plus size={18} /> Add
+          <Plus size={18} /> Ekle
         </button>
       </div>
 
       {habits.length === 0 ? (
         <div className="text-center py-16 text-slate-400">
           <Flame size={40} className="mx-auto mb-3 opacity-40" />
-          <p>No habits yet. Add one above!</p>
+          <p>Henüz alışkanlık yok. Yukarıdan ekleyin!</p>
         </div>
       ) : (
         <div className="space-y-4">

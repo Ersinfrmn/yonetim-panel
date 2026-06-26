@@ -19,13 +19,20 @@ export default function Login() {
         <div className="w-16 h-16 bg-primary-100 dark:bg-primary-900/30 rounded-2xl flex items-center justify-center mx-auto mb-4">
           <Zap size={32} className="text-primary-600 dark:text-primary-400" />
         </div>
-        <h1 className="text-2xl font-bold text-slate-800 dark:text-white mb-1">ProductiFlow</h1>
+        <h1 className="text-2xl font-bold text-slate-800 dark:text-white mb-1">EF Komuta Merkezi</h1>
         <p className="text-slate-500 dark:text-slate-400 text-sm mb-8">
-          Your all-in-one productivity workspace
+          Kişisel verimlilik çalışma alanınız
         </p>
 
         <div className="space-y-3 text-left mb-8">
-          {['Habit Tracker with streaks', 'Smart To-Do List', 'Daily Journal', 'Goal Tracker', 'Pomodoro Timer', 'Statistics Dashboard'].map(f => (
+          {[
+            'Alışkanlık takibi ve seriler',
+            'Akıllı görev listesi',
+            'Günlük journal',
+            'Hedef takibi',
+            'Pomodoro zamanlayıcı',
+            'İstatistik paneli',
+          ].map(f => (
             <div key={f} className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
               <div className="w-1.5 h-1.5 rounded-full bg-primary-500 shrink-0" />
               {f}
@@ -43,7 +50,7 @@ export default function Login() {
             <path fill="#FBBC05" d="M3.964 10.707c-.18-.54-.282-1.117-.282-1.707s.102-1.167.282-1.707V4.961H.957C.347 6.175 0 7.55 0 9s.348 2.825.957 4.039l3.007-2.332z"/>
             <path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.482 0 2.438 2.017.957 4.961L3.964 6.293C4.672 4.166 6.656 3.58 9 3.58z"/>
           </svg>
-          Continue with Google
+          Google ile Giriş Yap
         </button>
       </div>
     </div>

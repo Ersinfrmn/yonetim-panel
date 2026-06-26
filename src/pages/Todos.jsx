@@ -472,7 +472,7 @@ function CalendarView({ tasks, onToggle }) {
                       <>
                         <div className={`mb-1 w-6 h-6 text-xs font-semibold flex items-center justify-center rounded-full ${
                           todayCell
-                            ? 'bg-indigo-600 text-white'
+                            ? 'bg-primary-600 text-white'
                             : 'text-slate-700 dark:text-slate-200'
                         }`}>
                           {cell.getDate()}

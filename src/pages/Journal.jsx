@@ -178,6 +178,39 @@ export default function Journal() {
     saveTimer.current = setTimeout(() => save(content, next), 400)
   }
 
+  async function uploadImage(file) {
+    if (!file || !file.type.startsWith('image/')) {
+      toast.error('Sadece resim dosyaları yüklenebilir')
+      return
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error('Maksimum dosya boyutu 10 MB')
+      return
+    }
+    setUploading(true)
+    const ext = file.name.split('.').pop().toLowerCase()
+    const path = `${user.id}/${selectedDate}/${Date.now()}.${ext}`
+    const { error } = await supabase.storage.from('journal-images').upload(path, file)
+    if (error) {
+      toast.error('Resim yüklenemedi')
+      setUploading(false)
+      return
+    }
+    const newImages = [...images, path]
+    setImages(newImages)
+    await save(content, mood, newImages)
+    setUploading(false)
+    toast.success('Resim eklendi', { duration: 1500 })
+  }
+
+  async function deleteImage(path) {
+    await supabase.storage.from('journal-images').remove([path])
+    const newImages = images.filter(p => p !== path)
+    setImages(newImages)
+    await save(content, mood, newImages)
+    toast.success('Resim silindi', { duration: 1500 })
+  }
+
   function changeDay(delta) {
     const d = parseISO(selectedDate)
     d.setDate(d.getDate() + delta)

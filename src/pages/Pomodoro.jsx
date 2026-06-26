@@ -286,6 +286,11 @@ export default function Pomodoro() {
 
   function saveCfg() {
     setCfg(draft)
+    localStorage.setItem('pomodoro_settings', JSON.stringify({
+      focusDuration: draft.focus,
+      shortBreak:    draft.short,
+      longBreak:     draft.long,
+    }))
     if (phase === 'idle') { setSecs(draft.focus * 60); setTotal(draft.focus * 60) }
     setShowCfg(false)
   }

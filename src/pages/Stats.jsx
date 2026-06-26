@@ -5,15 +5,49 @@ import { subDays, format, parseISO, startOfWeek, startOfMonth } from 'date-fns'
 import { tr } from 'date-fns/locale'
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  LineChart, Line,
+  LineChart, Line, ComposedChart, Scatter,
 } from 'recharts'
-import { Flame, CheckSquare, BookOpen, Timer } from 'lucide-react'
+import { Flame, CheckSquare, BookOpen, Timer, Trophy, Download } from 'lucide-react'
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
 
 const fmt = d => format(d, 'yyyy-MM-dd')
 
+function linReg(pts) {
+  const n = pts.length
+  if (n < 2) return null
+  const sx  = pts.reduce((a, p) => a + p.x, 0)
+  const sy  = pts.reduce((a, p) => a + p.y, 0)
+  const sxy = pts.reduce((a, p) => a + p.x * p.y, 0)
+  const sx2 = pts.reduce((a, p) => a + p.x * p.x, 0)
+  const den = n * sx2 - sx * sx
+  if (!den) return null
+  const m = (n * sxy - sx * sy) / den
+  const b = (sy - m * sx) / n
+  return { m, b }
+}
+
+const MOOD = { 1: '😞', 2: '😕', 3: '😐', 4: '🙂', 5: '😄' }
+const pColor = p => p >= 100 ? '#22c55e' : p >= 67 ? '#6366f1' : p >= 34 ? '#eab308' : '#ef4444'
+
+function MoodTick({ x, y, payload }) {
+  return (
+    <g transform={`translate(${x},${y})`}>
+      <text x={-4} y={0} dy={5} textAnchor="end" fill="#94a3b8" fontSize={13}>
+        {MOOD[payload.value]}
+      </text>
+    </g>
+  )
+}
+
+// ── Component ─────────────────────────────────────────────────────────────────
+
 export default function Stats() {
   const { user } = useAuth()
-  const [data, setData] = useState(null)
+  const [data,   setData]   = useState(null)
+  const [extras, setExtras] = useState(null)
+
+  // ── Existing data load (unchanged) ────────────────────────────────────────
 
   useEffect(() => {
     async function load() {
@@ -32,49 +66,37 @@ export default function Stats() {
         supabase.from('pomodoro_sessions').select('*').eq('user_id', user.id).eq('completed', true),
       ])
 
-      // Son 7 gün alışkanlık verisi
       const last7 = Array.from({ length: 7 }, (_, i) => {
-        const d = subDays(today, 6 - i)
+        const d  = subDays(today, 6 - i)
         const ds = fmt(d)
-        const done = (habitLogs || []).filter(l => l.date === ds).length
+        const done  = (habitLogs || []).filter(l => l.date === ds).length
         const total = (habits || []).length
         return {
-          day: format(d, 'EEE', { locale: tr }),
+          day:  format(d, 'EEE', { locale: tr }),
           rate: total ? Math.round((done / total) * 100) : 0,
           done,
         }
       })
 
-      // Bu hafta / bu ay tamamlanan görevler
-      const weekStart = startOfWeek(today, { locale: tr })
-      const monthStart = startOfMonth(today)
-      const completedTasks = (tasks || []).filter(t => t.completed)
-      const tasksThisWeek = completedTasks.filter(t =>
-        t.created_at && parseISO(t.created_at) >= weekStart
-      ).length
-      const tasksThisMonth = completedTasks.filter(t =>
-        t.created_at && parseISO(t.created_at) >= monthStart
-      ).length
+      const weekStart   = startOfWeek(today, { locale: tr })
+      const monthStart  = startOfMonth(today)
+      const completedTasks  = (tasks || []).filter(t => t.completed)
+      const tasksThisWeek   = completedTasks.filter(t => t.created_at && parseISO(t.created_at) >= weekStart).length
+      const tasksThisMonth  = completedTasks.filter(t => t.created_at && parseISO(t.created_at) >= monthStart).length
 
-      // Günlük serisi
       const journalDates = new Set((journals || []).map(j => j.date))
       let journalStreak = 0
       let cur = today
-      while (journalDates.has(fmt(cur))) {
-        journalStreak++
-        cur = subDays(cur, 1)
-      }
+      while (journalDates.has(fmt(cur))) { journalStreak++; cur = subDays(cur, 1) }
 
-      // Pomodoro bugün / bu hafta
       const todayStr = fmt(today)
       const pomoToday = (pomodoros || []).filter(p => p.started_at?.startsWith(todayStr)).length
-      const pomoWeek = (pomodoros || []).filter(p => p.started_at && parseISO(p.started_at) >= weekStart).length
+      const pomoWeek  = (pomodoros || []).filter(p => p.started_at && parseISO(p.started_at) >= weekStart).length
 
-      // Son 30 günlük alışkanlık oranı (her 5 günde bir örnek)
       const last30 = Array.from({ length: 30 }, (_, i) => {
-        const d = subDays(today, 29 - i)
+        const d  = subDays(today, 29 - i)
         const ds = fmt(d)
-        const done = (habitLogs || []).filter(l => l.date === ds).length
+        const done  = (habitLogs || []).filter(l => l.date === ds).length
         const total = (habits || []).length
         return { day: format(d, 'd MMM', { locale: tr }), rate: total ? Math.round((done / total) * 100) : 0 }
       }).filter((_, i) => i % 5 === 4)
@@ -84,21 +106,191 @@ export default function Stats() {
     load()
   }, [])
 
+  // ── New extras data load ──────────────────────────────────────────────────
+
+  useEffect(() => {
+    async function loadExtras() {
+      const today       = new Date()
+      const ago30       = format(subDays(today, 29), 'yyyy-MM-dd')
+
+      const [
+        { data: goals },
+        { data: moodEntries },
+        { data: recentLogs },
+        { data: pomoDone },
+      ] = await Promise.all([
+        supabase.from('goals')
+          .select('id,title,progress,status,target_date,category')
+          .eq('user_id', user.id)
+          .neq('status', 'completed'),
+        supabase.from('journal_entries')
+          .select('date,mood')
+          .eq('user_id', user.id)
+          .gte('date', ago30)
+          .not('mood', 'is', null),
+        supabase.from('habit_logs')
+          .select('date')
+          .eq('user_id', user.id)
+          .eq('completed', true)
+          .gte('date', ago30),
+        // Catch both old (completed) and new (was_completed) sessions
+        supabase.from('pomodoro_sessions')
+          .select('started_at,completed_at,was_completed,completed')
+          .eq('user_id', user.id),
+      ])
+
+      // ── Habit × Mood correlation ──────────────────────────────────────────
+
+      const habitCountByDate = {}
+      ;(recentLogs || []).forEach(l => {
+        habitCountByDate[l.date] = (habitCountByDate[l.date] || 0) + 1
+      })
+
+      const rawPts = (moodEntries || []).map(e => ({
+        x: habitCountByDate[e.date] || 0,
+        y: e.mood,
+      }))
+
+      const reg = linReg(rawPts)
+
+      const correlationData = [...rawPts]
+        .sort((a, b) => a.x - b.x)
+        .map(p => ({
+          ...p,
+          trend: reg ? Math.max(1, Math.min(5, reg.m * p.x + reg.b)) : null,
+        }))
+
+      // ── Best pomodoro day ─────────────────────────────────────────────────
+
+      const dateMap = {}
+      ;(pomoDone || []).forEach(s => {
+        const isCompleted = s.was_completed === true || s.completed === true
+        if (!isCompleted) return
+        const dateStr = (s.completed_at || s.started_at)?.split('T')[0]
+        if (dateStr) dateMap[dateStr] = (dateMap[dateStr] || 0) + 1
+      })
+
+      const bestDay = Object.keys(dateMap).length
+        ? Object.entries(dateMap).reduce((a, b) => b[1] > a[1] ? b : a)
+        : null
+
+      setExtras({
+        goals:           goals || [],
+        correlationData,
+        hasEnoughCorr:   rawPts.length >= 5,
+        bestDay:         bestDay ? { date: bestDay[0], count: bestDay[1] } : null,
+      })
+    }
+    loadExtras()
+  }, [user.id])
+
+  // ── CSV export ────────────────────────────────────────────────────────────
+
+  async function downloadCSV() {
+    const now        = new Date()
+    const monthStart = format(startOfMonth(now), 'yyyy-MM-dd')
+    const filename   = `ef-komuta-istatistikler-${format(now, 'yyyy-MM')}.csv`
+
+    const [
+      { data: sessions },
+      { data: hlogs },
+      { data: journals },
+      { data: goals },
+      { data: habits },
+      { data: tasks },
+    ] = await Promise.all([
+      supabase.from('pomodoro_sessions')
+        .select('started_at,completed_at,duration_minutes,was_completed,task_id')
+        .eq('user_id', user.id)
+        .gte('started_at', `${monthStart}T00:00:00`),
+      supabase.from('habit_logs')
+        .select('date,habit_id,completed')
+        .eq('user_id', user.id)
+        .gte('date', monthStart),
+      supabase.from('journal_entries')
+        .select('date,mood')
+        .eq('user_id', user.id)
+        .gte('date', monthStart),
+      supabase.from('goals').select('title,progress,status,target_date').eq('user_id', user.id),
+      supabase.from('habits').select('id,name').eq('user_id', user.id),
+      supabase.from('tasks').select('id,title').eq('user_id', user.id),
+    ])
+
+    const habitMap = Object.fromEntries((habits || []).map(h => [h.id, h.name]))
+    const taskMap  = Object.fromEntries((tasks  || []).map(t => [t.id, t.title]))
+    const fmtD = s => s ? format(parseISO(s.split('T')[0]), 'dd.MM.yyyy') : ''
+    const fmtT = s => s ? format(parseISO(s), 'HH:mm') : ''
+    const esc  = s => `"${String(s || '').replace(/"/g, '""')}"`
+
+    const lines = []
+
+    lines.push('POMODORO SEANSLAR')
+    lines.push('Tarih,Başlangıç,Bitiş,Süre (dk),Tamamlandı mı,Görev')
+    ;(sessions || []).forEach(s => {
+      lines.push([
+        fmtD(s.started_at), fmtT(s.started_at), fmtT(s.completed_at),
+        s.duration_minutes || '', s.was_completed ? 'Evet' : 'Hayır',
+        esc(taskMap[s.task_id] || ''),
+      ].join(','))
+    })
+
+    lines.push('')
+    lines.push('ALIŞKANLıK TAMAMLANMALARI')
+    lines.push('Tarih,Alışkanlık Adı,Tamamlandı mı')
+    ;(hlogs || []).forEach(l => {
+      lines.push([fmtD(l.date), esc(habitMap[l.habit_id] || ''), l.completed ? 'Evet' : 'Hayır'].join(','))
+    })
+
+    lines.push('')
+    lines.push('RUH HALİ KAYITLARI')
+    lines.push('Tarih,Ruh Hali (1-5)')
+    ;(journals || []).filter(j => j.mood).forEach(j => {
+      lines.push([fmtD(j.date), j.mood].join(','))
+    })
+
+    lines.push('')
+    lines.push('HEDEF İLERLEMESİ')
+    lines.push('Hedef Adı,İlerleme (%),Durum,Hedef Tarih')
+    ;(goals || []).forEach(g => {
+      lines.push([esc(g.title), g.progress || 0, g.status || '', fmtD(g.target_date)].join(','))
+    })
+
+    const blob = new Blob(['﻿' + lines.join('\n')], { type: 'text/csv;charset=utf-8;' })
+    const url  = URL.createObjectURL(blob)
+    const a    = document.createElement('a')
+    a.href = url; a.download = filename; a.click()
+    URL.revokeObjectURL(url)
+  }
+
+  // ── Early return ──────────────────────────────────────────────────────────
+
   if (!data) return <div className="text-center py-20 text-slate-400">İstatistikler yükleniyor...</div>
 
   const statCards = [
-    { icon: CheckSquare, label: 'Bu hafta tamamlanan',  value: data.tasksThisWeek,  sub: `${data.tasksThisMonth} bu ay`,         color: 'text-blue-500',   bg: 'bg-blue-50 dark:bg-blue-900/20' },
-    { icon: BookOpen,    label: 'Günlük serisi',         value: `${data.journalStreak}g`, sub: 'ardışık gün',                   color: 'text-purple-500', bg: 'bg-purple-50 dark:bg-purple-900/20' },
-    { icon: Timer,       label: 'Bugünkü pomodoro',      value: data.pomoToday,      sub: `${data.pomoWeek} bu hafta`,           color: 'text-red-500',    bg: 'bg-red-50 dark:bg-red-900/20' },
-    { icon: Flame,       label: 'Aktif alışkanlık',      value: data.habitCount,     sub: 'takip edilen alışkanlık',             color: 'text-orange-500', bg: 'bg-orange-50 dark:bg-orange-900/20' },
+    { icon: CheckSquare, label: 'Bu hafta tamamlanan',  value: data.tasksThisWeek,       sub: `${data.tasksThisMonth} bu ay`,   color: 'text-blue-500',   bg: 'bg-blue-50 dark:bg-blue-900/20' },
+    { icon: BookOpen,    label: 'Günlük serisi',         value: `${data.journalStreak}g`,  sub: 'ardışık gün',                   color: 'text-purple-500', bg: 'bg-purple-50 dark:bg-purple-900/20' },
+    { icon: Timer,       label: 'Bugünkü pomodoro',      value: data.pomoToday,            sub: `${data.pomoWeek} bu hafta`,     color: 'text-red-500',    bg: 'bg-red-50 dark:bg-red-900/20' },
+    { icon: Flame,       label: 'Aktif alışkanlık',      value: data.habitCount,           sub: 'takip edilen alışkanlık',       color: 'text-orange-500', bg: 'bg-orange-50 dark:bg-orange-900/20' },
   ]
+
+  // ── Render ────────────────────────────────────────────────────────────────
 
   return (
     <div>
-      <h2 className="text-2xl font-bold text-slate-800 dark:text-white mb-6">İstatistikler</h2>
+      {/* Header + CSV button */}
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-2xl font-bold text-slate-800 dark:text-white">İstatistikler</h2>
+        <button
+          onClick={downloadCSV}
+          className="flex items-center gap-2 px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-medium hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+        >
+          <Download size={14} />
+          CSV İndir
+        </button>
+      </div>
 
-      {/* Özet kartlar */}
-      <div className="grid grid-cols-2 gap-3 mb-8">
+      {/* ── Özet kartlar (unchanged) ────────────────────────────────────────── */}
+      <div className="grid grid-cols-2 gap-3 mb-6">
         {statCards.map(({ icon: Icon, label, value, sub, color, bg }) => (
           <div key={label} className="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-100 dark:border-slate-700">
             <div className={`w-9 h-9 rounded-xl ${bg} flex items-center justify-center mb-3`}>
@@ -111,7 +303,29 @@ export default function Stats() {
         ))}
       </div>
 
-      {/* Son 7 gün alışkanlık tamamlanma oranı */}
+      {/* ── En Verimli Günüm badge ───────────────────────────────────────────── */}
+      {extras && (
+        <div className="mb-6 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 p-4">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-amber-50 dark:bg-amber-900/30 flex items-center justify-center shrink-0">
+              <Trophy size={22} className="text-amber-500" />
+            </div>
+            <div>
+              <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">En Verimli Günüm</p>
+              {extras.bestDay ? (<>
+                <p className="font-bold text-slate-800 dark:text-white text-sm mt-0.5">
+                  {format(parseISO(extras.bestDay.date), 'd MMMM yyyy, EEEE', { locale: tr })}
+                </p>
+                <p className="text-xs text-slate-400 mt-0.5">{extras.bestDay.count} pomodoro tamamlandı</p>
+              </>) : (
+                <p className="text-sm text-slate-400 mt-0.5">Henüz tamamlanan pomodoro yok</p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Son 7 gün alışkanlık tamamlanma oranı (unchanged) ───────────────── */}
       <div className="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-100 dark:border-slate-700 mb-6">
         <h3 className="text-sm font-semibold text-slate-600 dark:text-slate-300 mb-4">Alışkanlık Tamamlanma Oranı — Son 7 Gün</h3>
         <ResponsiveContainer width="100%" height={180}>
@@ -128,8 +342,8 @@ export default function Stats() {
         </ResponsiveContainer>
       </div>
 
-      {/* 30 günlük trend */}
-      <div className="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-100 dark:border-slate-700">
+      {/* ── 30 günlük trend (unchanged) ─────────────────────────────────────── */}
+      <div className="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-100 dark:border-slate-700 mb-6">
         <h3 className="text-sm font-semibold text-slate-600 dark:text-slate-300 mb-4">Alışkanlık Oranı Trendi — Son 30 Gün</h3>
         <ResponsiveContainer width="100%" height={180}>
           <LineChart data={data.last30} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
@@ -144,6 +358,124 @@ export default function Stats() {
           </LineChart>
         </ResponsiveContainer>
       </div>
+
+      {/* ── NEW: Goal Progress ───────────────────────────────────────────────── */}
+      {extras && (
+        <div className="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-100 dark:border-slate-700 mb-6">
+          <h3 className="text-sm font-semibold text-slate-600 dark:text-slate-300 mb-4">Hedef İlerlemesi</h3>
+          {extras.goals.length === 0 ? (
+            <p className="text-sm text-slate-400 text-center py-6">Henüz hedef eklenmedi</p>
+          ) : (
+            <div className="space-y-4">
+              {extras.goals.map(goal => {
+                const pct   = goal.progress ?? 0
+                const color = pColor(pct)
+                return (
+                  <div key={goal.id}>
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-sm font-medium text-slate-700 dark:text-slate-200 truncate max-w-[75%]">
+                        {goal.title}
+                      </span>
+                      <span className="text-xs font-semibold tabular-nums" style={{ color }}>
+                        {pct}%
+                      </span>
+                    </div>
+                    <div className="h-2 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+                      <div
+                        className="h-full rounded-full transition-all duration-500"
+                        style={{ width: `${pct}%`, backgroundColor: color }}
+                      />
+                    </div>
+                    {goal.target_date && (
+                      <p className="text-[11px] text-slate-400 mt-1">
+                        Hedef: {format(parseISO(goal.target_date), 'd MMM yyyy', { locale: tr })}
+                      </p>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── NEW: Habit × Mood Correlation ───────────────────────────────────── */}
+      {extras && (
+        <div className="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-100 dark:border-slate-700 mb-6">
+          <h3 className="text-sm font-semibold text-slate-600 dark:text-slate-300 mb-0.5">
+            Alışkanlık × Ruh Hali Korelasyonu
+          </h3>
+          <p className="text-xs text-slate-400 mb-4">Son 30 gün — yalnızca ruh hali girilen günler</p>
+
+          {!extras.hasEnoughCorr ? (
+            <p className="text-sm text-slate-400 text-center py-8">
+              Yeterli veri yok — daha fazla günlük girişi yapın
+            </p>
+          ) : (
+            <ResponsiveContainer width="100%" height={200}>
+              <ComposedChart
+                data={extras.correlationData}
+                margin={{ top: 4, right: 8, left: -4, bottom: 0 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(148,163,184,0.15)" />
+                <XAxis
+                  dataKey="x"
+                  type="number"
+                  label={{ value: 'Tamamlanan alışkanlık', position: 'insideBottom', offset: -2, fontSize: 10, fill: '#94a3b8' }}
+                  tick={{ fontSize: 11, fill: '#94a3b8' }}
+                  allowDecimals={false}
+                  domain={['auto', 'auto']}
+                />
+                <YAxis
+                  dataKey="y"
+                  type="number"
+                  domain={[0.5, 5.5]}
+                  ticks={[1, 2, 3, 4, 5]}
+                  tick={<MoodTick />}
+                  width={32}
+                />
+                <Tooltip
+                  contentStyle={{ background: '#1e293b', border: 'none', borderRadius: 8, fontSize: 12 }}
+                  labelStyle={{ color: '#94a3b8' }}
+                  formatter={(value, name) => [
+                    name === 'y'     ? MOOD[value] || value :
+                    name === 'trend' ? `${value.toFixed(1)} (trend)` : value,
+                    name === 'y' ? 'Ruh hali' : 'Trend',
+                  ]}
+                  labelFormatter={v => `${v} alışkanlık`}
+                />
+                {/* Scatter points */}
+                <Scatter dataKey="y" fill="#818cf8" opacity={0.75} name="y" />
+                {/* Trend line */}
+                <Line
+                  type="linear"
+                  dataKey="trend"
+                  dot={false}
+                  stroke="#f59e0b"
+                  strokeWidth={2}
+                  strokeDasharray="5 3"
+                  name="trend"
+                  connectNulls
+                />
+              </ComposedChart>
+            </ResponsiveContainer>
+          )}
+
+          {/* Mood legend */}
+          <div className="flex gap-3 mt-3 flex-wrap justify-center">
+            {[1, 2, 3, 4, 5].map(m => (
+              <span key={m} className="text-xs text-slate-400 flex items-center gap-1">
+                <span>{MOOD[m]}</span>
+                <span>{m}</span>
+              </span>
+            ))}
+            <span className="text-xs flex items-center gap-1 text-amber-500 ml-2">
+              <span className="inline-block w-4 h-0.5 bg-amber-400" style={{ borderTop: '2px dashed #f59e0b' }} />
+              trend
+            </span>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

@@ -1,252 +1,524 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
-import { format, parseISO } from 'date-fns'
+import { format, parseISO, differenceInDays } from 'date-fns'
 import { tr } from 'date-fns/locale'
-import { Plus, Trash2, Target, Check, ChevronDown, ChevronUp } from 'lucide-react'
+import { Plus, Trash2, Target, Sparkles, X } from 'lucide-react'
 import toast from 'react-hot-toast'
 
-const STATUS_STYLES = {
-  'in-progress': 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300',
-  completed:     'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300',
+// ─── Constants ───────────────────────────────────────────────────────────────
+
+const CATEGORIES = [
+  { value: 'career',    label: 'Kariyer',  emoji: '💼', bg: 'bg-blue-100 dark:bg-blue-900/30',    text: 'text-blue-700 dark:text-blue-300' },
+  { value: 'health',    label: 'Sağlık',   emoji: '💪', bg: 'bg-green-100 dark:bg-green-900/30',  text: 'text-green-700 dark:text-green-300' },
+  { value: 'education', label: 'Eğitim',   emoji: '📚', bg: 'bg-purple-100 dark:bg-purple-900/30', text: 'text-purple-700 dark:text-purple-300' },
+  { value: 'finance',   label: 'Finans',   emoji: '💰', bg: 'bg-yellow-100 dark:bg-yellow-900/30', text: 'text-yellow-700 dark:text-yellow-300' },
+  { value: 'personal',  label: 'Kişisel',  emoji: '🌱', bg: 'bg-teal-100 dark:bg-teal-900/30',    text: 'text-teal-700 dark:text-teal-300' },
+]
+
+const TEMPLATES = [
+  {
+    key: 'english_b1',
+    emoji: '🇬🇧',
+    title: '3 ayda İngilizce B1',
+    category: 'education',
+    description: 'Günde 30 dk çalışarak B1 sertifikasına ulaş. Ölçüt: haftalık kelime testi %80+',
+  },
+  {
+    key: 'marathon',
+    emoji: '🏃',
+    title: 'Maraton hazırlığı',
+    category: 'health',
+    description: '6 ayda 42 km koşabilecek kondisyona ulaş. Haftalık koşu planıyla kademeli artır.',
+  },
+  {
+    key: 'book_30',
+    emoji: '📖',
+    title: '30 günde kitap oku',
+    category: 'personal',
+    description: '30 gün içinde 1 kitap bitir. Günde minimum 20 sayfa, ölçüt: son sayfaya ulaşmak.',
+  },
+  {
+    key: 'new_skill',
+    emoji: '🎯',
+    title: 'Yeni beceri öğren',
+    category: 'education',
+    description: 'Seçtiğin bir beceride 60 günde temel yetkinlik kazan. Ölçüt: küçük proje tamamla.',
+  },
+]
+
+const STATUS_CONFIG = {
+  active:       { label: 'Aktif',      bg: 'bg-blue-100 dark:bg-blue-900/30',   text: 'text-blue-700 dark:text-blue-300' },
+  'in-progress':{ label: 'Aktif',      bg: 'bg-blue-100 dark:bg-blue-900/30',   text: 'text-blue-700 dark:text-blue-300' },
+  completed:    { label: 'Tamamlandı', bg: 'bg-green-100 dark:bg-green-900/30', text: 'text-green-700 dark:text-green-300' },
+  paused:       { label: 'Beklemede',  bg: 'bg-slate-100 dark:bg-slate-700',    text: 'text-slate-600 dark:text-slate-400' },
 }
 
-const STATUS_LABELS = {
-  'in-progress': 'Devam Ediyor',
-  completed:     'Tamamlandı',
+const MILESTONES = {
+  25:  { icon: '🎉', text: '%25 tamamlandı — harika başlangıç!' },
+  50:  { icon: '🔥', text: 'Yarı yoldasın — devam et!' },
+  75:  { icon: '⚡', text: '%75 tamam — bitiş çizgisi görünüyor!' },
+  100: { icon: '🏆', text: 'HEDEFİ TAMAMLADIN — tebrikler!' },
 }
 
-const TYPE_LABELS = {
-  weekly:  'Haftalık',
-  monthly: 'Aylık',
+const EMPTY_FORM = { title: '', description: '', category: 'personal', target_date: '', template: '' }
+const today = format(new Date(), 'yyyy-MM-dd')
+
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+
+function getCat(value) {
+  return CATEGORIES.find(c => c.value === value) || CATEGORIES[4]
 }
+
+function getDaysInfo(target_date) {
+  if (!target_date) return null
+  const days = differenceInDays(parseISO(target_date), new Date())
+  if (days < 0) return { label: `${Math.abs(days)} gün geçti`, color: 'text-red-500' }
+  if (days === 0) return { label: 'Bugün son gün!', color: 'text-amber-500' }
+  if (days <= 7)  return { label: `${days} gün kaldı`, color: 'text-amber-500' }
+  return { label: `${days} gün kaldı`, color: 'text-slate-400' }
+}
+
+// ─── Component ───────────────────────────────────────────────────────────────
 
 export default function Goals() {
   const { user } = useAuth()
   const [goals, setGoals] = useState([])
-  const [goalTasks, setGoalTasks] = useState([])
-  const [expanded, setExpanded] = useState({})
   const [loading, setLoading] = useState(true)
+  const [filter, setFilter] = useState('all')
   const [showForm, setShowForm] = useState(false)
-  const [form, setForm] = useState({ title: '', description: '', type: 'weekly', target_date: '', status: 'in-progress' })
-  const [newTaskText, setNewTaskText] = useState({})
+  const [showTemplates, setShowTemplates] = useState(false)
+  const [form, setForm] = useState(EMPTY_FORM)
+  const progressTimers = useRef({})
 
   useEffect(() => {
-    Promise.all([
-      supabase.from('goals').select('*').eq('user_id', user.id).order('created_at', { ascending: false }),
-      supabase.from('goal_tasks').select('*'),
-    ]).then(([{ data: g }, { data: gt }]) => {
-      setGoals(g || [])
-      setGoalTasks(gt || [])
-      setLoading(false)
-    })
+    supabase.from('goals').select('*').eq('user_id', user.id)
+      .order('created_at', { ascending: false })
+      .then(({ data }) => { setGoals(data || []); setLoading(false) })
   }, [])
+
+  // ── CRUD ──────────────────────────────────────────────────────────────────
 
   async function addGoal() {
     if (!form.title.trim()) return
     const { data, error } = await supabase
-      .from('goals').insert({ ...form, user_id: user.id, title: form.title.trim() }).select().single()
+      .from('goals')
+      .insert({
+        user_id: user.id,
+        title: form.title.trim(),
+        description: form.description.trim(),
+        category: form.category,
+        target_date: form.target_date || null,
+        template: form.template || null,
+        status: 'active',
+        progress: 0,
+        milestones: [],
+      })
+      .select().single()
     if (error) { toast.error('Hedef eklenemedi'); return }
     setGoals(g => [data, ...g])
-    setForm({ title: '', description: '', type: 'weekly', target_date: '', status: 'in-progress' })
+    setForm(EMPTY_FORM)
     setShowForm(false)
-    toast.success('Hedef eklendi!')
+    toast.success('Hedef eklendi! 🎯')
   }
 
   async function deleteGoal(id) {
-    await supabase.from('goal_tasks').delete().eq('goal_id', id)
     await supabase.from('goals').delete().eq('id', id)
     setGoals(g => g.filter(x => x.id !== id))
-    setGoalTasks(gt => gt.filter(x => x.goal_id !== id))
   }
 
   async function updateStatus(goal, status) {
-    const { data } = await supabase.from('goals').update({ status }).eq('id', goal.id).select().single()
-    setGoals(g => g.map(x => x.id === goal.id ? data : x))
+    const patch = { status }
+    if (status === 'completed' && (goal.progress ?? 0) < 100) patch.progress = 100
+    const { data } = await supabase.from('goals').update(patch).eq('id', goal.id).select().single()
+    if (data) setGoals(g => g.map(x => x.id === goal.id ? data : x))
   }
 
-  async function addSubTask(goalId) {
-    const text = newTaskText[goalId]?.trim()
-    if (!text) return
-    const { data } = await supabase
-      .from('goal_tasks').insert({ goal_id: goalId, title: text, completed: false }).select().single()
-    setGoalTasks(gt => [...gt, data])
-    setNewTaskText(t => ({ ...t, [goalId]: '' }))
+  function handleProgressChange(goal, newPct) {
+    // Optimistic local update
+    setGoals(g => g.map(x => x.id === goal.id ? { ...x, progress: newPct } : x))
+
+    // Milestone celebration — fire toast for any newly crossed threshold
+    const celebrated = goal.milestones || []
+    const newCelebrated = [...celebrated]
+    for (const [t, msg] of Object.entries(MILESTONES)) {
+      const threshold = parseInt(t)
+      if (newPct >= threshold && !celebrated.includes(String(threshold))) {
+        toast(msg.text, { icon: msg.icon, duration: 4000 })
+        newCelebrated.push(String(threshold))
+      }
+    }
+
+    // Debounce Supabase write (600ms)
+    clearTimeout(progressTimers.current[goal.id])
+    progressTimers.current[goal.id] = setTimeout(async () => {
+      const patch = { progress: newPct, milestones: newCelebrated }
+      if (newPct === 100) patch.status = 'completed'
+      const { data } = await supabase.from('goals').update(patch).eq('id', goal.id).select().single()
+      if (data) setGoals(g => g.map(x => x.id === goal.id ? data : x))
+    }, 600)
   }
 
-  async function toggleSubTask(task) {
-    const { data } = await supabase
-      .from('goal_tasks').update({ completed: !task.completed }).eq('id', task.id).select().single()
-    setGoalTasks(gt => gt.map(x => x.id === task.id ? data : x))
+  function applyTemplate(tmpl) {
+    setForm({ title: tmpl.title, description: tmpl.description, category: tmpl.category, target_date: '', template: tmpl.key })
+    setShowTemplates(false)
+    setShowForm(true)
   }
 
-  async function deleteSubTask(id) {
-    await supabase.from('goal_tasks').delete().eq('id', id)
-    setGoalTasks(gt => gt.filter(x => x.id !== id))
+  // ── Derived ───────────────────────────────────────────────────────────────
+
+  const isActive = g => g.status === 'active' || g.status === 'in-progress'
+
+  const filtered = goals.filter(g => {
+    if (filter === 'all')       return true
+    if (filter === 'active')    return isActive(g)
+    return g.status === filter
+  })
+
+  const countFor = key => {
+    if (key === 'active') return goals.filter(isActive).length
+    return goals.filter(g => g.status === key).length
   }
 
-  if (loading) return <div className="text-center py-20 text-slate-400">Yükleniyor...</div>
+  // ── Render ────────────────────────────────────────────────────────────────
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-48">
+        <div className="w-6 h-6 border-2 border-primary-500 border-t-transparent rounded-full animate-spin" />
+      </div>
+    )
+  }
 
   return (
     <div>
+      {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Hedefler</h2>
-        <button
-          onClick={() => setShowForm(f => !f)}
-          className="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-xl text-sm flex items-center gap-2 transition-colors"
-        >
-          <Plus size={16} /> Hedef Ekle
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={() => { setShowTemplates(t => !t); setShowForm(false) }}
+            className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium border transition-colors ${
+              showTemplates
+                ? 'bg-amber-50 dark:bg-amber-900/20 border-amber-300 dark:border-amber-700 text-amber-700 dark:text-amber-300'
+                : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'
+            }`}
+          >
+            <Sparkles size={14} />
+            Şablonlar
+          </button>
+          <button
+            onClick={() => { setShowForm(f => !f); setShowTemplates(false) }}
+            className="flex items-center gap-1.5 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-xl text-sm font-medium transition-colors"
+          >
+            {showForm ? <X size={14} /> : <Plus size={14} />}
+            {showForm ? 'İptal' : 'Hedef Ekle'}
+          </button>
+        </div>
       </div>
 
+      {/* ── Template gallery ──────────────────────────────────────────────── */}
+      {showTemplates && (
+        <div className="mb-6 bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 p-4">
+          <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-3">
+            Hazır Şablonlar
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {TEMPLATES.map(tmpl => (
+              <button
+                key={tmpl.key}
+                onClick={() => applyTemplate(tmpl)}
+                className="text-left p-3 rounded-xl border border-slate-200 dark:border-slate-600 hover:border-primary-400 dark:hover:border-primary-500 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-all group"
+              >
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-xl">{tmpl.emoji}</span>
+                  <span className="text-sm font-medium text-slate-800 dark:text-white group-hover:text-primary-700 dark:group-hover:text-primary-300 transition-colors">
+                    {tmpl.title}
+                  </span>
+                  <span className={`ml-auto text-xs px-1.5 py-0.5 rounded-full ${getCat(tmpl.category).bg} ${getCat(tmpl.category).text}`}>
+                    {getCat(tmpl.category).label}
+                  </span>
+                </div>
+                <p className="text-xs text-slate-400 line-clamp-2 pl-8">{tmpl.description}</p>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* ── Create form ───────────────────────────────────────────────────── */}
       {showForm && (
-        <div className="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-100 dark:border-slate-700 mb-6 space-y-3">
-          <input
-            value={form.title}
-            onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
-            placeholder="Hedef başlığı..."
-            className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500"
-          />
-          <textarea
-            value={form.description}
-            onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
-            placeholder="Açıklama (isteğe bağlı)..."
-            rows={2}
-            className="w-full px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none text-sm"
-          />
-          <div className="flex gap-2 flex-wrap">
-            <select
-              value={form.type}
-              onChange={e => setForm(f => ({ ...f, type: e.target.value }))}
-              className="flex-1 min-w-[120px] px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
-            >
-              <option value="weekly">Haftalık</option>
-              <option value="monthly">Aylık</option>
-            </select>
+        <div className="mb-6 bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 p-5 space-y-4">
+          {/* SMART chips */}
+          <div className="flex gap-1.5 flex-wrap">
+            {[
+              ['S', 'Specific'],
+              ['M', 'Measurable'],
+              ['A', 'Achievable'],
+              ['R', 'Relevant'],
+              ['T', 'Time-bound'],
+            ].map(([letter, word]) => (
+              <span
+                key={letter}
+                className="text-[10px] px-2 py-0.5 rounded-full bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 font-semibold"
+              >
+                {letter} — {word}
+              </span>
+            ))}
+          </div>
+
+          {/* Title */}
+          <div>
+            <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">
+              Başlık
+              <span className="ml-1 text-primary-400 font-normal">Specific</span>
+            </label>
             <input
-              type="date"
-              value={form.target_date}
-              onChange={e => setForm(f => ({ ...f, target_date: e.target.value }))}
-              className="flex-1 min-w-[140px] px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+              value={form.title}
+              onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
+              onKeyDown={e => e.key === 'Enter' && addGoal()}
+              placeholder="Ne tam olarak başarmak istiyorsun? Açık ve net yaz."
+              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm"
             />
+          </div>
+
+          {/* Description */}
+          <div>
+            <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">
+              Açıklama
+              <span className="ml-1 text-primary-400 font-normal">Measurable · Achievable · Relevant</span>
+            </label>
+            <textarea
+              value={form.description}
+              onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
+              placeholder="Başarıyı nasıl ölçeceksin? Bu hedef gerçekçi mi? Neden önemli?"
+              rows={2}
+              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none text-sm"
+            />
+          </div>
+
+          {/* Category + Date */}
+          <div className="flex gap-3 flex-wrap">
+            <div className="flex-1 min-w-[140px]">
+              <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Kategori</label>
+              <select
+                value={form.category}
+                onChange={e => setForm(f => ({ ...f, category: e.target.value }))}
+                className="w-full px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+              >
+                {CATEGORIES.map(c => (
+                  <option key={c.value} value={c.value}>{c.emoji} {c.label}</option>
+                ))}
+              </select>
+            </div>
+            <div className="flex-1 min-w-[140px]">
+              <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">
+                Hedef tarihi
+                <span className="ml-1 text-primary-400 font-normal">Time-bound</span>
+              </label>
+              <input
+                type="date"
+                value={form.target_date}
+                min={today}
+                onChange={e => setForm(f => ({ ...f, target_date: e.target.value }))}
+                className="w-full px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+              />
+            </div>
+          </div>
+
+          {/* Actions */}
+          <div className="flex gap-2 pt-1">
             <button
               onClick={addGoal}
-              className="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg text-sm transition-colors"
+              disabled={!form.title.trim()}
+              className="flex-1 bg-primary-600 hover:bg-primary-700 disabled:opacity-40 disabled:cursor-not-allowed text-white py-2.5 rounded-xl text-sm font-medium transition-colors"
             >
-              Kaydet
+              Hedef Ekle
+            </button>
+            <button
+              onClick={() => { setForm(EMPTY_FORM); setShowForm(false) }}
+              className="px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-sm hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+            >
+              İptal
             </button>
           </div>
         </div>
       )}
 
-      {goals.length === 0 ? (
+      {/* ── Filter tabs ───────────────────────────────────────────────────── */}
+      <div className="flex gap-1 mb-5 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl">
+        {[
+          { key: 'all',       label: 'Tümü' },
+          { key: 'active',    label: 'Aktif' },
+          { key: 'completed', label: 'Tamamlandı' },
+          { key: 'paused',    label: 'Beklemede' },
+        ].map(f => (
+          <button
+            key={f.key}
+            onClick={() => setFilter(f.key)}
+            className={`flex-1 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+              filter === f.key
+                ? 'bg-white dark:bg-slate-700 text-slate-800 dark:text-white shadow-sm'
+                : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+            }`}
+          >
+            {f.label}
+            {f.key !== 'all' && (
+              <span className="ml-1 opacity-60">({countFor(f.key)})</span>
+            )}
+          </button>
+        ))}
+      </div>
+
+      {/* ── Empty state ───────────────────────────────────────────────────── */}
+      {filtered.length === 0 && (
         <div className="text-center py-16 text-slate-400">
-          <Target size={40} className="mx-auto mb-3 opacity-40" />
-          <p>Henüz hedef yok. Bir tane belirleyin!</p>
+          <Target size={40} className="mx-auto mb-3 opacity-30" />
+          <p className="text-sm">
+            {filter === 'all' ? 'Henüz hedef yok.' : 'Bu filtrede hedef yok.'}
+          </p>
+          {filter === 'all' && (
+            <button
+              onClick={() => setShowForm(true)}
+              className="mt-3 text-sm text-primary-600 dark:text-primary-400 hover:underline"
+            >
+              İlk hedefini ekle →
+            </button>
+          )}
         </div>
-      ) : (
-        <div className="space-y-4">
-          {goals.map(goal => {
-            const tasks = goalTasks.filter(t => t.goal_id === goal.id)
-            const done = tasks.filter(t => t.completed).length
-            const pct = tasks.length ? Math.round((done / tasks.length) * 100) : 0
-            const isExpanded = expanded[goal.id]
-            return (
-              <div key={goal.id} className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
-                <div className="p-4">
-                  <div className="flex items-start gap-3">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <p className="font-semibold text-slate-800 dark:text-white">{goal.title}</p>
-                        <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${STATUS_STYLES[goal.status] || STATUS_STYLES['in-progress']}`}>
-                          {STATUS_LABELS[goal.status] || goal.status}
-                        </span>
-                        <span className="text-xs px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400">
-                          {TYPE_LABELS[goal.type] || goal.type}
-                        </span>
-                      </div>
-                      {goal.description && <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">{goal.description}</p>}
-                      {goal.target_date && (
-                        <p className="text-xs text-slate-400 mt-1">
-                          Hedef tarih: {format(parseISO(goal.target_date), 'd MMMM yyyy', { locale: tr })}
-                        </p>
-                      )}
-                      {tasks.length > 0 && (
-                        <div className="mt-2">
-                          <div className="flex justify-between text-xs text-slate-400 mb-1">
-                            <span>{done}/{tasks.length} alt görev</span>
-                            <span>{pct}%</span>
-                          </div>
-                          <div className="h-1.5 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
-                            <div
-                              className="h-full bg-primary-500 rounded-full transition-all"
-                              style={{ width: `${pct}%` }}
-                            />
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-1 shrink-0">
-                      <select
-                        value={goal.status}
-                        onChange={e => updateStatus(goal, e.target.value)}
-                        className="text-xs px-2 py-1 rounded-lg border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-slate-700 dark:text-slate-300 focus:outline-none"
-                      >
-                        <option value="in-progress">Devam Ediyor</option>
-                        <option value="completed">Tamamlandı</option>
-                      </select>
-                      <button onClick={() => setExpanded(e => ({ ...e, [goal.id]: !e[goal.id] }))} className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors">
-                        {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-                      </button>
-                      <button onClick={() => deleteGoal(goal.id)} className="p-1.5 text-slate-300 hover:text-red-500 transition-colors">
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
+      )}
+
+      {/* ── Goal cards ────────────────────────────────────────────────────── */}
+      <div className="space-y-4">
+        {filtered.map(goal => {
+          const cat      = getCat(goal.category)
+          const statusCfg = STATUS_CONFIG[goal.status] || STATUS_CONFIG.active
+          const daysInfo = getDaysInfo(goal.target_date)
+          const progress = goal.progress ?? 0
+          const celebrated = goal.milestones || []
+
+          return (
+            <div
+              key={goal.id}
+              className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 p-4"
+            >
+              {/* Card header */}
+              <div className="flex items-start gap-3 mb-4">
+                <span className="text-2xl mt-0.5 shrink-0">{cat.emoji}</span>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap mb-0.5">
+                    <p className="font-semibold text-slate-800 dark:text-white leading-tight">{goal.title}</p>
+                    <span className={`shrink-0 text-xs px-2 py-0.5 rounded-full font-medium ${statusCfg.bg} ${statusCfg.text}`}>
+                      {statusCfg.label}
+                    </span>
+                    <span className={`shrink-0 text-xs px-2 py-0.5 rounded-full font-medium ${cat.bg} ${cat.text}`}>
+                      {cat.label}
+                    </span>
                   </div>
+                  {goal.description && (
+                    <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 mt-0.5">{goal.description}</p>
+                  )}
+                </div>
+                <div className="flex items-center gap-1 shrink-0">
+                  <select
+                    value={goal.status === 'in-progress' ? 'active' : goal.status}
+                    onChange={e => updateStatus(goal, e.target.value)}
+                    className="text-xs px-2 py-1 rounded-lg border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-slate-700 dark:text-slate-300 focus:outline-none"
+                  >
+                    <option value="active">Aktif</option>
+                    <option value="paused">Beklemede</option>
+                    <option value="completed">Tamamlandı</option>
+                  </select>
+                  <button
+                    onClick={() => deleteGoal(goal.id)}
+                    className="p-1.5 text-slate-300 dark:text-slate-600 hover:text-red-500 transition-colors"
+                  >
+                    <Trash2 size={15} />
+                  </button>
+                </div>
+              </div>
+
+              {/* Progress */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-slate-500 dark:text-slate-400">İlerleme</span>
+                  <span className={`text-xs font-bold tabular-nums ${
+                    progress === 100 ? 'text-green-500' : 'text-primary-600 dark:text-primary-400'
+                  }`}>
+                    {progress}%
+                  </span>
                 </div>
 
-                {isExpanded && (
-                  <div className="border-t border-slate-100 dark:border-slate-700 p-4 space-y-2">
-                    {tasks.map(task => (
-                      <div key={task.id} className="flex items-center gap-2">
-                        <button
-                          onClick={() => toggleSubTask(task)}
-                          className={`w-5 h-5 rounded flex items-center justify-center border transition-colors ${
-                            task.completed ? 'bg-green-500 border-green-500 text-white' : 'border-slate-300 dark:border-slate-500'
-                          }`}
+                {/* Progress bar with milestone ticks */}
+                <div className="relative h-2 bg-slate-100 dark:bg-slate-700 rounded-full overflow-visible">
+                  <div
+                    className={`absolute inset-y-0 left-0 rounded-full transition-all duration-300 ${
+                      progress === 100 ? 'bg-green-500' : 'bg-primary-500'
+                    }`}
+                    style={{ width: `${progress}%` }}
+                  />
+                  {[25, 50, 75].map(tick => (
+                    <div
+                      key={tick}
+                      className={`absolute top-0 bottom-0 w-px rounded-full ${
+                        progress >= tick
+                          ? 'bg-white/70 dark:bg-white/50'
+                          : 'bg-slate-300 dark:bg-slate-600'
+                      }`}
+                      style={{ left: `${tick}%` }}
+                    />
+                  ))}
+                </div>
+
+                {/* Slider */}
+                <input
+                  type="range"
+                  min={0}
+                  max={100}
+                  value={progress}
+                  onChange={e => handleProgressChange(goal, parseInt(e.target.value))}
+                  className="w-full cursor-pointer accent-primary-600"
+                  style={{ height: 4, marginTop: 2 }}
+                />
+
+                {/* Earned milestone badges */}
+                {celebrated.length > 0 && (
+                  <div className="flex gap-1.5 mt-1 flex-wrap">
+                    {celebrated
+                      .slice()
+                      .sort((a, b) => parseInt(a) - parseInt(b))
+                      .map(m => (
+                        <span
+                          key={m}
+                          className="text-xs px-1.5 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300"
                         >
-                          {task.completed && <Check size={12} />}
-                        </button>
-                        <span className={`flex-1 text-sm ${task.completed ? 'line-through text-slate-400' : 'text-slate-700 dark:text-slate-300'}`}>
-                          {task.title}
+                          {MILESTONES[m]?.icon} {m}%
                         </span>
-                        <button onClick={() => deleteSubTask(task.id)} className="text-slate-300 hover:text-red-400 transition-colors">
-                          <Trash2 size={14} />
-                        </button>
-                      </div>
-                    ))}
-                    <div className="flex gap-2 mt-2">
-                      <input
-                        value={newTaskText[goal.id] || ''}
-                        onChange={e => setNewTaskText(t => ({ ...t, [goal.id]: e.target.value }))}
-                        onKeyDown={e => e.key === 'Enter' && addSubTask(goal.id)}
-                        placeholder="Alt görev ekle..."
-                        className="flex-1 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-white text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500"
-                      />
-                      <button
-                        onClick={() => addSubTask(goal.id)}
-                        className="px-3 py-1.5 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-300 rounded-lg text-sm transition-colors"
-                      >
-                        <Plus size={16} />
-                      </button>
-                    </div>
+                      ))}
                   </div>
                 )}
               </div>
-            )
-          })}
-        </div>
-      )}
+
+              {/* Footer: date + countdown */}
+              {(goal.target_date || daysInfo) && (
+                <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-700 flex items-center justify-between">
+                  <span className="text-xs text-slate-400">
+                    {goal.target_date
+                      ? format(parseISO(goal.target_date), 'd MMMM yyyy', { locale: tr })
+                      : ''}
+                  </span>
+                  {daysInfo && goal.status !== 'completed' && (
+                    <span className={`text-xs font-medium ${daysInfo.color}`}>{daysInfo.label}</span>
+                  )}
+                  {goal.status === 'completed' && (
+                    <span className="text-xs font-medium text-green-500">✓ Tamamlandı</span>
+                  )}
+                </div>
+              )}
+            </div>
+          )
+        })}
+      </div>
     </div>
   )
 }

@@ -59,7 +59,7 @@ export default function Stats() {
         { data: journals },
         { data: pomodoros },
       ] = await Promise.all([
-        supabase.from('habits').select('id,name').eq('user_id', user.id),
+        supabase.from('habits').select('id,name,target_days').eq('user_id', user.id),
         supabase.from('habit_logs').select('*').eq('user_id', user.id).eq('completed', true),
         supabase.from('tasks').select('*').eq('user_id', user.id),
         supabase.from('journal_entries').select('date').eq('user_id', user.id),

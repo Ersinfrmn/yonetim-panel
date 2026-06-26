@@ -137,6 +137,7 @@ export default function Journal() {
   useEffect(() => {
     setContent(entries[selectedDate]?.content || '')
     setMood(entries[selectedDate]?.mood ?? null)
+    setImages(entries[selectedDate]?.images || [])
     setPreview(false)
   }, [selectedDate]) // eslint-disable-line react-hooks/exhaustive-deps
 

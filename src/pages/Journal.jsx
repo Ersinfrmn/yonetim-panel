@@ -128,6 +128,7 @@ export default function Journal() {
         const today = fmt(new Date())
         setContent(map[today]?.content || '')
         setMood(map[today]?.mood ?? null)
+        setImages(map[today]?.images || [])
         setLoading(false)
       })
   }, [])

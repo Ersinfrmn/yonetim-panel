@@ -90,6 +90,7 @@ export default function Goals() {
   const [showTemplates, setShowTemplates] = useState(false)
   const [form, setForm] = useState(EMPTY_FORM)
   const progressTimers = useRef({})
+  const celebratedRef = useRef({})
 
   useEffect(() => {
     supabase.from('goals').select('*').eq('user_id', user.id)

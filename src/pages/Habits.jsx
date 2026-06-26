@@ -12,6 +12,8 @@ import toast from 'react-hot-toast'
 
 const CHAIN_DAYS = 14
 const MIN_BREAK_CHARS = 100
+const ALL_DAYS = [0, 1, 2, 3, 4, 5, 6]
+const DAY_LABELS = ['Paz', 'Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cts']
 
 const DURATION_OPTIONS = [
   { label: '7 Gün',   days: 7   },
@@ -34,7 +36,7 @@ const TEMPLATES = [
 
 // ─── Date helpers ─────────────────────────────────────────────────────────────
 
-const fmt   = d => format(d, 'yyyy-MM-dd')
+const fmt          = d => format(d, 'yyyy-MM-dd')
 const todayStr     = () => fmt(new Date())
 const yesterdayStr = () => fmt(subDays(new Date(), 1))
 
@@ -42,46 +44,94 @@ function completedSet(logs, habitId) {
   return new Set(logs.filter(l => l.habit_id === habitId && l.completed).map(l => l.date))
 }
 
-function getCurrentStreak(datesSet) {
-  const today = todayStr(), yesterday = yesterdayStr()
-  let check = datesSet.has(today) ? today : yesterday
-  if (!datesSet.has(check)) return 0
-  let streak = 0
-  for (let i = 0; i < 730; i++) {
-    if (datesSet.has(check)) { streak++; check = fmt(subDays(parseISO(check), 1)) } else break
-  }
-  return streak
+function targetSet(targetDays) {
+  return new Set(targetDays && targetDays.length ? targetDays : ALL_DAYS)
 }
 
-function getLongestStreak(datesSet) {
-  const sorted = [...datesSet].sort()
-  if (!sorted.length) return 0
-  let longest = 1, run = 1
-  for (let i = 1; i < sorted.length; i++) {
-    const diff = Math.round((parseISO(sorted[i]) - parseISO(sorted[i - 1])) / 86400000)
-    if (diff === 1) { run++; if (run > longest) longest = run } else run = 1
-  }
-  return longest
-}
-
-function getLastBroken(datesSet) {
-  if (!datesSet.size) return null
-  const yesterday = yesterdayStr()
-  const sorted = [...datesSet].sort((a, b) => b.localeCompare(a))
-  for (const d of sorted) {
-    const next = fmt(addDays(parseISO(d), 1))
-    if (next > yesterday) continue
-    if (!datesSet.has(next)) return next
+// Most recent target day strictly before today (starts from yesterday)
+function getMostRecentTargetDay(targetDays) {
+  const targets = targetSet(targetDays)
+  let date = subDays(new Date(), 1)
+  for (let i = 0; i < 7; i++) {
+    if (targets.has(date.getDay())) return fmt(date)
+    date = subDays(date, 1)
   }
   return null
 }
 
-function getActiveStreakSet(datesSet) {
-  const today = todayStr(), yesterday = yesterdayStr()
-  let check = datesSet.has(today) ? today : yesterday
-  const active = new Set()
+function getCurrentStreak(datesSet, targetDays) {
+  const targets = targetSet(targetDays)
+  const today   = new Date()
+  const todayS  = fmt(today)
+
+  // If today is a target day and was already done, include it; otherwise start from yesterday
+  let current = targets.has(today.getDay()) && datesSet.has(todayS)
+    ? today
+    : subDays(today, 1)
+
+  let streak = 0
+  for (let i = 0; i < 1460; i++) {
+    const dow     = current.getDay()
+    const dateStr = fmt(current)
+    if (!targets.has(dow)) { current = subDays(current, 1); continue }
+    if (datesSet.has(dateStr)) { streak++; current = subDays(current, 1) }
+    else break
+  }
+  return streak
+}
+
+function getLongestStreak(datesSet, targetDays) {
+  const targets = targetSet(targetDays)
+  // Only count completions that fall on target days
+  const targetDates = [...datesSet]
+    .filter(d => targets.has(parseISO(d).getDay()))
+    .sort()
+  if (!targetDates.length) return 0
+
+  let longest = 1, run = 1
+  for (let i = 1; i < targetDates.length; i++) {
+    // Check whether any target day between targetDates[i-1] and targetDates[i] was missed
+    let missed = false
+    let check  = addDays(parseISO(targetDates[i - 1]), 1)
+    const end  = parseISO(targetDates[i])
+    while (check < end) {
+      if (targets.has(check.getDay()) && !datesSet.has(fmt(check))) { missed = true; break }
+      check = addDays(check, 1)
+    }
+    if (!missed) { run++; if (run > longest) longest = run }
+    else run = 1
+  }
+  return longest
+}
+
+// Returns the most recent missed target day (= where the chain broke), or null if unbroken
+function getLastBroken(datesSet, targetDays) {
+  if (!datesSet.size) return null
+  const targets = targetSet(targetDays)
+  let date = subDays(new Date(), 1)    // start from yesterday
   for (let i = 0; i < 730; i++) {
-    if (datesSet.has(check)) { active.add(check); check = fmt(subDays(parseISO(check), 1)) } else break
+    const dateStr = fmt(date)
+    const dow     = date.getDay()
+    if (!targets.has(dow)) { date = subDays(date, 1); continue }
+    if (!datesSet.has(dateStr)) return dateStr  // missed target day
+    return null                                  // hit a completed target day → no break
+  }
+  return null
+}
+
+function getActiveStreakSet(datesSet, targetDays) {
+  const targets = targetSet(targetDays)
+  const today   = new Date()
+  const todayS  = fmt(today)
+  let current   = datesSet.has(todayS) ? today : subDays(today, 1)
+  const active  = new Set()
+  for (let i = 0; i < 1460; i++) {
+    const dateStr = fmt(current)
+    const dow     = current.getDay()
+    // Skip non-target days without adding them; they are rendered separately in ChainBoxes
+    if (!targets.has(dow)) { current = subDays(current, 1); continue }
+    if (datesSet.has(dateStr)) { active.add(dateStr); current = subDays(current, 1) }
+    else break
   }
   return active
 }
@@ -89,7 +139,7 @@ function getActiveStreakSet(datesSet) {
 function getProgress(habit, done) {
   if (!habit.duration_days || habit.duration_type === 'unlimited') return null
   const startDate = habit.start_date ? parseISO(habit.start_date) : new Date()
-  const today = new Date()
+  const today     = new Date()
   const elapsed   = Math.max(0, differenceInDays(today, startDate))
   const remaining = Math.max(0, habit.duration_days - elapsed)
   const windowStart = fmt(startDate)
@@ -99,15 +149,50 @@ function getProgress(habit, done) {
   return { pct, remaining, completions, total: habit.duration_days }
 }
 
+// ─── DayPicker ────────────────────────────────────────────────────────────────
+
+function DayPicker({ value, onChange }) {
+  function toggle(dow) {
+    const next = value.includes(dow)
+      ? value.filter(d => d !== dow)
+      : [...value, dow].sort((a, b) => a - b)
+    if (next.length === 0) return   // min 1 day must remain
+    onChange(next)
+  }
+  return (
+    <div>
+      <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">
+        Hangi Günler?
+      </p>
+      <div className="flex gap-1">
+        {DAY_LABELS.map((label, dow) => (
+          <button
+            key={dow}
+            type="button"
+            onClick={() => toggle(dow)}
+            className={`flex-1 py-2 rounded-lg text-xs font-semibold transition-colors ${
+              value.includes(dow)
+                ? 'bg-primary-600 text-white'
+                : 'bg-slate-100 dark:bg-slate-700 text-slate-400 dark:text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-600'
+            }`}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 // ─── ChainBoxes — 14-day chain, today on the left ────────────────────────────
 
-function ChainBoxes({ logs, habitId, onToggleToday }) {
+function ChainBoxes({ logs, habitId, targetDays, onToggleToday }) {
   const { dark } = useTheme()
   const todayDate = fmt(new Date())
-  const done   = completedSet(logs, habitId)
-  const active = getActiveStreakSet(done)
+  const done      = completedSet(logs, habitId)
+  const active    = getActiveStreakSet(done, targetDays)
+  const targets   = targetSet(targetDays)
 
-  // i=0 → today (leftmost), i=13 → 13 days ago (rightmost)
   const days = Array.from({ length: CHAIN_DAYS }, (_, i) => fmt(subDays(new Date(), i)))
 
   const LW = 32, LH = 30, CW = 10, VH = 52, LY = 4, PAD = 5
@@ -115,15 +200,17 @@ function ChainBoxes({ logs, habitId, onToggleToday }) {
   const CY = LY + (LH - 12) / 2, CH = 12
 
   const C = dark ? {
-    activeFill: '#f59e0b', activeStroke: '#78350f', activeX: '#fef3c7', activeConn: '#f59e0b',
-    doneFill:   '#334155', doneStroke:   '#1e293b', doneX:   '#94a3b8', doneConn:   '#334155',
-    emptyFill:  '#1e293b', emptyStroke:  '#334155',
-    todayStroke: '#38bdf8', todayLabel: '#38bdf8',
+    activeFill:  '#f59e0b', activeStroke: '#78350f', activeX: '#fef3c7', activeConn: '#f59e0b',
+    doneFill:    '#334155', doneStroke:   '#1e293b', doneX:   '#94a3b8', doneConn:   '#334155',
+    emptyFill:   '#1e293b', emptyStroke:  '#334155',
+    skipFill:    '#0f1623', skipStroke:   '#1a2232', skipDash: '#1e2d3d',
+    todayStroke: '#38bdf8', todayLabel:   '#38bdf8',
   } : {
-    activeFill: '#fbbf24', activeStroke: '#92400e', activeX: '#ffffff', activeConn: '#fbbf24',
-    doneFill:   '#cbd5e1', doneStroke:   '#64748b', doneX:   '#1e293b', doneConn:   '#cbd5e1',
-    emptyFill:  '#f8fafc', emptyStroke:  '#e2e8f0',
-    todayStroke: '#0ea5e9', todayLabel: '#0ea5e9',
+    activeFill:  '#fbbf24', activeStroke: '#92400e', activeX: '#ffffff', activeConn: '#fbbf24',
+    doneFill:    '#cbd5e1', doneStroke:   '#64748b', doneX:   '#1e293b', doneConn:   '#cbd5e1',
+    emptyFill:   '#f8fafc', emptyStroke:  '#e2e8f0',
+    skipFill:    '#f1f3f6', skipStroke:   '#e5e8ee', skipDash: '#c8d0da',
+    todayStroke: '#0ea5e9', todayLabel:   '#0ea5e9',
   }
 
   return (
@@ -132,37 +219,67 @@ function ChainBoxes({ logs, habitId, onToggleToday }) {
         style={{ width: '100%', height: 'auto', display: 'block', overflow: 'visible' }}
         role="img" aria-label="Alışkanlık zinciri">
         {days.map((d, i) => {
-          const isToday   = d === todayDate
+          const isToday  = d === todayDate
+          const isTarget = targets.has(parseISO(d).getDay())
           const completed = done.has(d), inActive = active.has(d)
-          const prevD = i > 0 ? days[i - 1] : null
+          const prevD      = i > 0 ? days[i - 1] : null
           const prevDone   = prevD ? done.has(prevD)   : false
           const prevActive = prevD ? active.has(prevD) : false
           const x = i * (LW + CW)
-          const fill   = completed && inActive ? C.activeFill : completed ? C.doneFill : C.emptyFill
-          const stroke = isToday ? C.todayStroke : completed && inActive ? C.activeStroke : completed ? C.doneStroke : C.emptyStroke
-          const sw   = isToday ? 2.5 : 1.5
+
+          const fill = !isTarget
+            ? C.skipFill
+            : completed && inActive ? C.activeFill
+            : completed ? C.doneFill : C.emptyFill
+
+          const stroke = !isTarget
+            ? C.skipStroke
+            : isToday ? C.todayStroke
+            : completed && inActive ? C.activeStroke
+            : completed ? C.doneStroke : C.emptyStroke
+
+          const sw = isToday && isTarget ? 2.5 : 1.5
           const xCol = inActive ? C.activeX : C.doneX
-          const showConn  = i > 0 && completed && prevDone
+
+          // Only draw connection between completed target-day boxes
+          const showConn  = i > 0 && completed && prevDone && isTarget && targets.has(parseISO(prevD).getDay())
           const connColor = showConn ? (inActive && prevActive ? C.activeConn : C.doneConn) : null
 
           return (
-            <g key={d} onClick={isToday ? onToggleToday : undefined}
-               style={{ cursor: isToday ? 'pointer' : 'default' }}>
+            <g key={d}
+               onClick={isToday && isTarget ? onToggleToday : undefined}
+               style={{ cursor: isToday && isTarget ? 'pointer' : 'default' }}>
               {showConn && <rect x={x - CW} y={CY} width={CW} height={CH} rx={1} fill={connColor} />}
               <rect x={x + sw / 2} y={LY + sw / 2} width={LW - sw} height={LH - sw}
                     rx={3} fill={fill} stroke={stroke} strokeWidth={sw} />
-              {completed && <>
+              {/* Check mark for completed target days */}
+              {completed && isTarget && <>
                 <line x1={x+PAD} y1={LY+PAD} x2={x+LW-PAD} y2={LY+LH-PAD} stroke={xCol} strokeWidth={2} strokeLinecap="round" />
                 <line x1={x+LW-PAD} y1={LY+PAD} x2={x+PAD} y2={LY+LH-PAD} stroke={xCol} strokeWidth={2} strokeLinecap="round" />
               </>}
-              {isToday && !completed && <circle cx={x+LW/2} cy={LY+LH/2} r={3.5} fill={C.todayStroke} />}
-              {isToday && (
-                <text x={x+LW/2} y={LY+LH+14} textAnchor="middle"
+              {/* Dash for non-target days */}
+              {!isTarget && (
+                <line
+                  x1={x + LW / 2 - 5} y1={LY + LH / 2}
+                  x2={x + LW / 2 + 5} y2={LY + LH / 2}
+                  stroke={C.skipDash} strokeWidth={1.5} strokeLinecap="round"
+                />
+              )}
+              {/* Dot: today + target + not done */}
+              {isToday && isTarget && !completed && (
+                <circle cx={x + LW / 2} cy={LY + LH / 2} r={3.5} fill={C.todayStroke} />
+              )}
+              {/* "bugün" label */}
+              {isToday && isTarget && (
+                <text x={x + LW / 2} y={LY + LH + 14} textAnchor="middle"
                       fontSize={9} fontWeight="700" letterSpacing="0.5" fill={C.todayLabel}>
                   bugün
                 </text>
               )}
-              <title>{format(parseISO(d), 'd MMM yyyy', { locale: tr })}</title>
+              <title>
+                {format(parseISO(d), 'd MMM yyyy', { locale: tr })}
+                {!isTarget ? ' — ⊘ Hedef gün değil' : completed ? ' — ✓ Tamamlandı' : ' — ○ Yapılmadı'}
+              </title>
             </g>
           )
         })}
@@ -177,23 +294,21 @@ function YearHeatmap({ logs, habitId }) {
   const { dark } = useTheme()
   const done    = completedSet(logs, habitId)
   const today   = new Date()
-  const start   = subDays(today, 364)   // 365 days including today
+  const start   = subDays(today, 364)
 
   const CELL = 11, GAP = 2, UNIT = CELL + GAP
   const DAY_W = 24, TOP_H = 18
 
-  // index 0 = 364 days ago, index 364 = today
   const cells = Array.from({ length: 365 }, (_, i) => {
     const d = subDays(today, 364 - i)
     return { dateStr: fmt(d), d }
   })
 
-  const startDow = start.getDay()   // 0=Sun … 6=Sat
+  const startDow = start.getDay()
   const numWeeks = Math.ceil((startDow + 365) / 7)
   const SVG_W = DAY_W + numWeeks * UNIT
   const SVG_H = TOP_H + 7 * UNIT
 
-  // Month labels
   const monthLabels = []
   let lastMonth = -1
   cells.forEach(({ d }, idx) => {
@@ -208,7 +323,6 @@ function YearHeatmap({ logs, habitId }) {
   const emptyFill = dark ? '#1e293b' : '#f1f5f9'
   const doneFill  = '#22c55e'
   const textFill  = dark ? '#475569' : '#94a3b8'
-  // show Pzt/Çar/Cum on rows 1/3/5
   const dayLabels = { 1: 'Pzt', 3: 'Çar', 5: 'Cum' }
 
   return (
@@ -218,17 +332,15 @@ function YearHeatmap({ logs, habitId }) {
           <text key={i} x={m.x} y={12} fontSize={8} fill={textFill} fontWeight="600">{m.label}</text>
         ))}
         {[1, 3, 5].map(row => (
-          <text key={row}
-            x={0} y={TOP_H + row * UNIT + CELL}
-            fontSize={7} fill={textFill}>
+          <text key={row} x={0} y={TOP_H + row * UNIT + CELL} fontSize={7} fill={textFill}>
             {dayLabels[row]}
           </text>
         ))}
         {cells.map(({ dateStr, d }, idx) => {
           const col = Math.floor((startDow + idx) / 7)
           const row = (startDow + idx) % 7
-          const x = DAY_W + col * UNIT
-          const y = TOP_H + row * UNIT
+          const x   = DAY_W + col * UNIT
+          const y   = TOP_H + row * UNIT
           const completed = done.has(dateStr)
           const isToday   = dateStr === todayStr()
           return (
@@ -237,7 +349,9 @@ function YearHeatmap({ logs, habitId }) {
               fill={completed ? doneFill : emptyFill}
               stroke={isToday ? '#0ea5e9' : 'none'}
               strokeWidth={isToday ? 1.5 : 0}>
-              <title>{format(d, 'd MMMM yyyy EEEE', { locale: tr })} — {completed ? '✓ Tamamlandı' : '○ Yapılmadı'}</title>
+              <title>
+                {format(d, 'd MMMM yyyy EEEE', { locale: tr })} — {completed ? '✓ Tamamlandı' : '○ Yapılmadı'}
+              </title>
             </rect>
           )
         })}
@@ -251,7 +365,7 @@ function YearHeatmap({ logs, habitId }) {
 function HabitNotes({ habitId, userId, initialNotes, onSaved }) {
   const [crisis,  setCrisis]  = useState(initialNotes?.crisis_notes  ?? '')
   const [general, setGeneral] = useState(initialNotes?.general_notes ?? '')
-  const noteId   = useRef(initialNotes?.id ?? null)
+  const noteId    = useRef(initialNotes?.id ?? null)
   const saveTimer = useRef(null)
 
   async function persistNotes(crisis_notes, general_notes) {
@@ -317,7 +431,6 @@ function BreakHistory({ breakReasons, habitId }) {
     )
   }
 
-  // Day-of-week pattern
   const dowCounts = Array(7).fill(0)
   habitBreaks.forEach(b => dowCounts[parseISO(b.break_date).getDay()]++)
   const maxDow   = dowCounts.indexOf(Math.max(...dowCounts))
@@ -351,13 +464,14 @@ function BreakHistory({ breakReasons, habitId }) {
   )
 }
 
-// ─── HabitCreateModal — 3-step creation flow ─────────────────────────────────
+// ─── HabitCreateModal — 4-step creation flow ─────────────────────────────────
 
 function HabitCreateModal({ onClose, onCreate }) {
-  const [step,     setStep]     = useState(1)
-  const [name,     setName]     = useState('')
-  const [duration, setDuration] = useState(null)
-  const [template, setTemplate] = useState(null)
+  const [step,       setStep]       = useState(1)
+  const [name,       setName]       = useState('')
+  const [duration,   setDuration]   = useState(null)
+  const [template,   setTemplate]   = useState(null)
+  const [targetDays, setTargetDays] = useState([...ALL_DAYS])
 
   function pickTemplate(t) {
     setTemplate(t)
@@ -370,6 +484,7 @@ function HabitCreateModal({ onClose, onCreate }) {
       duration_type: duration?.days ? 'limited' : 'unlimited',
       duration_days: duration?.days ?? null,
       template:      template?.id ?? 'custom',
+      target_days:   targetDays,
     })
   }
 
@@ -379,9 +494,9 @@ function HabitCreateModal({ onClose, onCreate }) {
   return (
     <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
       <div className="bg-white dark:bg-slate-800 rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden">
-        {/* Step bar */}
+        {/* Step bar (4 steps) */}
         <div className="flex">
-          {[1, 2, 3].map(s => (
+          {[1, 2, 3, 4].map(s => (
             <div key={s} className={`flex-1 h-1 transition-colors ${step >= s ? 'bg-primary-500' : 'bg-slate-200 dark:bg-slate-700'}`} />
           ))}
         </div>
@@ -389,7 +504,7 @@ function HabitCreateModal({ onClose, onCreate }) {
 
           {step === 1 && (
             <>
-              <p className="text-xs text-slate-400 uppercase tracking-wider mb-1">Adım 1 / 3</p>
+              <p className="text-xs text-slate-400 uppercase tracking-wider mb-1">Adım 1 / 4</p>
               <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-4">Alışkanlık Adı</h3>
               <input autoFocus value={name} onChange={e => setName(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && name.trim() && setStep(2)}
@@ -404,7 +519,7 @@ function HabitCreateModal({ onClose, onCreate }) {
 
           {step === 2 && (
             <>
-              <p className="text-xs text-slate-400 uppercase tracking-wider mb-1">Adım 2 / 3</p>
+              <p className="text-xs text-slate-400 uppercase tracking-wider mb-1">Adım 2 / 4</p>
               <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-4">Süre Belirle</h3>
               <div className="grid grid-cols-2 gap-2">
                 {DURATION_OPTIONS.map(opt => (
@@ -425,7 +540,7 @@ function HabitCreateModal({ onClose, onCreate }) {
 
           {step === 3 && (
             <>
-              <p className="text-xs text-slate-400 uppercase tracking-wider mb-1">Adım 3 / 3</p>
+              <p className="text-xs text-slate-400 uppercase tracking-wider mb-1">Adım 3 / 4</p>
               <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-4">Şablon Seç</h3>
               <div className="grid grid-cols-2 gap-2">
                 {TEMPLATES.map(t => (
@@ -441,7 +556,20 @@ function HabitCreateModal({ onClose, onCreate }) {
               </div>
               <div className="flex gap-3 mt-5">
                 <button onClick={() => setStep(2)} className={btnSec}>← Geri</button>
-                <button onClick={submit} disabled={!template} className={btnPri(!!template)}>Oluştur ✓</button>
+                <button onClick={() => setStep(4)} disabled={!template} className={btnPri(!!template)}>İleri →</button>
+              </div>
+            </>
+          )}
+
+          {step === 4 && (
+            <>
+              <p className="text-xs text-slate-400 uppercase tracking-wider mb-1">Adım 4 / 4</p>
+              <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-4">Günleri Seç</h3>
+              <DayPicker value={targetDays} onChange={setTargetDays} />
+              <p className="text-xs text-slate-400 mt-2 text-center">{targetDays.length} / 7 gün seçili</p>
+              <div className="flex gap-3 mt-5">
+                <button onClick={() => setStep(3)} className={btnSec}>← Geri</button>
+                <button onClick={submit} className={btnPri(true)}>Oluştur ✓</button>
               </div>
             </>
           )}
@@ -452,13 +580,14 @@ function HabitCreateModal({ onClose, onCreate }) {
   )
 }
 
-// ─── HabitEditModal — edit name + duration ───────────────────────────────────
+// ─── HabitEditModal — edit name + duration + target days ─────────────────────
 
 function HabitEditModal({ habit, onClose, onSave }) {
-  const [name, setName] = useState(habit.name)
-  const [duration, setDuration] = useState(
+  const [name,       setName]       = useState(habit.name)
+  const [duration,   setDuration]   = useState(
     () => DURATION_OPTIONS.find(o => o.days === habit.duration_days) ?? DURATION_OPTIONS[6]
   )
+  const [targetDays, setTargetDays] = useState(habit.target_days ?? [...ALL_DAYS])
 
   function submit() {
     if (!name.trim()) return
@@ -466,6 +595,7 @@ function HabitEditModal({ habit, onClose, onSave }) {
       name:          name.trim(),
       duration_type: duration?.days ? 'limited' : 'unlimited',
       duration_days: duration?.days ?? null,
+      target_days:   targetDays,
     })
   }
 
@@ -496,10 +626,19 @@ function HabitEditModal({ habit, onClose, onSave }) {
           ))}
         </div>
 
+        <div className="mb-5">
+          <DayPicker value={targetDays} onChange={setTargetDays} />
+        </div>
+
         <div className="flex gap-3">
-          <button onClick={onClose} className="flex-1 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-sm font-medium">İptal</button>
+          <button onClick={onClose}
+            className="flex-1 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-sm font-medium">
+            İptal
+          </button>
           <button onClick={submit} disabled={!name.trim()}
-            className={`flex-1 py-2.5 rounded-xl text-sm font-medium ${name.trim() ? 'bg-primary-600 hover:bg-primary-700 text-white' : 'bg-slate-100 dark:bg-slate-700 text-slate-400 cursor-not-allowed'}`}>
+            className={`flex-1 py-2.5 rounded-xl text-sm font-medium ${
+              name.trim() ? 'bg-primary-600 hover:bg-primary-700 text-white' : 'bg-slate-100 dark:bg-slate-700 text-slate-400 cursor-not-allowed'
+            }`}>
             Kaydet
           </button>
         </div>
@@ -554,9 +693,14 @@ function ChainBreakModal({ habit, onSubmit, onClose }) {
             }
           </div>
           <div className="flex gap-3">
-            <button onClick={onClose} className="flex-1 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-sm font-medium">İptal</button>
+            <button onClick={onClose}
+              className="flex-1 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-sm font-medium">
+              İptal
+            </button>
             <button onClick={() => ready && onSubmit(reason)} disabled={!ready}
-              className={`flex-1 py-2.5 rounded-xl text-sm font-medium transition-colors ${ready ? 'bg-primary-600 hover:bg-primary-700 text-white' : 'bg-slate-100 dark:bg-slate-700 text-slate-400 cursor-not-allowed'}`}>
+              className={`flex-1 py-2.5 rounded-xl text-sm font-medium transition-colors ${
+                ready ? 'bg-primary-600 hover:bg-primary-700 text-white' : 'bg-slate-100 dark:bg-slate-700 text-slate-400 cursor-not-allowed'
+              }`}>
               Zincirim Devam Ediyor →
             </button>
           </div>
@@ -573,12 +717,12 @@ export default function Habits() {
   const [habits,       setHabits]       = useState([])
   const [logs,         setLogs]         = useState([])
   const [breakReasons, setBreakReasons] = useState([])
-  const [habitNotes,   setHabitNotes]   = useState({})   // { [habitId]: noteRow }
+  const [habitNotes,   setHabitNotes]   = useState({})
   const [loading,      setLoading]      = useState(true)
   const [createModal,  setCreateModal]  = useState(false)
-  const [editModal,    setEditModal]    = useState(null)  // habit object
-  const [breakModal,   setBreakModal]   = useState(null)  // { habit, lastBroken }
-  const [expanded,     setExpanded]     = useState({})    // { [habitId]: { notes, history, heatmap } }
+  const [editModal,    setEditModal]    = useState(null)
+  const [breakModal,   setBreakModal]   = useState(null)
+  const [expanded,     setExpanded]     = useState({})
 
   async function load() {
     const [{ data: h }, { data: l }, { data: br }, { data: hn }] = await Promise.all([
@@ -607,10 +751,10 @@ export default function Habits() {
     }))
   }
 
-  async function handleCreate({ name, duration_type, duration_days, template }) {
+  async function handleCreate({ name, duration_type, duration_days, template, target_days }) {
     setCreateModal(false)
     const { data, error } = await supabase.from('habits')
-      .insert({ user_id: user.id, name, duration_type, duration_days, template, start_date: todayStr() })
+      .insert({ user_id: user.id, name, duration_type, duration_days, template, start_date: todayStr(), target_days })
       .select().single()
     if (error) { toast.error('Alışkanlık eklenemedi'); return }
     setHabits(h => [...h, data])
@@ -658,10 +802,13 @@ export default function Habits() {
     const doneToday = logs.some(l => l.habit_id === habit.id && l.date === todayStr() && l.completed)
     if (doneToday) { await unmarkToday(habit); return }
 
-    const done = completedSet(logs, habit.id)
-    const chainBroken = done.size > 0 && !done.has(yesterdayStr())
+    const done       = completedSet(logs, habit.id)
+    const td         = habit.target_days ?? ALL_DAYS
+    const lastTarget = getMostRecentTargetDay(td)
+    const chainBroken = done.size > 0 && lastTarget !== null && !done.has(lastTarget)
+
     if (chainBroken) {
-      const lastBroken = getLastBroken(done)
+      const lastBroken = getLastBroken(done, td)
       if (lastBroken) {
         const explained = breakReasons.some(r => r.habit_id === habit.id && r.break_date === lastBroken)
         if (!explained) { setBreakModal({ habit, lastBroken }); return }
@@ -683,10 +830,12 @@ export default function Habits() {
   if (loading) return <div className="text-center py-20 text-slate-400">Yükleniyor...</div>
 
   const SECTION_BTNS = [
-    { key: 'notes',   Icon: FileText,  label: 'Notlar'          },
-    { key: 'history', Icon: History,   label: 'Kırılma Geçmişi' },
-    { key: 'heatmap', Icon: Calendar,  label: 'Yıllık Harita'   },
+    { key: 'notes',   Icon: FileText, label: 'Notlar'          },
+    { key: 'history', Icon: History,  label: 'Kırılma Geçmişi' },
+    { key: 'heatmap', Icon: Calendar, label: 'Yıllık Harita'   },
   ]
+
+  const todayDow = new Date().getDay()
 
   return (
     <div>
@@ -712,28 +861,43 @@ export default function Habits() {
       ) : (
         <div className="space-y-4">
           {habits.map(habit => {
-            const done      = completedSet(logs, habit.id)
-            const doneToday = done.has(todayStr())
-            const current   = getCurrentStreak(done)
-            const longest   = getLongestStreak(done)
-            const lastBroke = getLastBroken(done)
-            const progress  = getProgress(habit, done)
-            const isExp     = expanded[habit.id] || {}
-            const tplEmoji  = TEMPLATES.find(t => t.id === habit.template)?.emoji
+            const td          = habit.target_days ?? ALL_DAYS
+            const done        = completedSet(logs, habit.id)
+            const doneToday   = done.has(todayStr())
+            const isTargetDay = td.includes(todayDow)
+            const current     = getCurrentStreak(done, td)
+            const longest     = getLongestStreak(done, td)
+            const lastBroke   = getLastBroken(done, td)
+            const progress    = getProgress(habit, done)
+            const isExp       = expanded[habit.id] || {}
+            const tplEmoji    = TEMPLATES.find(t => t.id === habit.template)?.emoji
 
             return (
               <div key={habit.id}
-                className="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-100 dark:border-slate-700">
+                className={`bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-100 dark:border-slate-700 transition-opacity ${
+                  !isTargetDay ? 'opacity-60' : ''
+                }`}>
 
                 {/* ── Header ── */}
                 <div className="flex items-center gap-3">
-                  <button onClick={() => handleToggleToday(habit)}
+                  <button
+                    onClick={() => isTargetDay && handleToggleToday(habit)}
+                    disabled={!isTargetDay}
                     className={`w-8 h-8 rounded-full flex items-center justify-center border-2 transition-colors shrink-0 ${
-                      doneToday ? 'bg-amber-400 border-amber-400 text-white' : 'border-slate-300 dark:border-slate-500 hover:border-amber-400'
+                      doneToday
+                        ? 'bg-amber-400 border-amber-400 text-white'
+                        : isTargetDay
+                          ? 'border-slate-300 dark:border-slate-500 hover:border-amber-400'
+                          : 'border-slate-200 dark:border-slate-600 cursor-not-allowed'
                     }`}>
                     {doneToday && <Check size={16} />}
                   </button>
-                  <p className="flex-1 font-semibold text-slate-800 dark:text-white truncate">{habit.name}</p>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-slate-800 dark:text-white truncate">{habit.name}</p>
+                    {!isTargetDay && (
+                      <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">Bugün hedef gün değil</p>
+                    )}
+                  </div>
                   {tplEmoji && habit.template !== 'custom' && (
                     <span className="text-base shrink-0">{tplEmoji}</span>
                   )}
@@ -767,8 +931,12 @@ export default function Habits() {
                 )}
 
                 {/* ── Chain boxes ── */}
-                <ChainBoxes logs={logs} habitId={habit.id}
-                  onToggleToday={() => handleToggleToday(habit)} />
+                <ChainBoxes
+                  logs={logs}
+                  habitId={habit.id}
+                  targetDays={td}
+                  onToggleToday={() => handleToggleToday(habit)}
+                />
 
                 {/* ── Stats row ── */}
                 <div className="flex flex-wrap gap-x-4 gap-y-1.5 mt-3 pt-3 border-t border-slate-100 dark:border-slate-700">
@@ -790,6 +958,12 @@ export default function Habits() {
                       <span className="text-slate-400 dark:text-slate-500">
                         Son kırılma: {format(parseISO(lastBroke), 'd MMM', { locale: tr })}
                       </span>
+                    </span>
+                  )}
+                  {/* Target days badge */}
+                  {td.length < 7 && (
+                    <span className="flex items-center gap-1.5 text-xs text-slate-400 dark:text-slate-500">
+                      📅 {td.map(d => DAY_LABELS[d]).join('/')}
                     </span>
                   )}
                 </div>

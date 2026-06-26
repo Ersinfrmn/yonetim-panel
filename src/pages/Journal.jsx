@@ -111,9 +111,12 @@ export default function Journal() {
   const [preview, setPreview] = useState(false)
   const [showSummary, setShowSummary] = useState(false)
   const [summaryPeriod, setSummaryPeriod] = useState(7)
+  const [images, setImages] = useState([])
+  const [uploading, setUploading] = useState(false)
   const [saving, setSaving] = useState(false)
   const saveTimer = useRef(null)
   const textareaRef = useRef(null)
+  const fileInputRef = useRef(null)
 
   // Initial load
   useEffect(() => {

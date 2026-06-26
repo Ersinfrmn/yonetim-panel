@@ -104,3 +104,18 @@ create table pomodoro_sessions (
 alter table pomodoro_sessions enable row level security;
 create policy "Users manage own pomodoro_sessions" on pomodoro_sessions
   using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+-- 8. HABIT BREAK REASONS
+-- Run this in Supabase SQL Editor if upgrading from a previous version.
+create table if not exists habit_break_reasons (
+  id uuid primary key default gen_random_uuid(),
+  habit_id uuid references habits(id) on delete cascade not null,
+  user_id uuid references auth.users(id) on delete cascade not null,
+  break_date date not null,
+  reason text not null,
+  created_at timestamptz default now(),
+  unique(habit_id, break_date)
+);
+alter table habit_break_reasons enable row level security;
+create policy "Users manage own habit_break_reasons" on habit_break_reasons
+  using (auth.uid() = user_id) with check (auth.uid() = user_id);

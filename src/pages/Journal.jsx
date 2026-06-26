@@ -4,8 +4,7 @@ import { useAuth } from '../contexts/AuthContext'
 import { format, parseISO } from 'date-fns'
 import { tr } from 'date-fns/locale'
 import {
-  BookOpen, Save, ChevronLeft, ChevronRight,
-  Eye, Pencil, Bold, Italic, List, BarChart2, Hash,
+  ChevronLeft, ChevronRight, BarChart2,
   ImagePlus, X, Loader2,
 } from 'lucide-react'
 import toast from 'react-hot-toast'
@@ -15,110 +14,61 @@ import {
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
-const fmt = d => format(d, 'yyyy-MM-dd')
+const fmt     = d => format(d, 'yyyy-MM-dd')
 const display = d => format(typeof d === 'string' ? parseISO(d) : d, 'd MMMM yyyy', { locale: tr })
-const wordCount = text => (text?.trim() ? text.trim().split(/\s+/).length : 0)
 
 const MOOD_EMOJIS = ['😞', '😕', '😐', '🙂', '😊']
-
-const PROMPTS = [
-  'Bugün ne öğrendim?',
-  'Minnettar olduğum 3 şey neler?',
-  'Yarın ne yapmak istiyorum?',
-  'Bugün ne iyi gitti?',
-  'Kendime bugün ne söylemek isterim?',
-  'Bugün neye odaklandım?',
-  'Bugün en zorlandığım an neydi?',
-  'Bu haftadan çıkardığım ders?',
-  'Kendimi bugün nasıl hissettim?',
-  'Yarın daha iyi yapmak istediğim bir şey?',
-  'Bu ay hangi hedeflere ilerliyorum?',
-  'Başarılı hissettiğim bir an?',
-]
-
-function getDailyPrompts(dateStr) {
-  const d = parseISO(dateStr)
-  const start = new Date(d.getFullYear(), 0, 0)
-  const dayOfYear = Math.floor((d - start) / 86_400_000)
-  return [0, 1, 2].map(i => PROMPTS[(dayOfYear + i) % PROMPTS.length])
-}
 
 function getImageUrl(path) {
   const { data } = supabase.storage.from('journal-images').getPublicUrl(path)
   return data.publicUrl
 }
 
+// Streak counts days that have at least one image or a mood selection
 function calcStreak(entries) {
   let streak = 0
   const d = new Date()
   while (true) {
     const key = fmt(d)
-    if (!entries[key]?.content?.trim()) break
+    const e   = entries[key]
+    if (!e || (!e.images?.length && !e.mood)) break
     streak++
     d.setDate(d.getDate() - 1)
   }
   return streak
 }
 
-// Simple markdown → HTML (no external dep, user content only so dangerouslySetInnerHTML is safe)
-function renderMarkdown(text) {
-  if (!text) return ''
-  const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-  const inline = s => {
-    let r = esc(s)
-    r = r.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-    r = r.replace(/\*(.+?)\*/g, '<em>$1</em>')
-    return r
-  }
-  const lines = text.split('\n')
-  let html = ''
-  let inList = false
-  for (const line of lines) {
-    if (line.startsWith('### ')) {
-      if (inList) { html += '</ul>'; inList = false }
-      html += `<h3 class="text-base font-bold mt-3 mb-1">${inline(line.slice(4))}</h3>`
-    } else if (line.startsWith('## ')) {
-      if (inList) { html += '</ul>'; inList = false }
-      html += `<h2 class="text-lg font-bold mt-4 mb-1">${inline(line.slice(3))}</h2>`
-    } else if (line.startsWith('# ')) {
-      if (inList) { html += '</ul>'; inList = false }
-      html += `<h1 class="text-xl font-bold mt-4 mb-2">${inline(line.slice(2))}</h1>`
-    } else if (line.startsWith('- ') || line.startsWith('* ')) {
-      if (!inList) { html += '<ul class="list-disc pl-5 my-2 space-y-0.5">'; inList = true }
-      html += `<li class="leading-relaxed">${inline(line.slice(2))}</li>`
-    } else {
-      if (inList) { html += '</ul>'; inList = false }
-      if (line.trim() === '') {
-        html += '<div class="h-2"></div>'
-      } else {
-        html += `<p class="leading-relaxed my-1">${inline(line)}</p>`
-      }
-    }
-  }
-  if (inList) html += '</ul>'
-  return html
-}
-
 // ─── Component ───────────────────────────────────────────────────────────────
 
 export default function Journal() {
   const { user } = useAuth()
-  const [entries, setEntries] = useState({})
-  const [loading, setLoading] = useState(true)
-  const [selectedDate, setSelectedDate] = useState(fmt(new Date()))
-  const [content, setContent] = useState('')
-  const [mood, setMood] = useState(null)
-  const [preview, setPreview] = useState(false)
-  const [showSummary, setShowSummary] = useState(false)
-  const [summaryPeriod, setSummaryPeriod] = useState(7)
-  const [images, setImages] = useState([])
-  const [uploading, setUploading] = useState(false)
-  const [saving, setSaving] = useState(false)
-  const saveTimer = useRef(null)
-  const textareaRef = useRef(null)
+
+  const [entries,        setEntries]        = useState({})
+  const [loading,        setLoading]        = useState(true)
+  const [selectedDate,   setSelectedDate]   = useState(fmt(new Date()))
+  const [mood,           setMood]           = useState(null)
+  const [images,         setImages]         = useState([])
+  const [uploading,      setUploading]      = useState(false)
+  const [uploadProgress, setUploadProgress] = useState(0)
+  const [saving,         setSaving]         = useState(false)   // eslint-disable-line no-unused-vars
+  const [showSummary,    setShowSummary]    = useState(false)
+  const [summaryPeriod,  setSummaryPeriod]  = useState(7)
+  const [dragging,       setDragging]       = useState(false)
+  const [lightbox,       setLightbox]       = useState(null)    // { images: string[], index: number } | null
+
+  const saveTimer    = useRef(null)
   const fileInputRef = useRef(null)
 
-  // Initial load
+  // ── Escape closes lightbox ───────────────────────────────────────────────
+
+  useEffect(() => {
+    const h = e => { if (e.key === 'Escape') setLightbox(null) }
+    window.addEventListener('keydown', h)
+    return () => window.removeEventListener('keydown', h)
+  }, [])
+
+  // ── Initial load ─────────────────────────────────────────────────────────
+
   useEffect(() => {
     supabase.from('journal_entries').select('*').eq('user_id', user.id)
       .then(({ data }) => {
@@ -126,31 +76,24 @@ export default function Journal() {
         ;(data || []).forEach(e => { map[e.date] = e })
         setEntries(map)
         const today = fmt(new Date())
-        setContent(map[today]?.content || '')
         setMood(map[today]?.mood ?? null)
         setImages(map[today]?.images || [])
         setLoading(false)
       })
   }, [])
 
-  // Reset editor when date changes (NOT on entries change — avoids mid-type resets)
+  // ── Reset when date changes ───────────────────────────────────────────────
+
   useEffect(() => {
-    setContent(entries[selectedDate]?.content || '')
     setMood(entries[selectedDate]?.mood ?? null)
     setImages(entries[selectedDate]?.images || [])
-    setPreview(false)
   }, [selectedDate]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  function scheduleAutosave(val, currentMood = mood) {
-    setContent(val)
-    clearTimeout(saveTimer.current)
-    saveTimer.current = setTimeout(() => save(val, currentMood), 1500)
-  }
+  // ── Persist mood + images to DB ───────────────────────────────────────────
 
-  async function save(val = content, currentMood = mood, currentImages = images) {
+  async function save(currentMood = mood, currentImages = images, { notify = false } = {}) {
     setSaving(true)
-    const wc = wordCount(val)
-    const payload = { content: val, mood: currentMood, word_count: wc, images: currentImages }
+    const payload  = { mood: currentMood, images: currentImages }
     const existing = entries[selectedDate]
     let result
     if (existing) {
@@ -160,56 +103,78 @@ export default function Journal() {
     } else {
       const { data } = await supabase
         .from('journal_entries')
-        .insert({ user_id: user.id, date: selectedDate, ...payload })
+        .insert({ user_id: user.id, date: selectedDate, content: '', ...payload })
         .select().single()
       result = data
     }
     if (result) {
       setEntries(e => ({ ...e, [selectedDate]: result }))
-      toast.success('Kaydedildi!', { duration: 1000 })
+      if (notify) toast.success('Kaydedildi!', { duration: 1000 })
     }
     setSaving(false)
   }
+
+  // ── Mood ─────────────────────────────────────────────────────────────────
 
   function handleMoodSelect(val) {
     const next = val === mood ? null : val
     setMood(next)
     clearTimeout(saveTimer.current)
-    saveTimer.current = setTimeout(() => save(content, next), 400)
+    saveTimer.current = setTimeout(() => save(next, images, { notify: true }), 400)
   }
 
-  async function uploadImage(file) {
-    if (!file || !file.type.startsWith('image/')) {
-      toast.error('Sadece resim dosyaları yüklenebilir')
-      return
+  // ── Image upload (handles 1 or multiple files) ────────────────────────────
+
+  async function uploadFiles(files) {
+    const valid   = files.filter(f => f.type.startsWith('image/') && f.size <= 10 * 1024 * 1024)
+    const invalid = files.length - valid.length
+    if (invalid > 0) toast.error(`${invalid} dosya geçersiz (tür veya boyut)`)
+
+    const slots    = 5 - images.length
+    if (slots <= 0) { toast.error('En fazla 5 görsel ekleyebilirsiniz'); return }
+
+    const toUpload = valid.slice(0, slots)
+    if (!toUpload.length) return
+
+    // Walk sequentially so each upload gets a fresh `current` without stale closures
+    let current = [...images]
+    for (const file of toUpload) {
+      setUploading(true)
+      setUploadProgress(0)
+      const ext  = file.name.split('.').pop().toLowerCase()
+      const path = `${user.id}/${selectedDate}/${Date.now()}.${ext}`
+      const { error } = await supabase.storage
+        .from('journal-images')
+        .upload(path, file, {
+          onUploadProgress: evt => {
+            if (evt.total) setUploadProgress(Math.round((evt.loaded / evt.total) * 100))
+          },
+        })
+      if (error) {
+        toast.error(`${file.name}: yüklenemedi`)
+      } else {
+        current = [...current, path]
+        setImages(current)
+      }
     }
-    if (file.size > 10 * 1024 * 1024) {
-      toast.error('Maksimum dosya boyutu 10 MB')
-      return
-    }
-    setUploading(true)
-    const ext = file.name.split('.').pop().toLowerCase()
-    const path = `${user.id}/${selectedDate}/${Date.now()}.${ext}`
-    const { error } = await supabase.storage.from('journal-images').upload(path, file)
-    if (error) {
-      toast.error('Resim yüklenemedi')
-      setUploading(false)
-      return
-    }
-    const newImages = [...images, path]
-    setImages(newImages)
-    await save(content, mood, newImages)
     setUploading(false)
-    toast.success('Resim eklendi', { duration: 1500 })
+    setUploadProgress(0)
+    await save(mood, current)
+    toast.success(
+      toUpload.length === 1 ? 'Görsel eklendi' : `${toUpload.length} görsel eklendi`,
+      { duration: 1500 },
+    )
   }
 
   async function deleteImage(path) {
     await supabase.storage.from('journal-images').remove([path])
-    const newImages = images.filter(p => p !== path)
-    setImages(newImages)
-    await save(content, mood, newImages)
-    toast.success('Resim silindi', { duration: 1500 })
+    const next = images.filter(p => p !== path)
+    setImages(next)
+    await save(mood, next)
+    toast.success('Görsel silindi', { duration: 1500 })
   }
+
+  // ── Date navigation ───────────────────────────────────────────────────────
 
   function changeDay(delta) {
     const d = parseISO(selectedDate)
@@ -218,80 +183,39 @@ export default function Journal() {
     setSelectedDate(fmt(d))
   }
 
-  function insertPrompt(prompt) {
-    const insert = content.trim() ? `\n\n## ${prompt}\n` : `## ${prompt}\n`
-    const next = content + insert
-    scheduleAutosave(next)
-    textareaRef.current?.focus()
-  }
+  // ── Derived ───────────────────────────────────────────────────────────────
 
-  function insertMarkdown(type) {
-    const ta = textareaRef.current
-    if (!ta || preview) return
-    const start = ta.selectionStart
-    const end = ta.selectionEnd
-    const sel = content.slice(start, end)
-    let rep = ''
-    let cursorPos
+  // An entry exists if it has images or a mood selection
+  const entryDates = Object.keys(entries).filter(d => {
+    const e = entries[d]
+    return e?.images?.length > 0 || e?.mood
+  })
 
-    switch (type) {
-      case 'bold':
-        rep = `**${sel || 'metin'}**`
-        cursorPos = start + (sel ? rep.length : 2)
-        break
-      case 'italic':
-        rep = `*${sel || 'metin'}*`
-        cursorPos = start + (sel ? rep.length : 1)
-        break
-      case 'heading':
-        rep = `\n## ${sel || 'Başlık'}\n`
-        cursorPos = start + rep.length
-        break
-      case 'list':
-        rep = `\n- ${sel || 'madde'}`
-        cursorPos = start + rep.length
-        break
-      default:
-        return
-    }
-
-    const next = content.slice(0, start) + rep + content.slice(end)
-    scheduleAutosave(next)
-    requestAnimationFrame(() => {
-      ta.focus()
-      ta.setSelectionRange(cursorPos, cursorPos)
-    })
-  }
-
-  // ─── Derived values ──────────────────────────────────────────────────────
-
-  const entryDates = Object.keys(entries).filter(d => entries[d]?.content?.trim())
-  const dailyPrompts = getDailyPrompts(selectedDate)
   const streak = calcStreak(entries)
+
+  const mostImagesDate = entryDates.reduce(
+    (best, d) => (entries[d]?.images?.length || 0) > (entries[best]?.images?.length || 0) ? d : best,
+    entryDates[0] || '',
+  )
+
+  const allWithMood  = entryDates.filter(d => entries[d]?.mood)
+  const happiestDate = allWithMood.reduce(
+    (best, d) => (entries[d]?.mood || 0) > (entries[best]?.mood || 0) ? d : best,
+    allWithMood[0] || '',
+  )
 
   const chartData = Array.from({ length: summaryPeriod }, (_, i) => {
     const d = new Date()
     d.setDate(d.getDate() - (summaryPeriod - 1 - i))
     const key = fmt(d)
-    const e = entries[key]
+    const e   = entries[key]
     return {
       date: format(d, summaryPeriod <= 7 ? 'EEE' : 'dd.MM', { locale: tr }),
       mood: e?.mood ?? null,
-      words: wordCount(e?.content),
     }
   })
 
-  const allWithMood = entryDates.filter(d => entries[d]?.mood)
-  const longestDate = entryDates.reduce(
-    (best, d) => wordCount(entries[d]?.content) > wordCount(entries[best]?.content) ? d : best,
-    entryDates[0] || ''
-  )
-  const happiestDate = allWithMood.reduce(
-    (best, d) => (entries[d]?.mood || 0) > (entries[best]?.mood || 0) ? d : best,
-    allWithMood[0] || ''
-  )
-
-  // ─── Render ──────────────────────────────────────────────────────────────
+  // ── Render ────────────────────────────────────────────────────────────────
 
   if (loading) {
     return (
@@ -303,7 +227,8 @@ export default function Journal() {
 
   return (
     <div>
-      {/* Page header */}
+
+      {/* ── Page header ───────────────────────────────────────────────────── */}
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Günlük</h2>
         <button
@@ -322,7 +247,6 @@ export default function Journal() {
       {/* ── Summary panel ─────────────────────────────────────────────────── */}
       {showSummary && (
         <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 p-4 mb-6">
-          {/* Stats row */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
             <div className="bg-slate-50 dark:bg-slate-700 rounded-xl p-3 text-center">
               <p className="text-2xl font-bold text-primary-600 dark:text-primary-400">{streak}</p>
@@ -330,15 +254,17 @@ export default function Journal() {
             </div>
             <div className="bg-slate-50 dark:bg-slate-700 rounded-xl p-3 text-center">
               <p className="text-2xl font-bold text-slate-800 dark:text-white">{entryDates.length}</p>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Toplam kayıt</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Toplam giriş</p>
             </div>
             <div className="bg-slate-50 dark:bg-slate-700 rounded-xl p-3 text-center">
-              <p className="text-sm font-semibold text-slate-800 dark:text-white truncate">
-                {longestDate ? display(longestDate) : '—'}
+              <p className="text-2xl font-bold text-slate-800 dark:text-white">
+                {mostImagesDate ? (entries[mostImagesDate]?.images?.length || 0) : '—'}
               </p>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                En uzun yazı
-                {longestDate ? ` (${wordCount(entries[longestDate]?.content)}k)` : ''}
+                En çok görsel
+                {mostImagesDate
+                  ? ` — ${format(parseISO(mostImagesDate), 'd MMM', { locale: tr })}`
+                  : ''}
               </p>
             </div>
             <div className="bg-slate-50 dark:bg-slate-700 rounded-xl p-3 text-center">
@@ -346,7 +272,7 @@ export default function Journal() {
                 <>
                   <p className="text-2xl">{MOOD_EMOJIS[(entries[happiestDate]?.mood || 1) - 1]}</p>
                   <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                    En mutlu — {display(happiestDate)}
+                    En mutlu — {format(parseISO(happiestDate), 'd MMM', { locale: tr })}
                   </p>
                 </>
               ) : (
@@ -358,22 +284,18 @@ export default function Journal() {
             </div>
           </div>
 
-          {/* Period toggle */}
           <div className="flex items-center justify-between mb-3">
             <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">
               Ruh hali trendi
             </p>
             <div className="flex gap-1">
               {[7, 30].map(p => (
-                <button
-                  key={p}
-                  onClick={() => setSummaryPeriod(p)}
+                <button key={p} onClick={() => setSummaryPeriod(p)}
                   className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
                     summaryPeriod === p
                       ? 'bg-primary-600 text-white'
                       : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700'
-                  }`}
-                >
+                  }`}>
                   {p} gün
                 </button>
               ))}
@@ -383,19 +305,12 @@ export default function Journal() {
           {chartData.some(d => d.mood !== null) ? (
             <ResponsiveContainer width="100%" height={110}>
               <LineChart data={chartData} margin={{ top: 5, right: 5, bottom: 0, left: -28 }}>
-                <XAxis
-                  dataKey="date"
-                  tick={{ fontSize: 10, fill: '#94a3b8' }}
-                  tickLine={false}
-                  axisLine={false}
+                <XAxis dataKey="date"
+                  tick={{ fontSize: 10, fill: '#94a3b8' }} tickLine={false} axisLine={false}
                   interval={summaryPeriod <= 7 ? 0 : Math.floor(summaryPeriod / 7)}
                 />
-                <YAxis
-                  domain={[1, 5]}
-                  ticks={[1, 2, 3, 4, 5]}
-                  tick={{ fontSize: 10, fill: '#94a3b8' }}
-                  tickLine={false}
-                  axisLine={false}
+                <YAxis domain={[1, 5]} ticks={[1, 2, 3, 4, 5]}
+                  tick={{ fontSize: 10, fill: '#94a3b8' }} tickLine={false} axisLine={false}
                 />
                 <Tooltip
                   content={({ payload, label }) => {
@@ -408,20 +323,15 @@ export default function Journal() {
                     )
                   }}
                 />
-                <Line
-                  type="monotone"
-                  dataKey="mood"
-                  stroke="#6366f1"
-                  strokeWidth={2}
-                  dot={{ fill: '#6366f1', r: 3, strokeWidth: 0 }}
-                  activeDot={{ r: 4 }}
+                <Line type="monotone" dataKey="mood" stroke="#6366f1" strokeWidth={2}
+                  dot={{ fill: '#6366f1', r: 3, strokeWidth: 0 }} activeDot={{ r: 4 }}
                   connectNulls={false}
                 />
               </LineChart>
             </ResponsiveContainer>
           ) : (
             <p className="text-xs text-slate-400 dark:text-slate-500 text-center py-6">
-              Henüz ruh hali kaydı yok — günlük yazarken emoji seç
+              Henüz ruh hali kaydı yok — günlük eklerken emoji seçin
             </p>
           )}
         </div>
@@ -429,10 +339,8 @@ export default function Journal() {
 
       {/* ── Date navigation ───────────────────────────────────────────────── */}
       <div className="flex items-center gap-3 mb-4">
-        <button
-          onClick={() => changeDay(-1)}
-          className="p-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-slate-50 transition-colors"
-        >
+        <button onClick={() => changeDay(-1)}
+          className="p-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-slate-50 transition-colors">
           <ChevronLeft size={18} />
         </button>
         <div className="flex-1 text-center">
@@ -445,26 +353,11 @@ export default function Journal() {
           />
           <p className="text-xs text-slate-400 mt-1">{display(selectedDate)}</p>
         </div>
-        <button
-          onClick={() => changeDay(1)}
+        <button onClick={() => changeDay(1)}
           disabled={selectedDate === fmt(new Date())}
-          className="p-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-slate-50 transition-colors disabled:opacity-40"
-        >
+          className="p-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-slate-50 transition-colors disabled:opacity-40">
           <ChevronRight size={18} />
         </button>
-      </div>
-
-      {/* ── Daily prompts ─────────────────────────────────────────────────── */}
-      <div className="flex flex-wrap gap-2 mb-4">
-        {dailyPrompts.map(prompt => (
-          <button
-            key={prompt}
-            onClick={() => insertPrompt(prompt)}
-            className="px-3 py-1.5 rounded-full text-xs font-medium bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 border border-primary-200 dark:border-primary-700/50 hover:bg-primary-100 dark:hover:bg-primary-800/40 transition-colors"
-          >
-            + {prompt}
-          </button>
-        ))}
       </div>
 
       {/* ── Mood selector ─────────────────────────────────────────────────── */}
@@ -472,164 +365,139 @@ export default function Journal() {
         <span className="text-xs text-slate-500 dark:text-slate-400 shrink-0">Bugün nasılsın?</span>
         <div className="flex gap-1">
           {MOOD_EMOJIS.map((emoji, i) => (
-            <button
-              key={i}
-              onClick={() => handleMoodSelect(i + 1)}
+            <button key={i} onClick={() => handleMoodSelect(i + 1)}
               title={['Kötü', 'Üzgün', 'Nötr', 'İyi', 'Harika'][i]}
               className={`text-xl w-9 h-9 rounded-lg transition-all ${
                 mood === i + 1
                   ? 'bg-primary-100 dark:bg-primary-900/40 scale-110 ring-2 ring-primary-400'
                   : 'hover:bg-slate-100 dark:hover:bg-slate-700 opacity-50 hover:opacity-100'
-              }`}
-            >
+              }`}>
               {emoji}
             </button>
           ))}
           {mood && (
-            <button
-              onClick={() => handleMoodSelect(null)}
-              className="text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 px-1 ml-1"
-            >
+            <button onClick={() => handleMoodSelect(null)}
+              className="text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 px-1 ml-1">
               ✕
             </button>
           )}
         </div>
       </div>
 
-      {/* ── Editor card ───────────────────────────────────────────────────── */}
+      {/* ── Image upload card ─────────────────────────────────────────────── */}
       <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 overflow-hidden mb-6">
-        {/* Toolbar */}
-        <div className="px-4 py-2 border-b border-slate-100 dark:border-slate-700 flex items-center gap-2 flex-wrap">
-          {/* Formatting buttons */}
-          <div className="flex items-center gap-0.5">
-            {[
-              { type: 'bold',    Icon: Bold,   title: 'Kalın' },
-              { type: 'italic',  Icon: Italic, title: 'İtalik' },
-              { type: 'heading', Icon: Hash,   title: 'Başlık' },
-              { type: 'list',    Icon: List,   title: 'Liste' },
-            ].map(({ type, Icon, title }) => (
-              <button
-                key={type}
-                onClick={() => insertMarkdown(type)}
-                disabled={preview}
-                title={title}
-                className="p-1.5 rounded text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors disabled:opacity-30"
-              >
-                <Icon size={14} />
-              </button>
-            ))}
-          </div>
 
-          <div className="w-px h-4 bg-slate-200 dark:bg-slate-600 mx-1" />
-
-          <div className="flex items-center gap-1.5">
-            <BookOpen size={13} className="text-slate-400" />
-            <span className="text-xs text-slate-400">{wordCount(content)} kelime</span>
-          </div>
-
-          <button
-            onClick={() => fileInputRef.current?.click()}
-            disabled={uploading}
-            title="Resim ekle"
-            className="p-1.5 rounded text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors disabled:opacity-40"
-          >
-            {uploading ? <Loader2 size={14} className="animate-spin" /> : <ImagePlus size={14} />}
-          </button>
-
-          <div className="flex items-center gap-2 ml-auto">
-            <button
-              onClick={() => setPreview(p => !p)}
-              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                preview
-                  ? 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200'
-                  : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700'
-              }`}
-            >
-              {preview ? <Pencil size={12} /> : <Eye size={12} />}
-              {preview ? 'Düzenle' : 'Önizle'}
-            </button>
-            <button
-              onClick={() => save()}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-primary-600 hover:bg-primary-700 text-white text-xs rounded-lg transition-colors"
-            >
-              <Save size={12} />
-              {saving ? 'Kaydediliyor...' : 'Kaydet'}
-            </button>
-          </div>
-        </div>
-
-        {/* Content area */}
-        {preview ? (
-          <div
-            className="min-h-[350px] p-4 text-slate-700 dark:text-slate-200 text-sm"
-            dangerouslySetInnerHTML={{
-              __html: renderMarkdown(content) ||
-                '<p class="text-slate-400 dark:text-slate-600">Önizlenecek içerik yok.</p>',
-            }}
-          />
-        ) : (
-          <textarea
-            ref={textareaRef}
-            value={content}
-            onChange={e => scheduleAutosave(e.target.value)}
-            placeholder={`${display(selectedDate)} nasıl geçti?`}
-            className="w-full min-h-[350px] p-4 bg-transparent text-slate-700 dark:text-slate-200 placeholder-slate-300 dark:placeholder-slate-600 focus:outline-none resize-none text-sm leading-relaxed"
-          />
-        )}
-      </div>
-
-      {/* ── Image thumbnails ──────────────────────────────────────────────── */}
-      {images.length > 0 && (
-        <div className="mb-6">
-          <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-3">
-            Görseller ({images.length})
-          </p>
-          <div className="flex flex-wrap gap-3">
-            {images.map(path => (
-              <div key={path} className="relative group">
-                <a href={getImageUrl(path)} target="_blank" rel="noreferrer">
+        {/* Existing image grid */}
+        {images.length > 0 && (
+          <div className="p-4 border-b border-slate-100 dark:border-slate-700">
+            <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-3">
+              Görseller ({images.length} / 5)
+            </p>
+            <div className="grid grid-cols-2 gap-3">
+              {images.map((path, idx) => (
+                <div key={path}
+                  className="relative group aspect-video rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-700">
                   <img
                     src={getImageUrl(path)}
                     alt=""
-                    className="w-24 h-24 object-cover rounded-xl border border-slate-200 dark:border-slate-600 hover:opacity-90 transition-opacity"
+                    className="w-full h-full object-cover cursor-pointer transition-opacity hover:opacity-90"
+                    onClick={() => setLightbox({ images, index: idx })}
                   />
-                </a>
-                <button
-                  onClick={() => deleteImage(path)}
-                  className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-red-500 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-sm"
-                >
-                  <X size={10} />
-                </button>
-              </div>
-            ))}
-            <button
-              onClick={() => fileInputRef.current?.click()}
-              disabled={uploading}
-              className="w-24 h-24 rounded-xl border-2 border-dashed border-slate-200 dark:border-slate-600 flex flex-col items-center justify-center gap-1 text-slate-400 hover:border-primary-400 hover:text-primary-500 transition-colors disabled:opacity-40"
-            >
-              {uploading
-                ? <Loader2 size={18} className="animate-spin" />
-                : <><ImagePlus size={18} /><span className="text-xs">Ekle</span></>
-              }
-            </button>
+                  {/* Delete button */}
+                  <button
+                    onClick={() => deleteImage(path)}
+                    className="absolute top-2 right-2 w-6 h-6 rounded-full bg-black/60 hover:bg-red-600 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all shadow">
+                    <X size={12} />
+                  </button>
+                  {/* Expand hint */}
+                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                    <span className="bg-black/50 rounded-md px-2 py-0.5 text-white text-[10px] font-medium">
+                      Büyüt
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
-      )}
+        )}
+
+        {/* Upload zone — hidden when at capacity */}
+        {images.length < 5 ? (
+          <div
+            onDragOver={e => { e.preventDefault(); if (!uploading) setDragging(true) }}
+            onDragLeave={() => setDragging(false)}
+            onDrop={e => {
+              e.preventDefault()
+              setDragging(false)
+              if (!uploading) uploadFiles(Array.from(e.dataTransfer.files))
+            }}
+            onClick={() => { if (!uploading) fileInputRef.current?.click() }}
+            className={`m-4 border-2 border-dashed rounded-2xl py-12 px-6 flex flex-col items-center justify-center gap-2 select-none transition-colors ${
+              uploading
+                ? 'border-slate-200 dark:border-slate-600 cursor-default'
+                : dragging
+                  ? 'border-primary-400 bg-primary-50 dark:bg-primary-900/20 cursor-copy'
+                  : 'border-slate-200 dark:border-slate-600 cursor-pointer hover:border-primary-400 dark:hover:border-primary-500 hover:bg-slate-50 dark:hover:bg-slate-700/30'
+            }`}
+          >
+            {uploading ? (
+              <>
+                <Loader2 size={38} className="animate-spin text-primary-500 mb-1" />
+                <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Yükleniyor...</p>
+                {uploadProgress > 0 && (
+                  <div className="w-44 mt-2">
+                    <div className="h-1.5 bg-slate-200 dark:bg-slate-600 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-primary-500 rounded-full transition-all duration-300"
+                        style={{ width: `${uploadProgress}%` }}
+                      />
+                    </div>
+                    <p className="text-[10px] text-center text-slate-400 mt-1">%{uploadProgress}</p>
+                  </div>
+                )}
+              </>
+            ) : (
+              <>
+                <ImagePlus
+                  size={40}
+                  className={`mb-1 transition-colors ${dragging ? 'text-primary-400' : 'text-slate-300 dark:text-slate-600'}`}
+                />
+                <p className="text-sm font-semibold text-slate-600 dark:text-slate-300 text-center">
+                  {dragging ? 'Bırakın!' : 'Günlük görselinizi yükleyin'}
+                </p>
+                <p className="text-xs text-slate-400 text-center">
+                  Tablet ekran görüntüsü veya fotoğraf — JPG, PNG, WEBP
+                </p>
+                {images.length > 0 && (
+                  <p className="text-xs text-primary-500 dark:text-primary-400 mt-1">
+                    {5 - images.length} görsel daha ekleyebilirsiniz
+                  </p>
+                )}
+              </>
+            )}
+          </div>
+        ) : (
+          <p className="text-xs text-slate-400 text-center py-5">
+            Maksimum görsel sayısına ulaşıldı (5 / 5)
+          </p>
+        )}
+      </div>
 
       {/* Hidden file input */}
       <input
         ref={fileInputRef}
         type="file"
-        accept="image/*"
+        accept="image/jpeg,image/png,image/webp,image/*"
+        multiple
         className="hidden"
         onChange={e => {
-          const file = e.target.files?.[0]
-          if (file) uploadImage(file)
+          const files = Array.from(e.target.files || [])
+          if (files.length) uploadFiles(files)
           e.target.value = ''
         }}
       />
 
-      {/* ── History ───────────────────────────────────────────────────────── */}
+      {/* ── Past entries list ─────────────────────────────────────────────── */}
       {entryDates.length > 0 && (
         <div>
           <h3 className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-3">
@@ -639,33 +507,131 @@ export default function Journal() {
             {[...entryDates]
               .sort((a, b) => b.localeCompare(a))
               .slice(0, 10)
-              .map(d => (
-                <button
-                  key={d}
-                  onClick={() => setSelectedDate(d)}
-                  className={`w-full text-left px-4 py-3 rounded-xl border transition-colors ${
-                    d === selectedDate
-                      ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
-                      : 'border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700'
-                  }`}
-                >
-                  <div className="flex items-center justify-between mb-0.5">
-                    <p className="text-sm font-medium text-slate-700 dark:text-slate-200">{display(d)}</p>
-                    <div className="flex items-center gap-2 shrink-0 ml-2">
-                      {entries[d]?.mood && (
-                        <span className="text-base leading-none">{MOOD_EMOJIS[entries[d].mood - 1]}</span>
-                      )}
-                      <span className="text-xs text-slate-400">{wordCount(entries[d]?.content)}k</span>
+              .map(d => {
+                const entry    = entries[d]
+                const firstImg = entry?.images?.[0]
+                const imgCount = entry?.images?.length || 0
+                return (
+                  <button
+                    key={d}
+                    onClick={() => setSelectedDate(d)}
+                    className={`w-full text-left px-3 py-3 rounded-xl border transition-colors flex items-center gap-3 ${
+                      d === selectedDate
+                        ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
+                        : 'border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700'
+                    }`}
+                  >
+                    {/* Thumbnail */}
+                    <div className="w-12 h-12 rounded-lg overflow-hidden shrink-0 bg-slate-100 dark:bg-slate-700 flex items-center justify-center">
+                      {firstImg
+                        ? <img src={getImageUrl(firstImg)} alt="" className="w-full h-full object-cover" />
+                        : <ImagePlus size={16} className="text-slate-300 dark:text-slate-600" />
+                      }
                     </div>
-                  </div>
-                  <p className="text-xs text-slate-400 line-clamp-1">
-                    {entries[d]?.content?.slice(0, 90)}
-                  </p>
-                </button>
-              ))}
+                    {/* Info */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between mb-0.5">
+                        <p className="text-sm font-medium text-slate-700 dark:text-slate-200 truncate">
+                          {display(d)}
+                        </p>
+                        {entry?.mood && (
+                          <span className="text-base leading-none shrink-0 ml-2">
+                            {MOOD_EMOJIS[entry.mood - 1]}
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-xs text-slate-400">
+                        {imgCount > 0 ? `${imgCount} görsel` : 'Görsel yok'}
+                      </p>
+                    </div>
+                  </button>
+                )
+              })}
           </div>
         </div>
       )}
+
+      {/* ── Lightbox ──────────────────────────────────────────────────────── */}
+      {lightbox && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center"
+          style={{ background: 'rgba(0,0,0,0.92)' }}
+          onClick={e => e.target === e.currentTarget && setLightbox(null)}
+        >
+          {/* Counter */}
+          {lightbox.images.length > 1 && (
+            <div className="absolute top-4 left-4 bg-black/50 rounded-full px-3 py-1 text-white text-xs font-medium pointer-events-none">
+              {lightbox.index + 1} / {lightbox.images.length}
+            </div>
+          )}
+
+          {/* Close */}
+          <button
+            onClick={() => setLightbox(null)}
+            className="absolute top-4 right-4 z-10 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
+          >
+            <X size={22} />
+          </button>
+
+          {/* Prev */}
+          {lightbox.images.length > 1 && (
+            <button
+              onClick={e => {
+                e.stopPropagation()
+                setLightbox(l => ({
+                  ...l,
+                  index: (l.index - 1 + l.images.length) % l.images.length,
+                }))
+              }}
+              className="absolute left-4 z-10 p-3 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
+            >
+              <ChevronLeft size={28} />
+            </button>
+          )}
+
+          {/* Main image */}
+          <img
+            src={getImageUrl(lightbox.images[lightbox.index])}
+            alt=""
+            className="max-w-[90vw] max-h-[90vh] object-contain rounded-lg shadow-2xl"
+            onClick={e => e.stopPropagation()}
+          />
+
+          {/* Next */}
+          {lightbox.images.length > 1 && (
+            <button
+              onClick={e => {
+                e.stopPropagation()
+                setLightbox(l => ({
+                  ...l,
+                  index: (l.index + 1) % l.images.length,
+                }))
+              }}
+              className="absolute right-4 z-10 p-3 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
+            >
+              <ChevronRight size={28} />
+            </button>
+          )}
+
+          {/* Dot indicators */}
+          {lightbox.images.length > 1 && (
+            <div className="absolute bottom-5 left-1/2 -translate-x-1/2 flex items-center gap-2">
+              {lightbox.images.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={e => { e.stopPropagation(); setLightbox(l => ({ ...l, index: i })) }}
+                  className={`rounded-full transition-all ${
+                    i === lightbox.index
+                      ? 'w-3 h-3 bg-white'
+                      : 'w-2 h-2 bg-white/35 hover:bg-white/60'
+                  }`}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
     </div>
   )
 }

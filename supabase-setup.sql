@@ -119,3 +119,24 @@ create table if not exists habit_break_reasons (
 alter table habit_break_reasons enable row level security;
 create policy "Users manage own habit_break_reasons" on habit_break_reasons
   using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+-- 9. HABIT NOTES (crisis management + general notes per habit)
+-- Run this in Supabase SQL Editor if upgrading from a previous version.
+create table if not exists habit_notes (
+  id uuid primary key default gen_random_uuid(),
+  habit_id uuid references habits(id) on delete cascade not null,
+  user_id uuid references auth.users(id) on delete cascade not null,
+  crisis_notes text default '',
+  general_notes text default '',
+  updated_at timestamptz default now()
+);
+alter table habit_notes enable row level security;
+create policy "Users manage own habit_notes" on habit_notes
+  using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+-- 10. HABIT DURATION / TEMPLATE COLUMNS
+-- Run these ALTER statements in Supabase SQL Editor if upgrading from a previous version.
+alter table habits add column if not exists duration_type text default 'unlimited';
+alter table habits add column if not exists duration_days integer;
+alter table habits add column if not exists start_date date default current_date;
+alter table habits add column if not exists template text default 'custom';

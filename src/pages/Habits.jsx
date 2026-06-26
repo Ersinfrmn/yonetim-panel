@@ -78,148 +78,141 @@ function getActiveStreakSet(datesSet) {
   return active
 }
 
-// ─── Chain row — rendered as a single SVG ────────────────────────────────────
+// ─── Chain row — single SVG, left = oldest, right = today ───────────────────
 //
-// Each day = one rectangular link with an X cross inside.
-// Consecutive completed links are joined by a solid horizontal bar.
-// Oldest day on the LEFT, today on the RIGHT.
+// Slot layout (viewBox units):
+//   [link 0=13 days ago] [conn] [link 1] ... [link 13=TODAY]
 //
-// SVG units (viewBox coords):
-//   LW=30  link width    CW=9  connector width
-//   LH=26  link height   VH=40 total viewBox height
-//   LY=7   link top y    PAD=5 inset for X lines
+//   LW=32  link width     CW=10  connector width
+//   LH=30  link height    VH=52  total viewBox height (includes label row)
+//   LY=4   link top y     PAD=5  X-line corner inset
+//   UNIT = LW + CW = 42
+//   VW   = 14*32 + 13*10 = 578
 //
 function ChainBoxes({ logs, habitId, onToggleToday }) {
   const { dark } = useTheme()
-  const today = todayStr()
-  const done  = completedSet(logs, habitId)
+
+  // Always recalculate from the current moment
+  const todayDate = fmt(new Date())
+
+  const done   = completedSet(logs, habitId)
   const active = getActiveStreakSet(done)
 
-  // Oldest → left (i=0), today → right (i=CHAIN_DAYS-1)
+  // i=0  → 13 days ago  (FAR LEFT)
+  // i=13 → today        (FAR RIGHT)
   const days = Array.from({ length: CHAIN_DAYS }, (_, i) =>
     fmt(subDays(new Date(), CHAIN_DAYS - 1 - i))
   )
 
-  // ── SVG geometry ──────────────────────────────────────────────────────────
-  const LW = 30, LH = 26, CW = 9
-  const VH = 40,  LY = (VH - LH) / 2          // = 7
-  const VW = CHAIN_DAYS * LW + (CHAIN_DAYS - 1) * CW  // 420 + 117 = 537
-  const PAD = 5                                 // X-line inset from link corners
+  // ── SVG geometry (all in viewBox units) ───────────────────────────────────
+  const LW = 32, LH = 30, CW = 10
+  const VH = 52                             // extra bottom space for "bugün" label
+  const LY = 4                              // link top
+  const PAD = 5
+  const VW = CHAIN_DAYS * LW + (CHAIN_DAYS - 1) * CW   // 14*32+13*10 = 578
 
-  // Connector bar sits in the vertical middle, 10px tall
-  const CY  = (VH - 10) / 2                   // = 15
-  const CH  = 10
+  // Connector bar: centred vertically within the link
+  const CY = LY + (LH - 12) / 2            // 12px tall connector, centred in link
+  const CH = 12
 
   // ── Colour palette ────────────────────────────────────────────────────────
   const C = dark ? {
-    activeFill:   '#f59e0b',  activeStroke: '#92400e',  activeX: '#fef3c7',
+    activeFill:   '#f59e0b',  activeStroke: '#78350f',  activeX:   '#fef3c7',
     activeConn:   '#f59e0b',
-    doneFill:     '#475569',  doneStroke:   '#1e293b',   doneX:  '#94a3b8',
-    doneConn:     '#475569',
+    doneFill:     '#334155',  doneStroke:   '#1e293b',  doneX:     '#94a3b8',
+    doneConn:     '#334155',
     emptyFill:    '#1e293b',  emptyStroke:  '#334155',
-    todayRing:    '#38bdf8',
+    todayStroke:  '#38bdf8',  todayLabel:   '#38bdf8',
+    labelMuted:   '#334155',
   } : {
-    activeFill:   '#fbbf24',  activeStroke: '#b45309',   activeX: '#ffffff',
+    activeFill:   '#fbbf24',  activeStroke: '#92400e',  activeX:   '#ffffff',
     activeConn:   '#fbbf24',
-    doneFill:     '#cbd5e1',  doneStroke:   '#64748b',    doneX:  '#334155',
+    doneFill:     '#cbd5e1',  doneStroke:   '#64748b',  doneX:     '#1e293b',
     doneConn:     '#cbd5e1',
-    emptyFill:    '#f1f5f9',  emptyStroke:  '#cbd5e1',
-    todayRing:    '#0ea5e9',
+    emptyFill:    '#f8fafc',  emptyStroke:  '#e2e8f0',
+    todayStroke:  '#0ea5e9',  todayLabel:   '#0ea5e9',
+    labelMuted:   '#e2e8f0',
   }
 
   return (
-    <div className="mt-3 w-full select-none" aria-hidden="true">
+    <div className="mt-3 w-full select-none">
       <svg
         viewBox={`0 0 ${VW} ${VH}`}
-        width="100%"
-        height="auto"
-        style={{ display: 'block', overflow: 'visible' }}
+        style={{ width: '100%', height: 'auto', display: 'block', overflow: 'visible' }}
+        role="img"
+        aria-label="Alışkanlık zinciri"
       >
         {days.map((d, i) => {
-          const isToday     = d === today
-          const completed   = done.has(d)
-          const inActive    = active.has(d)
-          const prevD       = i > 0 ? days[i - 1] : null
-          const prevDone    = prevD ? done.has(prevD) : false
-          const prevActive  = prevD ? active.has(prevD) : false
+          const isToday    = d === todayDate
+          const completed  = done.has(d)
+          const inActive   = active.has(d)
+          const prevD      = i > 0 ? days[i - 1] : null
+          const prevDone   = prevD ? done.has(prevD) : false
+          const prevActive = prevD ? active.has(prevD) : false
 
-          // Link top-left x (each slot is LW + CW wide)
+          // x position: slot i starts at i * (LW + CW)
+          // i=0  → x=0   (leftmost,  13 days ago)
+          // i=13 → x=546 (rightmost, today)
           const x = i * (LW + CW)
 
-          // Per-link colours
           const fill   = completed && inActive ? C.activeFill
                        : completed             ? C.doneFill
                        :                         C.emptyFill
-          const stroke = isToday               ? C.todayRing
+          const stroke = isToday               ? C.todayStroke
                        : completed && inActive ? C.activeStroke
                        : completed             ? C.doneStroke
                        :                         C.emptyStroke
           const sw     = isToday ? 2.5 : 1.5
           const xCol   = inActive ? C.activeX : C.doneX
 
-          // Connector between link[i-1] and link[i]
           const showConn  = i > 0 && completed && prevDone
           const connColor = showConn
             ? (inActive && prevActive ? C.activeConn : C.doneConn)
             : null
 
           return (
-            <g
-              key={d}
-              onClick={isToday ? onToggleToday : undefined}
-              style={{ cursor: isToday ? 'pointer' : 'default' }}
-            >
-              {/* ── Connector bar (sits in the gap between link[i-1] and link[i]) ── */}
+            <g key={d} onClick={isToday ? onToggleToday : undefined}
+               style={{ cursor: isToday ? 'pointer' : 'default' }}>
+
+              {/* Connector between previous link and this link */}
               {showConn && (
-                <rect
-                  x={x - CW}
-                  y={CY}
-                  width={CW}
-                  height={CH}
-                  rx={1}
-                  fill={connColor}
-                />
+                <rect x={x - CW} y={CY} width={CW} height={CH} rx={1} fill={connColor} />
               )}
 
-              {/* ── Link rectangle ── */}
+              {/* Link frame */}
               <rect
-                x={x + sw / 2}
-                y={LY + sw / 2}
-                width={LW - sw}
-                height={LH - sw}
-                rx={3}
-                fill={fill}
-                stroke={stroke}
-                strokeWidth={sw}
+                x={x + sw / 2}  y={LY + sw / 2}
+                width={LW - sw}  height={LH - sw}
+                rx={3} fill={fill} stroke={stroke} strokeWidth={sw}
               />
 
-              {/* ── X cross (completed days only) ── */}
+              {/* X cross — completed days only */}
               {completed && (
                 <>
-                  <line
-                    x1={x + PAD}      y1={LY + PAD}
-                    x2={x + LW - PAD} y2={LY + LH - PAD}
-                    stroke={xCol} strokeWidth={1.8} strokeLinecap="round"
-                  />
-                  <line
-                    x1={x + LW - PAD} y1={LY + PAD}
-                    x2={x + PAD}      y2={LY + LH - PAD}
-                    stroke={xCol} strokeWidth={1.8} strokeLinecap="round"
-                  />
+                  <line x1={x+PAD} y1={LY+PAD} x2={x+LW-PAD} y2={LY+LH-PAD}
+                        stroke={xCol} strokeWidth={2} strokeLinecap="round" />
+                  <line x1={x+LW-PAD} y1={LY+PAD} x2={x+PAD} y2={LY+LH-PAD}
+                        stroke={xCol} strokeWidth={2} strokeLinecap="round" />
                 </>
               )}
 
-              {/* ── Today indicator: centre dot when not yet completed ── */}
+              {/* Centre dot — today, not yet completed */}
               {isToday && !completed && (
-                <circle
-                  cx={x + LW / 2}
-                  cy={VH / 2}
-                  r={3}
-                  fill={C.todayRing}
-                />
+                <circle cx={x + LW/2} cy={LY + LH/2} r={3.5} fill={C.todayStroke} />
               )}
 
-              {/* ── Tooltip: invisible hit-area with <title> ── */}
+              {/* "bugün" label under today's box */}
+              {isToday && (
+                <text
+                  x={x + LW / 2} y={LY + LH + 14}
+                  textAnchor="middle"
+                  fontSize={9} fontWeight="700" letterSpacing="0.5"
+                  fill={C.todayLabel}
+                >
+                  bugün
+                </text>
+              )}
+
               <title>{format(parseISO(d), 'd MMM yyyy', { locale: tr })}</title>
             </g>
           )

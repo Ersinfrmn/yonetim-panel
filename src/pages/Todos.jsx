@@ -96,7 +96,7 @@ function pillBg(task) {
   if (task.priority === 'high')   return 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300'
   if (task.priority === 'medium') return 'bg-yellow-100 text-yellow-700 dark:bg-amber-900/40 dark:text-yellow-300'
   if (task.priority === 'low')    return 'bg-slate-100 text-slate-500 dark:bg-slate-600 dark:text-slate-300'
-  return 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300'
+  return 'bg-primary-100 text-primary-700 dark:bg-primary-900/40 dark:text-primary-300'
 }
 
 // ─── TagInput ─────────────────────────────────────────────────────────────────

@@ -549,7 +549,7 @@ function CalendarView({ tasks, onToggle }) {
               const todayDay = isToday(day)
               return (
                 <div key={i} className={`rounded-xl border overflow-hidden flex flex-col ${
-                  todayDay ? 'border-indigo-500 dark:border-indigo-400' : 'border-slate-200 dark:border-slate-600'
+                  todayDay ? 'border-primary-500 dark:border-primary-400' : 'border-slate-200 dark:border-slate-600'
                 }`}>
                   {/* Column header */}
                   <div className={`py-2 px-1 text-center shrink-0 ${todayDay ? 'bg-indigo-600' : 'bg-slate-50 dark:bg-slate-700/60'}`}>

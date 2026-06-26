@@ -16,24 +16,23 @@ const NAV = [
   { to: '/stats',    label: 'İstatistik', icon: BarChart2 },
 ]
 
+const SIDEBAR_W = 224
+const TRANSITION = '260ms cubic-bezier(0.4, 0, 0.2, 1)'
+
 const bottomLinkClass = ({ isActive }) =>
   `flex flex-col items-center gap-0.5 text-xs font-medium transition-colors ${
     isActive ? 'text-primary-600 dark:text-primary-400' : 'text-slate-500 dark:text-slate-400'
   }`
 
-/* ── Shared sidebar body (used in both expanded + preview) ── */
 function SidebarBody({ user, dark, toggle, handleSignOut }) {
   return (
-    <div className="flex flex-col h-full" style={{ width: '224px', minWidth: '224px' }}>
-      {/* Header */}
+    <div className="flex flex-col h-full" style={{ width: SIDEBAR_W, minWidth: SIDEBAR_W }}>
       <div className="px-4 py-3 border-b border-slate-200 dark:border-slate-700 shrink-0">
         <h1 className="text-sm font-bold text-slate-800 dark:text-white leading-tight">
           EF Komuta Merkezi
         </h1>
         <p className="text-xs text-slate-400 truncate mt-0.5">{user?.email}</p>
       </div>
-
-      {/* Nav */}
       <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
         {NAV.map(({ to, label, icon: Icon }) => (
           <NavLink
@@ -52,8 +51,6 @@ function SidebarBody({ user, dark, toggle, handleSignOut }) {
           </NavLink>
         ))}
       </nav>
-
-      {/* Footer */}
       <div className="p-3 border-t border-slate-200 dark:border-slate-700 flex items-center gap-2 shrink-0">
         <button
           onClick={toggle}
@@ -81,7 +78,6 @@ export default function Layout({ children }) {
   const [collapsed, setCollapsed] = useState(
     () => localStorage.getItem('sidebar-collapsed') === 'true'
   )
-  // Controls whether the hover preview is in its "visible" CSS state
   const [previewVisible, setPreviewVisible] = useState(false)
 
   function toggleCollapsed() {
@@ -97,7 +93,6 @@ export default function Layout({ children }) {
   }
 
   function onLeave() {
-    // Small delay so mouse can travel between the tab and the panel without closing
     leaveTimer.current = setTimeout(() => setPreviewVisible(false), 140)
   }
 
@@ -106,121 +101,95 @@ export default function Layout({ children }) {
     navigate('/login')
   }
 
+  /*
+   * Toggle button `left` positions:
+   *   Collapsed → 8px   (top-left corner of screen)
+   *   Expanded  → SIDEBAR_W - 11px   (half-inside/half-outside the sidebar edge)
+   *
+   * The button is always outside the <aside> so overflow:hidden never clips it.
+   * It transitions its `left` in sync with the sidebar width animation.
+   */
+  const btnLeft = collapsed ? 8 : SIDEBAR_W - 11
+
   return (
     <div className="flex h-screen bg-slate-50 dark:bg-slate-900 overflow-hidden">
 
-      {/* ── Desktop sidebar (expanded) ──────────────────────────────── */}
+      {/* ── Desktop sidebar (expanded) ──────────────────────────── */}
       <aside
-        className={`hidden md:block relative shrink-0 bg-white dark:bg-slate-800 ${
-          !collapsed ? 'border-r border-slate-200 dark:border-slate-700' : ''
+        className={`hidden md:block shrink-0 bg-white dark:bg-slate-800 ${
+          collapsed ? '' : 'border-r border-slate-200 dark:border-slate-700'
         }`}
         style={{
-          width: collapsed ? 0 : '224px',
+          width: collapsed ? 0 : SIDEBAR_W,
           overflow: 'hidden',
-          transition: 'width 260ms cubic-bezier(0.4, 0, 0.2, 1)',
+          transition: `width ${TRANSITION}`,
         }}
       >
+        {/* Inner container holds the fixed-width content so it doesn't reflow */}
         <SidebarBody user={user} dark={dark} toggle={toggle} handleSignOut={handleSignOut} />
-
-        {/* Collapse button — floats on the right edge */}
-        <button
-          onClick={toggleCollapsed}
-          title="Küçült"
-          className="
-            absolute -right-3 top-14 z-10
-            w-6 h-6 rounded-full
-            bg-white dark:bg-slate-700
-            border border-slate-200 dark:border-slate-600
-            shadow-sm flex items-center justify-center
-            text-slate-400 hover:text-slate-600 dark:hover:text-slate-200
-            hover:bg-slate-50 dark:hover:bg-slate-600
-            transition-colors
-          "
-        >
-          <ChevronLeft size={13} />
-        </button>
       </aside>
 
-      {/* ── Collapsed state: edge tab + slide-in preview (desktop) ──── */}
       {/*
-        pointer-events: none on the wrapper so it doesn't block the main content.
-        Each interactive child opts back in with pointer-events: auto.
-      */}
-      <div
-        className="hidden md:block"
+       * ── Sidebar toggle button ──────────────────────────────────
+       *
+       * Lives OUTSIDE <aside> so overflow:hidden never clips it.
+       * Tracks the sidebar's right edge via a left transition.
+       *
+       * When collapsed: top-left corner (small, clean pill)
+       * When expanded:  straddling the sidebar's right edge
+       *
+       * When collapsed, hovering also triggers the preview panel.
+       */}
+      <button
+        onClick={toggleCollapsed}
+        onMouseEnter={collapsed ? onEnter : undefined}
+        onMouseLeave={collapsed ? onLeave : undefined}
+        title={collapsed ? 'Genişlet' : 'Küçült'}
+        className="hidden md:flex items-center justify-center w-[22px] h-[22px] rounded-md border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 hover:border-slate-300 dark:hover:border-slate-500"
         style={{
           position: 'fixed',
-          left: 0,
-          top: 0,
-          bottom: 0,
-          width: collapsed ? '224px' : 0,
-          zIndex: 50,
-          pointerEvents: 'none',
-          overflow: 'visible',
+          top: 18,
+          left: btnLeft,
+          zIndex: 60,
+          boxShadow: '0 1px 3px rgba(0,0,0,0.10)',
+          transition: `left ${TRANSITION}, background-color 150ms, color 150ms, border-color 150ms`,
         }}
       >
-        {/* Edge toggle tab — always visible when collapsed */}
-        {collapsed && (
-          <div
-            style={{
-              position: 'absolute',
-              left: 0,
-              top: '50%',
-              transform: 'translateY(-50%)',
-              pointerEvents: 'auto',
-              zIndex: 52,
-            }}
-            onMouseEnter={onEnter}
-            onMouseLeave={onLeave}
-          >
-            <button
-              onClick={toggleCollapsed}
-              title="Genişlet"
-              className="
-                w-5 h-10 rounded-r-lg
-                bg-white dark:bg-slate-800
-                border border-l-0 border-slate-200 dark:border-slate-700
-                shadow-md
-                flex items-center justify-center
-                text-slate-400 hover:text-primary-600 dark:hover:text-primary-400
-                hover:bg-slate-50 dark:hover:bg-slate-700
-                transition-colors
-              "
-            >
-              <ChevronRight size={12} />
-            </button>
-          </div>
-        )}
+        {collapsed
+          ? <ChevronRight size={12} strokeWidth={2.2} />
+          : <ChevronLeft  size={12} strokeWidth={2.2} />
+        }
+      </button>
 
-        {/* Slide-in preview panel */}
-        {collapsed && (
-          <div
-            style={{
-              position: 'absolute',
-              left: 0,
-              top: 0,
-              bottom: 0,
-              width: '224px',
-              zIndex: 51,
-              pointerEvents: previewVisible ? 'auto' : 'none',
-              /* Slide in from the left + fade */
-              opacity: previewVisible ? 1 : 0,
-              transform: previewVisible ? 'translateX(0)' : 'translateX(-18px)',
-              transition: previewVisible
-                ? 'opacity 230ms ease-out, transform 230ms ease-out'
-                : 'opacity 180ms ease-in, transform 180ms ease-in',
-            }}
-            onMouseEnter={onEnter}
-            onMouseLeave={onLeave}
-          >
-            <div className="h-full bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 shadow-2xl">
-              <SidebarBody user={user} dark={dark} toggle={toggle} handleSignOut={handleSignOut} />
-            </div>
+      {/* ── Slide-in preview panel (collapsed state, desktop only) ─ */}
+      {collapsed && (
+        <div
+          className="hidden md:block"
+          style={{
+            position: 'fixed',
+            left: 0,
+            top: 0,
+            bottom: 0,
+            width: SIDEBAR_W,
+            zIndex: 50,
+            /* Slide from the left: starts 20px behind, eases into place */
+            opacity: previewVisible ? 1 : 0,
+            transform: previewVisible ? 'translateX(0)' : 'translateX(-20px)',
+            pointerEvents: previewVisible ? 'auto' : 'none',
+            transition: previewVisible
+              ? `opacity 230ms ease-out, transform 230ms ease-out`
+              : `opacity 170ms ease-in,  transform 170ms ease-in`,
+          }}
+          onMouseEnter={onEnter}
+          onMouseLeave={onLeave}
+        >
+          <div className="h-full bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 shadow-2xl">
+            <SidebarBody user={user} dark={dark} toggle={toggle} handleSignOut={handleSignOut} />
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
-      {/* ── Mobile Header ───────────────────────────────────────────── */}
+      {/* ── Mobile Header ─────────────────────────────────────────── */}
       <div className="md:hidden fixed top-0 left-0 right-0 z-40 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between px-4 h-14">
         <h1 className="text-base font-bold text-slate-800 dark:text-white">EF Komuta Merkezi</h1>
         <div className="flex items-center gap-2">
@@ -233,14 +202,14 @@ export default function Layout({ children }) {
         </div>
       </div>
 
-      {/* ── Main content ────────────────────────────────────────────── */}
+      {/* ── Main content ──────────────────────────────────────────── */}
       <main className="flex-1 overflow-y-auto md:pt-0 pt-14 pb-20 md:pb-0">
         <div className="max-w-4xl mx-auto p-4 md:p-6">
           {children}
         </div>
       </main>
 
-      {/* ── Mobile Bottom Nav ───────────────────────────────────────── */}
+      {/* ── Mobile Bottom Nav ─────────────────────────────────────── */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 flex">
         {NAV.map(({ to, label, icon: Icon }) => (
           <NavLink

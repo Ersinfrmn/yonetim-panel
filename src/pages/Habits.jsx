@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext'
 import { format, subDays, addDays, parseISO } from 'date-fns'
 import { tr } from 'date-fns/locale'
 import { Plus, Trash2, Flame, Check, Trophy, X } from 'lucide-react'
+import { useTheme } from '../contexts/ThemeContext'
 import toast from 'react-hot-toast'
 
 const CHAIN_DAYS = 14
@@ -77,108 +78,153 @@ function getActiveStreakSet(datesSet) {
   return active
 }
 
-// Chain link SVG — the exact icon the user specified
-function ChainIcon({ className }) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={2}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      style={{ width: '58%', height: '58%' }}
-      className={className}
-    >
-      <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
-      <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
-    </svg>
-  )
-}
-
-// ─── Chain box row ────────────────────────────────────────────────────────────
+// ─── Chain row — rendered as a single SVG ────────────────────────────────────
 //
-// Layout: [box] [conn] [box] [conn] ... [box=TODAY]
-// Boxes:  flex-1, square via aspect-ratio.
-// Conns:  fixed 6px wide, height 2px — shown only between two completed boxes.
+// Each day = one rectangular link with an X cross inside.
+// Consecutive completed links are joined by a solid horizontal bar.
+// Oldest day on the LEFT, today on the RIGHT.
+//
+// SVG units (viewBox coords):
+//   LW=30  link width    CW=9  connector width
+//   LH=26  link height   VH=40 total viewBox height
+//   LY=7   link top y    PAD=5 inset for X lines
 //
 function ChainBoxes({ logs, habitId, onToggleToday }) {
+  const { dark } = useTheme()
   const today = todayStr()
-  const done = completedSet(logs, habitId)
+  const done  = completedSet(logs, habitId)
   const active = getActiveStreakSet(done)
 
-  // Oldest on the left (index 0), today on the right (index CHAIN_DAYS-1)
+  // Oldest → left (i=0), today → right (i=CHAIN_DAYS-1)
   const days = Array.from({ length: CHAIN_DAYS }, (_, i) =>
     fmt(subDays(new Date(), CHAIN_DAYS - 1 - i))
   )
 
-  // Build a flat array: connector → box → connector → box …
-  const items = []
-  for (let i = 0; i < days.length; i++) {
-    const d = days[i]
-    const isToday = d === today
-    const completed = done.has(d)
-    const inActive = active.has(d)
+  // ── SVG geometry ──────────────────────────────────────────────────────────
+  const LW = 30, LH = 26, CW = 9
+  const VH = 40,  LY = (VH - LH) / 2          // = 7
+  const VW = CHAIN_DAYS * LW + (CHAIN_DAYS - 1) * CW  // 420 + 117 = 537
+  const PAD = 5                                 // X-line inset from link corners
 
-    // Connector before this box (between [i-1] and [i])
-    if (i > 0) {
-      const prevD = days[i - 1]
-      const prevCompleted = done.has(prevD)
-      const prevActive = active.has(prevD)
-      const connected = completed && prevCompleted
-      const bothActive = connected && inActive && prevActive
+  // Connector bar sits in the vertical middle, 10px tall
+  const CY  = (VH - 10) / 2                   // = 15
+  const CH  = 10
 
-      items.push(
-        <div
-          key={`c-${i}`}
-          aria-hidden="true"
-          style={{
-            width: 6,
-            height: 2,
-            borderRadius: 1,
-            flexShrink: 0,
-            alignSelf: 'center',
-            backgroundColor: bothActive
-              ? '#f59e0b'   // amber-500  — active streak connector
-              : connected
-              ? '#94a3b8'   // slate-400  — old completed connector
-              : 'transparent',
-          }}
-        />
-      )
-    }
-
-    // Box
-    items.push(
-      <div
-        key={d}
-        onClick={isToday ? onToggleToday : undefined}
-        title={format(parseISO(d), 'd MMM yyyy', { locale: tr })}
-        className={[
-          'flex-1 rounded-lg flex items-center justify-center transition-colors',
-          isToday ? 'cursor-pointer' : 'cursor-default',
-          // Today gets a vivid sky-blue ring to distinguish it clearly
-          isToday
-            ? 'ring-2 ring-sky-500 ring-offset-2 ring-offset-white dark:ring-offset-slate-800'
-            : '',
-          completed && inActive
-            ? 'bg-amber-400 dark:bg-amber-500'
-            : completed
-            ? 'bg-slate-300 dark:bg-slate-600'
-            : 'bg-slate-100 dark:bg-slate-700/60',
-        ].filter(Boolean).join(' ')}
-        style={{ aspectRatio: '1 / 1' }}
-      >
-        {completed && (
-          <ChainIcon className={inActive ? 'text-white' : 'text-slate-500 dark:text-slate-400'} />
-        )}
-      </div>
-    )
+  // ── Colour palette ────────────────────────────────────────────────────────
+  const C = dark ? {
+    activeFill:   '#f59e0b',  activeStroke: '#92400e',  activeX: '#fef3c7',
+    activeConn:   '#f59e0b',
+    doneFill:     '#475569',  doneStroke:   '#1e293b',   doneX:  '#94a3b8',
+    doneConn:     '#475569',
+    emptyFill:    '#1e293b',  emptyStroke:  '#334155',
+    todayRing:    '#38bdf8',
+  } : {
+    activeFill:   '#fbbf24',  activeStroke: '#b45309',   activeX: '#ffffff',
+    activeConn:   '#fbbf24',
+    doneFill:     '#cbd5e1',  doneStroke:   '#64748b',    doneX:  '#334155',
+    doneConn:     '#cbd5e1',
+    emptyFill:    '#f1f5f9',  emptyStroke:  '#cbd5e1',
+    todayRing:    '#0ea5e9',
   }
 
   return (
-    <div className="flex items-center mt-3">
-      {items}
+    <div className="mt-3 w-full select-none" aria-hidden="true">
+      <svg
+        viewBox={`0 0 ${VW} ${VH}`}
+        width="100%"
+        height="auto"
+        style={{ display: 'block', overflow: 'visible' }}
+      >
+        {days.map((d, i) => {
+          const isToday     = d === today
+          const completed   = done.has(d)
+          const inActive    = active.has(d)
+          const prevD       = i > 0 ? days[i - 1] : null
+          const prevDone    = prevD ? done.has(prevD) : false
+          const prevActive  = prevD ? active.has(prevD) : false
+
+          // Link top-left x (each slot is LW + CW wide)
+          const x = i * (LW + CW)
+
+          // Per-link colours
+          const fill   = completed && inActive ? C.activeFill
+                       : completed             ? C.doneFill
+                       :                         C.emptyFill
+          const stroke = isToday               ? C.todayRing
+                       : completed && inActive ? C.activeStroke
+                       : completed             ? C.doneStroke
+                       :                         C.emptyStroke
+          const sw     = isToday ? 2.5 : 1.5
+          const xCol   = inActive ? C.activeX : C.doneX
+
+          // Connector between link[i-1] and link[i]
+          const showConn  = i > 0 && completed && prevDone
+          const connColor = showConn
+            ? (inActive && prevActive ? C.activeConn : C.doneConn)
+            : null
+
+          return (
+            <g
+              key={d}
+              onClick={isToday ? onToggleToday : undefined}
+              style={{ cursor: isToday ? 'pointer' : 'default' }}
+            >
+              {/* ── Connector bar (sits in the gap between link[i-1] and link[i]) ── */}
+              {showConn && (
+                <rect
+                  x={x - CW}
+                  y={CY}
+                  width={CW}
+                  height={CH}
+                  rx={1}
+                  fill={connColor}
+                />
+              )}
+
+              {/* ── Link rectangle ── */}
+              <rect
+                x={x + sw / 2}
+                y={LY + sw / 2}
+                width={LW - sw}
+                height={LH - sw}
+                rx={3}
+                fill={fill}
+                stroke={stroke}
+                strokeWidth={sw}
+              />
+
+              {/* ── X cross (completed days only) ── */}
+              {completed && (
+                <>
+                  <line
+                    x1={x + PAD}      y1={LY + PAD}
+                    x2={x + LW - PAD} y2={LY + LH - PAD}
+                    stroke={xCol} strokeWidth={1.8} strokeLinecap="round"
+                  />
+                  <line
+                    x1={x + LW - PAD} y1={LY + PAD}
+                    x2={x + PAD}      y2={LY + LH - PAD}
+                    stroke={xCol} strokeWidth={1.8} strokeLinecap="round"
+                  />
+                </>
+              )}
+
+              {/* ── Today indicator: centre dot when not yet completed ── */}
+              {isToday && !completed && (
+                <circle
+                  cx={x + LW / 2}
+                  cy={VH / 2}
+                  r={3}
+                  fill={C.todayRing}
+                />
+              )}
+
+              {/* ── Tooltip: invisible hit-area with <title> ── */}
+              <title>{format(parseISO(d), 'd MMM yyyy', { locale: tr })}</title>
+            </g>
+          )
+        })}
+      </svg>
     </div>
   )
 }

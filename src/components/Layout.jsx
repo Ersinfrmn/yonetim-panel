@@ -17,7 +17,16 @@ const NAV = [
 ]
 
 const SIDEBAR_W = 224
-const TRANSITION = '260ms cubic-bezier(0.4, 0, 0.2, 1)'
+const EASING = '260ms cubic-bezier(0.4, 0, 0.2, 1)'
+
+// Button anchor is always at left:8px (top-left corner).
+// When expanded, translateX slides it to the sidebar's right edge.
+// Using transform (not `left`) keeps it GPU-composited → always above the sidebar.
+const BTN_ANCHOR = 8
+const BTN_SIZE   = 22
+// Center of button lands exactly on sidebar's right edge when expanded:
+//   8 + translateX = SIDEBAR_W - BTN_SIZE/2  →  translateX = 224 - 11 - 8 = 205
+const BTN_OPEN_TX = SIDEBAR_W - BTN_SIZE / 2 - BTN_ANCHOR   // 205 px
 
 const bottomLinkClass = ({ isActive }) =>
   `flex flex-col items-center gap-0.5 text-xs font-medium transition-colors ${
@@ -33,6 +42,7 @@ function SidebarBody({ user, dark, toggle, handleSignOut }) {
         </h1>
         <p className="text-xs text-slate-400 truncate mt-0.5">{user?.email}</p>
       </div>
+
       <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
         {NAV.map(({ to, label, icon: Icon }) => (
           <NavLink
@@ -51,6 +61,7 @@ function SidebarBody({ user, dark, toggle, handleSignOut }) {
           </NavLink>
         ))}
       </nav>
+
       <div className="p-3 border-t border-slate-200 dark:border-slate-700 flex items-center gap-2 shrink-0">
         <button
           onClick={toggle}
@@ -101,20 +112,10 @@ export default function Layout({ children }) {
     navigate('/login')
   }
 
-  /*
-   * Toggle button `left` positions:
-   *   Collapsed → 8px   (top-left corner of screen)
-   *   Expanded  → SIDEBAR_W - 11px   (half-inside/half-outside the sidebar edge)
-   *
-   * The button is always outside the <aside> so overflow:hidden never clips it.
-   * It transitions its `left` in sync with the sidebar width animation.
-   */
-  const btnLeft = collapsed ? 8 : SIDEBAR_W - 11
-
   return (
     <div className="flex h-screen bg-slate-50 dark:bg-slate-900 overflow-hidden">
 
-      {/* ── Desktop sidebar (expanded) ──────────────────────────── */}
+      {/* ── Desktop sidebar ──────────────────────────────────────── */}
       <aside
         className={`hidden md:block shrink-0 bg-white dark:bg-slate-800 ${
           collapsed ? '' : 'border-r border-slate-200 dark:border-slate-700'
@@ -122,42 +123,57 @@ export default function Layout({ children }) {
         style={{
           width: collapsed ? 0 : SIDEBAR_W,
           overflow: 'hidden',
-          transition: `width ${TRANSITION}`,
+          transition: `width ${EASING}`,
         }}
       >
-        {/* Inner container holds the fixed-width content so it doesn't reflow */}
         <SidebarBody user={user} dark={dark} toggle={toggle} handleSignOut={handleSignOut} />
       </aside>
 
       {/*
        * ── Sidebar toggle button ──────────────────────────────────
        *
-       * Lives OUTSIDE <aside> so overflow:hidden never clips it.
-       * Tracks the sidebar's right edge via a left transition.
+       * Anchored at left: BTN_ANCHOR (8px) — top-left corner.
+       * translateX slides it rightward to straddle the sidebar edge.
        *
-       * When collapsed: top-left corner (small, clean pill)
-       * When expanded:  straddling the sidebar's right edge
+       * Using transform (not `left`) is key:
+       *   • GPU-composited → renders above the sidebar regardless of z-index wars
+       *   • Animates at 60 fps with no layout reflow
        *
-       * When collapsed, hovering also triggers the preview panel.
+       * collapsed → translateX(0)           → left edge of screen  (top-left)
+       * expanded  → translateX(BTN_OPEN_TX) → sidebar's right edge (overlaps ~11px into main content)
+       *
+       * The button is never inside <aside>, so overflow:hidden never touches it.
        */}
       <button
         onClick={toggleCollapsed}
         onMouseEnter={collapsed ? onEnter : undefined}
         onMouseLeave={collapsed ? onLeave : undefined}
         title={collapsed ? 'Genişlet' : 'Küçült'}
-        className="hidden md:flex items-center justify-center w-[22px] h-[22px] rounded-md border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 hover:border-slate-300 dark:hover:border-slate-500"
+        aria-label={collapsed ? 'Genişlet' : 'Küçült'}
+        className="hidden md:flex items-center justify-center rounded-md border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 hover:border-slate-300 dark:hover:border-slate-500"
         style={{
           position: 'fixed',
-          top: 18,
-          left: btnLeft,
-          zIndex: 60,
-          boxShadow: '0 1px 3px rgba(0,0,0,0.10)',
-          transition: `left ${TRANSITION}, background-color 150ms, color 150ms, border-color 150ms`,
+          top: BTN_ANCHOR + 10,         // 18 px from top
+          left: BTN_ANCHOR,             // always anchored at left: 8px
+          width: BTN_SIZE,
+          height: BTN_SIZE,
+          zIndex: 9999,                 // above everything
+          boxShadow: '0 1px 4px rgba(0,0,0,0.13)',
+          // transform drives the open/close movement (not `left`, not `margin`)
+          transform: collapsed
+            ? 'translateX(0)'
+            : `translateX(${BTN_OPEN_TX}px)`,
+          transition: [
+            `transform ${EASING}`,
+            'background-color 150ms',
+            'color 150ms',
+            'border-color 150ms',
+          ].join(', '),
         }}
       >
         {collapsed
-          ? <ChevronRight size={12} strokeWidth={2.2} />
-          : <ChevronLeft  size={12} strokeWidth={2.2} />
+          ? <ChevronRight size={12} strokeWidth={2.5} />
+          : <ChevronLeft  size={12} strokeWidth={2.5} />
         }
       </button>
 
@@ -171,8 +187,7 @@ export default function Layout({ children }) {
             top: 0,
             bottom: 0,
             width: SIDEBAR_W,
-            zIndex: 50,
-            /* Slide from the left: starts 20px behind, eases into place */
+            zIndex: 100,
             opacity: previewVisible ? 1 : 0,
             transform: previewVisible ? 'translateX(0)' : 'translateX(-20px)',
             pointerEvents: previewVisible ? 'auto' : 'none',

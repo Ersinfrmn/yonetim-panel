@@ -185,3 +185,9 @@ alter table pomodoro_sessions add column if not exists session_number integer de
 
 -- 16. TASK POMODORO COUNTER
 alter table tasks add column if not exists pomodoro_count integer default 0;
+
+-- 17. HABIT TARGET DAYS
+-- Stores which days of the week the habit should be performed.
+-- Values: 0=Sunday, 1=Monday, 2=Tuesday, 3=Wednesday, 4=Thursday, 5=Friday, 6=Saturday
+-- Default {0,1,2,3,4,5,6} means every day — existing habits are unaffected.
+alter table habits add column if not exists target_days integer[] default '{0,1,2,3,4,5,6}';

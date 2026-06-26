@@ -96,10 +96,12 @@ export default function Stats() {
       const pomoWeek  = (pomodoros || []).filter(p => p.started_at && parseISO(p.started_at) >= weekStart).length
 
       const last30 = Array.from({ length: 30 }, (_, i) => {
-        const d  = subDays(today, 29 - i)
-        const ds = fmt(d)
+        const d   = subDays(today, 29 - i)
+        const ds  = fmt(d)
+        const dow = d.getDay()
         const done  = (habitLogs || []).filter(l => l.date === ds).length
-        const total = (habits || []).length
+        // Denominator = habits that target this specific day of week
+        const total = (habits || []).filter(h => (h.target_days ?? [0,1,2,3,4,5,6]).includes(dow)).length
         return { day: format(d, 'd MMM', { locale: tr }), rate: total ? Math.round((done / total) * 100) : 0 }
       }).filter((_, i) => i % 5 === 4)
 

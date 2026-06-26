@@ -147,10 +147,10 @@ export default function Journal() {
     saveTimer.current = setTimeout(() => save(val, currentMood), 1500)
   }
 
-  async function save(val = content, currentMood = mood) {
+  async function save(val = content, currentMood = mood, currentImages = images) {
     setSaving(true)
     const wc = wordCount(val)
-    const payload = { content: val, mood: currentMood, word_count: wc }
+    const payload = { content: val, mood: currentMood, word_count: wc, images: currentImages }
     const existing = entries[selectedDate]
     let result
     if (existing) {

@@ -133,7 +133,8 @@ export default function Goals() {
   async function updateStatus(goal, status) {
     const patch = { status }
     if (status === 'completed' && (goal.progress ?? 0) < 100) patch.progress = 100
-    const { data } = await supabase.from('goals').update(patch).eq('id', goal.id).select().single()
+    const { data, error } = await supabase.from('goals').update(patch).eq('id', goal.id).select().single()
+    if (error) { console.error('updateStatus:', error); return }
     if (data) setGoals(g => g.map(x => x.id === goal.id ? data : x))
   }
 

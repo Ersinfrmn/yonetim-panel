@@ -6,6 +6,7 @@ import { tr } from 'date-fns/locale'
 import {
   BookOpen, Save, ChevronLeft, ChevronRight,
   Eye, Pencil, Bold, Italic, List, BarChart2, Hash,
+  ImagePlus, X, Loader2,
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import {

@@ -98,10 +98,11 @@ function ChainBoxes({ logs, habitId, onToggleToday }) {
   const done   = completedSet(logs, habitId)
   const active = getActiveStreakSet(done)
 
-  // i=0  → 13 days ago  (FAR LEFT)
-  // i=13 → today        (FAR RIGHT)
+  // i=0  → today        (FAR LEFT)   ← today's completion fills the leftmost box
+  // i=1  → yesterday
+  // i=13 → 13 days ago  (FAR RIGHT)  ← chain grows rightward as streak extends
   const days = Array.from({ length: CHAIN_DAYS }, (_, i) =>
-    fmt(subDays(new Date(), CHAIN_DAYS - 1 - i))
+    fmt(subDays(new Date(), i))
   )
 
   // ── SVG geometry (all in viewBox units) ───────────────────────────────────

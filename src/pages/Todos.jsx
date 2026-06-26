@@ -646,7 +646,7 @@ function CalendarView({ tasks, onToggle }) {
                   {format(parseISO(popoverDate), 'd MMMM yyyy', { locale: tr })}
                 </p>
                 {isToday(parseISO(popoverDate)) && (
-                  <p className="text-xs text-indigo-500 dark:text-indigo-400 mt-0.5">Bugün</p>
+                  <p className="text-xs text-primary-500 dark:text-primary-400 mt-0.5">Bugün</p>
                 )}
               </div>
               <button onClick={() => setPopoverDate(null)}

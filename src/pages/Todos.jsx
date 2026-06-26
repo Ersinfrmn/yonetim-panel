@@ -511,7 +511,7 @@ function CalendarView({ tasks, onToggle }) {
 
               return entries.map(([d, dayTasks]) => (
                 <div key={d} className="rounded-xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 p-3">
-                  <p className={`text-sm font-semibold mb-2 ${isToday(parseISO(d)) ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-700 dark:text-slate-200'}`}>
+                  <p className={`text-sm font-semibold mb-2 ${isToday(parseISO(d)) ? 'text-primary-600 dark:text-primary-400' : 'text-slate-700 dark:text-slate-200'}`}>
                     {format(parseISO(d), 'd MMMM', { locale: tr })}
                     {isToday(parseISO(d)) && <span className="ml-1.5 text-xs font-normal opacity-70">Bugün</span>}
                   </p>

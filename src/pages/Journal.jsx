@@ -527,6 +527,15 @@ export default function Journal() {
             <span className="text-xs text-slate-400">{wordCount(content)} kelime</span>
           </div>
 
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            disabled={uploading}
+            title="Resim ekle"
+            className="p-1.5 rounded text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors disabled:opacity-40"
+          >
+            {uploading ? <Loader2 size={14} className="animate-spin" /> : <ImagePlus size={14} />}
+          </button>
+
           <div className="flex items-center gap-2 ml-auto">
             <button
               onClick={() => setPreview(p => !p)}

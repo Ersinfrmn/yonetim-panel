@@ -140,3 +140,21 @@ alter table habits add column if not exists duration_type text default 'unlimite
 alter table habits add column if not exists duration_days integer;
 alter table habits add column if not exists start_date date default current_date;
 alter table habits add column if not exists template text default 'custom';
+
+-- 11. SUBTASKS
+create table if not exists subtasks (
+  id uuid primary key default gen_random_uuid(),
+  task_id uuid references tasks(id) on delete cascade not null,
+  user_id uuid references auth.users(id) on delete cascade not null,
+  title text not null,
+  completed boolean default false,
+  created_at timestamptz default now()
+);
+alter table subtasks enable row level security;
+create policy "Users manage own subtasks" on subtasks
+  using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+-- 12. TASK ENHANCEMENTS (tags, recurrence, importance)
+alter table tasks add column if not exists tags text[] default '{}';
+alter table tasks add column if not exists recurrence text default 'none';
+alter table tasks add column if not exists importance text default 'normal';

@@ -578,6 +578,57 @@ export default function Journal() {
         )}
       </div>
 
+      {/* ── Image thumbnails ──────────────────────────────────────────────── */}
+      {images.length > 0 && (
+        <div className="mb-6">
+          <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-3">
+            Görseller ({images.length})
+          </p>
+          <div className="flex flex-wrap gap-3">
+            {images.map(path => (
+              <div key={path} className="relative group">
+                <a href={getImageUrl(path)} target="_blank" rel="noreferrer">
+                  <img
+                    src={getImageUrl(path)}
+                    alt=""
+                    className="w-24 h-24 object-cover rounded-xl border border-slate-200 dark:border-slate-600 hover:opacity-90 transition-opacity"
+                  />
+                </a>
+                <button
+                  onClick={() => deleteImage(path)}
+                  className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-red-500 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-sm"
+                >
+                  <X size={10} />
+                </button>
+              </div>
+            ))}
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploading}
+              className="w-24 h-24 rounded-xl border-2 border-dashed border-slate-200 dark:border-slate-600 flex flex-col items-center justify-center gap-1 text-slate-400 hover:border-primary-400 hover:text-primary-500 transition-colors disabled:opacity-40"
+            >
+              {uploading
+                ? <Loader2 size={18} className="animate-spin" />
+                : <><ImagePlus size={18} /><span className="text-xs">Ekle</span></>
+              }
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Hidden file input */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={e => {
+          const file = e.target.files?.[0]
+          if (file) uploadImage(file)
+          e.target.value = ''
+        }}
+      />
+
       {/* ── History ───────────────────────────────────────────────────────── */}
       {entryDates.length > 0 && (
         <div>

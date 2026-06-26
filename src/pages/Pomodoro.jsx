@@ -57,15 +57,25 @@ const pick = (arr, n) => [...arr].sort(() => Math.random() - 0.5).slice(0, n)
 export default function Pomodoro() {
   const { user } = useAuth()
 
-  // Settings
-  const [cfg, setCfg]         = useState({ focus: 25, short: 5, long: 15 })
-  const [draft, setDraft]     = useState({ focus: 25, short: 5, long: 15 })
+  // Settings — initialise from localStorage; fall back to defaults
+  const initCfg = () => {
+    try {
+      const s = JSON.parse(localStorage.getItem('pomodoro_settings'))
+      if (s && typeof s.focusDuration === 'number' &&
+              typeof s.shortBreak    === 'number' &&
+              typeof s.longBreak     === 'number')
+        return { focus: s.focusDuration, short: s.shortBreak, long: s.longBreak }
+    } catch {}
+    return { focus: 25, short: 5, long: 15 }
+  }
+  const [cfg, setCfg]         = useState(initCfg)
+  const [draft, setDraft]     = useState(initCfg)
   const [showCfg, setShowCfg] = useState(false)
 
   // Timer — phase: 'idle' | 'focus' | 'paused' | 'break' | 'cdown'
   const [phase,  setPhase]  = useState('idle')
-  const [secs,   setSecs]   = useState(25 * 60)
-  const [total,  setTotal]  = useState(25 * 60)
+  const [secs,   setSecs]   = useState(() => initCfg().focus * 60)
+  const [total,  setTotal]  = useState(() => initCfg().focus * 60)
   const [pCount, setPCount] = useState(0)   // 0-3, resets after 4th
   const [dayIdx, setDayIdx] = useState(1)   // session number today
 

@@ -552,8 +552,8 @@ function CalendarView({ tasks, onToggle }) {
                   todayDay ? 'border-primary-500 dark:border-primary-400' : 'border-slate-200 dark:border-slate-600'
                 }`}>
                   {/* Column header */}
-                  <div className={`py-2 px-1 text-center shrink-0 ${todayDay ? 'bg-indigo-600' : 'bg-slate-50 dark:bg-slate-700/60'}`}>
-                    <p className={`text-[10px] font-bold uppercase tracking-wider ${todayDay ? 'text-indigo-200' : 'text-slate-400 dark:text-slate-500'}`}>
+                  <div className={`py-2 px-1 text-center shrink-0 ${todayDay ? 'bg-primary-600' : 'bg-slate-50 dark:bg-slate-700/60'}`}>
+                    <p className={`text-[10px] font-bold uppercase tracking-wider ${todayDay ? 'text-primary-200' : 'text-slate-400 dark:text-slate-500'}`}>
                       {WEEK_SHORT[day.getDay()]}
                     </p>
                     <p className={`text-lg font-bold leading-none mt-0.5 ${todayDay ? 'text-white' : 'text-slate-800 dark:text-white'}`}>

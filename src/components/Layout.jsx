@@ -65,7 +65,7 @@ export default function Layout({ children }) {
         <div className="flex flex-col h-full" style={{ width: SIDEBAR_W, minWidth: SIDEBAR_W }}>
 
           {/* Header — pl-10 leaves room for the toggle button */}
-          <div className="pl-10 pr-4 py-3 border-b border-slate-200 dark:border-slate-700 shrink-0">
+          <div className="pl-8 pr-4 py-3 border-b border-slate-200 dark:border-slate-700 shrink-0">
             <h1 className="text-sm font-bold text-slate-800 dark:text-white truncate">
               EF Komuta Merkezi
             </h1>
@@ -131,7 +131,7 @@ export default function Layout({ children }) {
         style={{
           position: 'fixed',
           top: 16,
-          left: 16,
+          left: 4,
           width: 24,
           height: 24,
           padding: 0,

@@ -464,8 +464,8 @@ function CalendarView({ tasks, onToggle }) {
                     onClick={() => cell && setPopoverDate(ds)}
                     className={[
                       'bg-white dark:bg-slate-800 min-h-[88px] p-1.5 transition-colors',
-                      cell ? 'cursor-pointer hover:bg-indigo-50/60 dark:hover:bg-indigo-900/10' : 'bg-slate-50/80 dark:bg-slate-800/40 pointer-events-none',
-                      todayCell ? 'ring-1 ring-inset ring-indigo-500 dark:ring-indigo-400' : '',
+                      cell ? 'cursor-pointer hover:bg-primary-50/60 dark:hover:bg-primary-900/10' : 'bg-slate-50/80 dark:bg-slate-800/40 pointer-events-none',
+                      todayCell ? 'ring-1 ring-inset ring-primary-500 dark:ring-primary-400' : '',
                     ].join(' ')}
                   >
                     {cell && (

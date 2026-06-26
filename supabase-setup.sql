@@ -174,3 +174,14 @@ alter table goals add column if not exists template text;
 alter table journal_entries add column if not exists mood integer check (mood between 1 and 5);
 alter table journal_entries add column if not exists word_count integer default 0;
 alter table journal_entries add column if not exists images text[] default '{}';
+
+-- 15. POMODORO SESSION ENHANCEMENTS
+-- Add new columns to the existing pomodoro_sessions table
+alter table pomodoro_sessions add column if not exists task_id  uuid references tasks(id) on delete set null;
+alter table pomodoro_sessions add column if not exists habit_id uuid references habits(id) on delete set null;
+alter table pomodoro_sessions add column if not exists completed_at   timestamptz;
+alter table pomodoro_sessions add column if not exists was_completed  boolean default false;
+alter table pomodoro_sessions add column if not exists session_number integer default 1;
+
+-- 16. TASK POMODORO COUNTER
+alter table tasks add column if not exists pomodoro_count integer default 0;

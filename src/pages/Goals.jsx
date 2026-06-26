@@ -425,11 +425,11 @@ export default function Goals() {
                 </div>
                 <div className="flex items-center gap-1 shrink-0">
                   <select
-                    value={goal.status === 'in-progress' ? 'active' : goal.status}
+                    value={goal.status}
                     onChange={e => updateStatus(goal, e.target.value)}
                     className="text-xs px-2 py-1 rounded-lg border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-slate-700 dark:text-slate-300 focus:outline-none"
                   >
-                    <option value="active">Aktif</option>
+                    <option value="in-progress">Aktif</option>
                     <option value="paused">Beklemede</option>
                     <option value="completed">Tamamlandı</option>
                   </select>

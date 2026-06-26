@@ -43,6 +43,11 @@ function getDailyPrompts(dateStr) {
   return [0, 1, 2].map(i => PROMPTS[(dayOfYear + i) % PROMPTS.length])
 }
 
+function getImageUrl(path) {
+  const { data } = supabase.storage.from('journal-images').getPublicUrl(path)
+  return data.publicUrl
+}
+
 function calcStreak(entries) {
   let streak = 0
   const d = new Date()

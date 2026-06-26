@@ -3,7 +3,7 @@ import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
 import { format, subDays, addDays, parseISO } from 'date-fns'
 import { tr } from 'date-fns/locale'
-import { Plus, Trash2, Flame, Check, Link2, Trophy, X } from 'lucide-react'
+import { Plus, Trash2, Flame, Check, Trophy, X } from 'lucide-react'
 import toast from 'react-hot-toast'
 
 const CHAIN_DAYS = 14
@@ -77,63 +77,108 @@ function getActiveStreakSet(datesSet) {
   return active
 }
 
-// ─── Chain box row ────────────────────────────────────────────────────────────
+// Chain link SVG — the exact icon the user specified
+function ChainIcon({ className }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      style={{ width: '58%', height: '58%' }}
+      className={className}
+    >
+      <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+      <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+    </svg>
+  )
+}
 
+// ─── Chain box row ────────────────────────────────────────────────────────────
+//
+// Layout: [box] [conn] [box] [conn] ... [box=TODAY]
+// Boxes:  flex-1, square via aspect-ratio.
+// Conns:  fixed 6px wide, height 2px — shown only between two completed boxes.
+//
 function ChainBoxes({ logs, habitId, onToggleToday }) {
   const today = todayStr()
   const done = completedSet(logs, habitId)
   const active = getActiveStreakSet(done)
 
+  // Oldest on the left (index 0), today on the right (index CHAIN_DAYS-1)
   const days = Array.from({ length: CHAIN_DAYS }, (_, i) =>
     fmt(subDays(new Date(), CHAIN_DAYS - 1 - i))
   )
 
-  return (
-    <div className="flex gap-1.5 mt-3">
-      {days.map((d, i) => {
-        const isToday = d === today
-        const completed = done.has(d)
-        const inActive = active.has(d)
-        const prevCompleted = i > 0 && done.has(days[i - 1])
+  // Build a flat array: connector → box → connector → box …
+  const items = []
+  for (let i = 0; i < days.length; i++) {
+    const d = days[i]
+    const isToday = d === today
+    const completed = done.has(d)
+    const inActive = active.has(d)
 
-        return (
-          <div key={d} className="flex-1 flex items-center">
-            {/* Connector bar between consecutive completed days */}
-            {i > 0 && (
-              <div
-                className={`h-0.5 w-1.5 shrink-0 -ml-1.5 -mr-0 ${
-                  completed && prevCompleted && inActive && active.has(days[i - 1])
-                    ? 'bg-amber-400 dark:bg-amber-500'
-                    : completed && prevCompleted
-                    ? 'bg-slate-300 dark:bg-slate-600'
-                    : 'bg-transparent'
-                }`}
-              />
-            )}
-            <div
-              onClick={isToday ? onToggleToday : undefined}
-              title={format(parseISO(d), 'd MMM yyyy', { locale: tr })}
-              className={[
-                'flex-1 aspect-square rounded-lg flex items-center justify-center transition-colors',
-                isToday ? 'ring-2 ring-primary-500 ring-offset-1 dark:ring-offset-slate-800' : '',
-                isToday ? 'cursor-pointer' : '',
-                completed && inActive
-                  ? 'bg-amber-400 dark:bg-amber-500'
-                  : completed
-                  ? 'bg-slate-300 dark:bg-slate-600'
-                  : 'bg-slate-100 dark:bg-slate-700/60',
-              ].filter(Boolean).join(' ')}
-            >
-              {completed && (
-                <Link2
-                  size={11}
-                  className={inActive ? 'text-white' : 'text-slate-500 dark:text-slate-400'}
-                />
-              )}
-            </div>
-          </div>
-        )
-      })}
+    // Connector before this box (between [i-1] and [i])
+    if (i > 0) {
+      const prevD = days[i - 1]
+      const prevCompleted = done.has(prevD)
+      const prevActive = active.has(prevD)
+      const connected = completed && prevCompleted
+      const bothActive = connected && inActive && prevActive
+
+      items.push(
+        <div
+          key={`c-${i}`}
+          aria-hidden="true"
+          style={{
+            width: 6,
+            height: 2,
+            borderRadius: 1,
+            flexShrink: 0,
+            alignSelf: 'center',
+            backgroundColor: bothActive
+              ? '#f59e0b'   // amber-500  — active streak connector
+              : connected
+              ? '#94a3b8'   // slate-400  — old completed connector
+              : 'transparent',
+          }}
+        />
+      )
+    }
+
+    // Box
+    items.push(
+      <div
+        key={d}
+        onClick={isToday ? onToggleToday : undefined}
+        title={format(parseISO(d), 'd MMM yyyy', { locale: tr })}
+        className={[
+          'flex-1 rounded-lg flex items-center justify-center transition-colors',
+          isToday ? 'cursor-pointer' : 'cursor-default',
+          // Today gets a vivid sky-blue ring to distinguish it clearly
+          isToday
+            ? 'ring-2 ring-sky-500 ring-offset-2 ring-offset-white dark:ring-offset-slate-800'
+            : '',
+          completed && inActive
+            ? 'bg-amber-400 dark:bg-amber-500'
+            : completed
+            ? 'bg-slate-300 dark:bg-slate-600'
+            : 'bg-slate-100 dark:bg-slate-700/60',
+        ].filter(Boolean).join(' ')}
+        style={{ aspectRatio: '1 / 1' }}
+      >
+        {completed && (
+          <ChainIcon className={inActive ? 'text-white' : 'text-slate-500 dark:text-slate-400'} />
+        )}
+      </div>
+    )
+  }
+
+  return (
+    <div className="flex items-center mt-3">
+      {items}
     </div>
   )
 }

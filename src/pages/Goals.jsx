@@ -101,22 +101,25 @@ export default function Goals() {
 
   async function addGoal() {
     if (!form.title.trim()) return
+    // Use base schema columns only ('in-progress' matches original status check constraint)
     const { data, error } = await supabase
       .from('goals')
       .insert({
         user_id: user.id,
         title: form.title.trim(),
         description: form.description.trim(),
-        category: form.category,
         target_date: form.target_date || null,
-        template: form.template || null,
-        status: 'active',
-        progress: 0,
-        milestones: [],
+        status: 'in-progress',
       })
       .select().single()
-    if (error) { toast.error('Hedef eklenemedi'); return }
-    setGoals(g => [data, ...g])
+    if (error) { console.error('addGoal:', error); toast.error('Hedef eklenemedi'); return }
+
+    // Patch new columns (category, progress, milestones, template) — requires migration;
+    // silently skipped if migration hasn't been run yet
+    const ext = { category: form.category, template: form.template || null, progress: 0, milestones: [] }
+    const { data: patched } = await supabase.from('goals').update(ext).eq('id', data.id).select().single()
+
+    setGoals(g => [patched ?? data, ...g])
     setForm(EMPTY_FORM)
     setShowForm(false)
     toast.success('Hedef eklendi! 🎯')

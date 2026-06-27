@@ -261,7 +261,7 @@ export default function Dashboard() {
                 error={errs.tasks}
               />
               <StatCard
-                emoji="🍅"
+                icon={Timer}
                 title="Pomodoro"
                 primary={`${todayPomoCount} oturum — ${todayPomoMins} dk`}
                 secondary={todayPomoCount >= 4 ? 'Günlük hedefe ulaşıldı 🎯' : `${4 - todayPomoCount} oturum daha önerilir`}

@@ -1275,6 +1275,10 @@ export default function Habits() {
         <BreakArchive breakReasons={breakReasons} habits={habits} />
       )}
 
+      {habitsTab === 'yearly' && (
+        <YearlyView habits={habits} logs={logs} />
+      )}
+
       {createModal && <HabitCreateModal onClose={() => setCreateModal(false)} onCreate={handleCreate} />}
       {editModal   && <HabitEditModal habit={editModal} onClose={() => setEditModal(null)} onSave={handleEdit} />}
       {breakModal  && <ChainBreakModal habit={breakModal.habit} onSubmit={handleBreakReasonSubmit} onClose={() => setBreakModal(null)} />}

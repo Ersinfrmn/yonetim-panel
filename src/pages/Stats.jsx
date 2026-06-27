@@ -380,7 +380,7 @@ export default function Stats() {
         <h3 className="text-sm font-semibold text-ink-secondary mb-4">Alışkanlık Tamamlanma Oranı — Son 7 Gün</h3>
         <ResponsiveContainer width="100%" height={180}>
           <BarChart data={data.last7} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="rgba(108,63,232,0.08)" />
+            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
             <XAxis dataKey="day" tick={{ fontSize: 12, fill: '#888888' }} />
             <YAxis domain={[0, 100]} tick={{ fontSize: 12, fill: '#888888' }} unit="%" />
             <Tooltip
@@ -397,7 +397,7 @@ export default function Stats() {
         <h3 className="text-sm font-semibold text-ink-secondary mb-4">Alışkanlık Oranı Trendi — Son 30 Gün</h3>
         <ResponsiveContainer width="100%" height={180}>
           <LineChart data={data.last30} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="rgba(108,63,232,0.08)" />
+            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
             <XAxis dataKey="day" tick={{ fontSize: 11, fill: '#888888' }} />
             <YAxis domain={[0, 100]} tick={{ fontSize: 12, fill: '#888888' }} unit="%" />
             <Tooltip
@@ -510,7 +510,7 @@ export default function Stats() {
                 data={extras.correlationData}
                 margin={{ top: 4, right: 8, left: -4, bottom: 0 }}
               >
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(108,63,232,0.08)" />
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
                 <XAxis
                   dataKey="x"
                   type="number"

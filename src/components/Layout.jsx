@@ -6,6 +6,7 @@ import {
 } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 import { supabase } from '../lib/supabase'
+import AddictionPanel from './AddictionPanel'
 
 // ─── Top Bar ──────────────────────────────────────────────────────────────────
 

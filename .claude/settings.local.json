@@ -15,7 +15,8 @@
       "Skill(update-config)",
       "Skill(update-config:*)",
       "Bash(node -e ' *)",
-      "Bash(git commit *)"
+      "Bash(git commit *)",
+      "Bash(git checkout *)"
     ]
   },
   "hooks": {

@@ -11,6 +11,7 @@ import Journal from './pages/Journal'
 import Goals from './pages/Goals'
 import Pomodoro from './pages/Pomodoro'
 import Stats from './pages/Stats'
+import WeeklyPlan from './pages/WeeklyPlan'
 
 function PrivateRoute({ children }) {
   const { user, loading } = useAuth()

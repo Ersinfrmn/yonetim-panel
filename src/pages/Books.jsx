@@ -268,7 +268,18 @@ export default function Books() {
       </div>
 
       {/* Content */}
-      {loading ? null : books.length === 0 ? (
+      {fetchError ? (
+        <div style={{ textAlign: 'center', padding: '80px 20px', color: '#ef4444' }}>
+          <p style={{ fontSize: 13, marginBottom: 8 }}>Kitaplar yüklenemedi.</p>
+          <p style={{ fontSize: 11, color: '#7f1d1d', fontFamily: 'monospace' }}>{fetchError}</p>
+          <button
+            onClick={loadBooks}
+            style={{ marginTop: 16, background: 'none', border: '1px solid #7f1d1d', borderRadius: 2, color: '#ef4444', padding: '6px 16px', fontSize: 11, cursor: 'pointer', fontFamily: 'inherit' }}
+          >
+            Tekrar Dene
+          </button>
+        </div>
+      ) : loading ? null : books.length === 0 ? (
         <div style={{ textAlign: 'center', padding: '80px 20px', color: '#444444' }}>
           <Library size={48} style={{ color: '#1a1a1a', marginBottom: 16, display: 'block', margin: '0 auto 16px' }} />
           <p style={{ fontSize: 14, marginBottom: 20 }}>Henüz kitap eklenmedi.</p>

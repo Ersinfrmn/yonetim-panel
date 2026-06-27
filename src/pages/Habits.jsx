@@ -493,7 +493,7 @@ function HabitCreateModal({ onClose, onCreate }) {
 
   return (
     <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="bg-surface-card border border-border-subtle rounded-xl w-full max-w-sm shadow-none overflow-hidden">
+      <div className="border border-border-subtle w-full max-w-sm overflow-hidden" style={{ background: '#0a0a0a', borderRadius: 4 }}>
         {/* Step bar (4 steps) */}
         <div className="flex">
           {[1, 2, 3, 4].map(s => (

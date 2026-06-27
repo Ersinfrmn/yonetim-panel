@@ -918,7 +918,7 @@ export default function Todos() {
                 <Plus size={16} /> Ekle
               </button>
             </div>
-            <FormFields f={form} set={setF} />
+            <FormFields f={form} set={setF} goals={goals} />
           </div>
 
           {/* Status + tag filters (list view only) */}

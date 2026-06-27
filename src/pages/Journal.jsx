@@ -227,7 +227,7 @@ export default function Journal() {
 
       {/* ── Page header ───────────────────────────────────────────────────── */}
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-semibold text-ink-primary">Günlük</h2>
+        <h2 className="text-2xl font-bold tracking-widest uppercase text-ink-primary">Günlük</h2>
         <button
           onClick={() => setShowSummary(s => !s)}
           className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${

@@ -58,7 +58,7 @@ export default function BookDetail() {
       {/* Back */}
       <button
         onClick={() => navigate('/books')}
-        style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', color: '#444444', fontSize: 12, cursor: 'pointer', padding: '0 0 24px', fontFamily: 'inherit' }}
+        style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', color: 'rgba(255,255,255,0.5)', fontSize: 11, letterSpacing: '0.1em', textTransform: 'uppercase', cursor: 'pointer', padding: '0 0 24px', fontFamily: 'inherit' }}
       >
         <ArrowLeft size={13} /> Kitaplar
       </button>

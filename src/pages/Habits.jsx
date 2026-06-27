@@ -944,6 +944,22 @@ export default function Habits() {
 
   return (
     <div>
+      {/* ── Tab switcher ── */}
+      <div className="flex gap-2 mb-5 bg-surface-card p-1 rounded-xl border border-border-subtle">
+        {[
+          { key: 'habits',  label: 'Alışkanlıklar'  },
+          { key: 'archive', label: 'Kırılma Arşivi' },
+        ].map(({ key, label }) => (
+          <button key={key} onClick={() => setHabitsTab(key)}
+            className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-colors ${
+              habitsTab === key ? 'bg-white/10 text-ink-primary' : 'text-ink-muted hover:text-ink-secondary'
+            }`}>
+            {label}
+          </button>
+        ))}
+      </div>
+
+      {habitsTab === 'habits' && (<>
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-semibold text-ink-primary">Alışkanlık Takibi</h2>
         <button

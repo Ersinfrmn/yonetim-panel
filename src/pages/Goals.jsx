@@ -216,7 +216,7 @@ export default function Goals() {
     <div>
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold text-ink-primary">Hedefler</h2>
+        <h2 className="text-2xl font-bold tracking-widest uppercase text-ink-primary">Hedefler</h2>
         <div className="flex gap-2">
           <button
             onClick={() => { setShowTemplates(t => !t); setShowForm(false) }}

@@ -352,7 +352,7 @@ export default function Journal() {
         </div>
         <button onClick={() => changeDay(1)}
           disabled={selectedDate === fmt(new Date())}
-          className="p-2 rounded-lg bg-white/5 border border-border-subtle text-ink-secondary hover:bg-white/10 transition-colors disabled:opacity-40">
+          className="p-2 text-ink-muted hover:text-white hover:bg-white/5 transition-colors disabled:opacity-40" style={{ borderRadius: 2 }}>
           <ChevronRight size={18} />
         </button>
       </div>

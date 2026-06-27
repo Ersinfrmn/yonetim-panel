@@ -710,6 +710,141 @@ function ChainBreakModal({ habit, onSubmit, onClose }) {
   )
 }
 
+// ─── YearlyView — 365-day heatmap ────────────────────────────────────────────
+
+const TR_MONTHS_SHORT = ['Oca','Şub','Mar','Nis','May','Haz','Tem','Ağu','Eyl','Eki','Kas','Ara']
+
+function YearlyView({ habits, logs }) {
+  const [selectedHabitId, setSelectedHabitId] = useState('all')
+
+  const today     = new Date()
+  const startDate = subDays(today, 364)
+
+  const completedLogs = logs.filter(l => l.completed)
+
+  const dayCompletions = {}
+  completedLogs.forEach(l => {
+    if (!dayCompletions[l.date]) dayCompletions[l.date] = new Set()
+    dayCompletions[l.date].add(l.habit_id)
+  })
+
+  const days = Array.from({ length: 365 }, (_, i) => {
+    const d           = subDays(today, 364 - i)
+    const dateStr     = fmt(d)
+    const done        = dayCompletions[dateStr] || new Set()
+    const targetCount = habits.filter(h => (h.target_days ?? ALL_DAYS).includes(d.getDay())).length
+    const count       = selectedHabitId === 'all' ? done.size : (done.has(selectedHabitId) ? 1 : 0)
+    return { dateStr, d, count, targetCount }
+  })
+
+  function cellColor({ count, targetCount }) {
+    if (count === 0) return '#1a1a1a'
+    if (selectedHabitId === 'all') {
+      if (targetCount > 0 && count >= targetCount) return '#b91c1c'
+      if (count >= 2) return 'rgba(185,28,28,0.6)'
+      return 'rgba(185,28,28,0.3)'
+    }
+    return '#b91c1c'
+  }
+
+  const CELL = 12, GAP = 2, UNIT = CELL + GAP
+  const DAY_LBL_W = 24, TOP_H = 20
+
+  function toMonFirst(dow) { return dow === 0 ? 6 : dow - 1 }
+  const startOffset = toMonFirst(startDate.getDay())
+  const numWeeks    = Math.ceil((startOffset + 365) / 7)
+  const SVG_W       = DAY_LBL_W + numWeeks * UNIT
+  const SVG_H       = TOP_H + 7 * UNIT
+
+  const monthLabels = []
+  let lastMonth = -1
+  days.forEach(({ d }, idx) => {
+    const m = d.getMonth()
+    if (m !== lastMonth) {
+      const col = Math.floor((startOffset + idx) / 7)
+      monthLabels.push({ label: TR_MONTHS_SHORT[m], x: DAY_LBL_W + col * UNIT })
+      lastMonth = m
+    }
+  })
+
+  const todayFmt        = fmt(today)
+  const activeDays      = days.filter(d => d.count > 0).length
+  const thisMonthPrefix = todayFmt.slice(0, 7)
+  const thisMonthDays   = days.filter(d => d.dateStr.startsWith(thisMonthPrefix))
+  const thisMonthRate   = thisMonthDays.length
+    ? Math.round((thisMonthDays.filter(d => d.count > 0).length / thisMonthDays.length) * 100)
+    : 0
+
+  let longestStreak = 0, curStreak = 0
+  days.forEach(d => {
+    if (d.count > 0) { curStreak++; if (curStreak > longestStreak) longestStreak = curStreak }
+    else curStreak = 0
+  })
+
+  return (
+    <div className="space-y-4">
+      <h2 className="text-2xl font-semibold text-ink-primary">Yıllık Görünüm</h2>
+
+      <select
+        value={selectedHabitId}
+        onChange={e => setSelectedHabitId(e.target.value)}
+        className="px-3 py-2 text-sm border border-border-subtle bg-white/5 text-ink-primary focus:outline-none focus:border-border-glow"
+        style={{ borderRadius: 4 }}
+      >
+        <option value="all">Tüm Alışkanlıklar</option>
+        {habits.map(h => <option key={h.id} value={h.id}>{h.name}</option>)}
+      </select>
+
+      <div className="bg-surface-card/80 border border-border-subtle p-4 overflow-x-auto" style={{ borderRadius: 4 }}>
+        <svg width={SVG_W} height={SVG_H} style={{ display: 'block' }}>
+          {monthLabels.map((m, i) => (
+            <text key={i} x={m.x} y={13} fontSize={8} fill="#444444" fontWeight="600">{m.label}</text>
+          ))}
+          {[{ row: 0, lbl: 'Pzt' }, { row: 2, lbl: 'Çar' }, { row: 4, lbl: 'Cum' }].map(({ row, lbl }) => (
+            <text key={row} x={0} y={TOP_H + row * UNIT + CELL} fontSize={7} fill="#444444">{lbl}</text>
+          ))}
+          {days.map(({ dateStr, d, count, targetCount }, idx) => {
+            const col     = Math.floor((startOffset + idx) / 7)
+            const row     = (startOffset + idx) % 7
+            const x       = DAY_LBL_W + col * UNIT
+            const y       = TOP_H + row * UNIT
+            const fill    = cellColor({ count, targetCount })
+            const isToday = dateStr === todayFmt
+            const label   = selectedHabitId === 'all'
+              ? `${format(d, 'd MMM yyyy', { locale: tr })} — ${count}/${targetCount} alışkanlık tamamlandı`
+              : `${format(d, 'd MMM yyyy', { locale: tr })} — ${count > 0 ? 'Tamamlandı' : 'Tamamlanmadı'}`
+            return (
+              <rect key={dateStr}
+                x={x} y={y} width={CELL} height={CELL} rx={2}
+                fill={fill}
+                stroke={isToday ? '#b91c1c' : 'none'}
+                strokeWidth={isToday ? 1.5 : 0}
+              >
+                <title>{label}</title>
+              </rect>
+            )
+          })}
+        </svg>
+      </div>
+
+      <div className="flex gap-3">
+        <div className="flex-1 bg-surface-card/80 border border-border-subtle p-4" style={{ borderRadius: 4 }}>
+          <p style={{ fontSize: 10, color: '#444444', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: 6 }}>Bu yıl aktif</p>
+          <p className="text-2xl font-bold text-ink-primary">{activeDays} <span className="text-sm font-normal text-ink-muted">gün</span></p>
+        </div>
+        <div className="flex-1 bg-surface-card/80 border border-border-subtle p-4" style={{ borderRadius: 4 }}>
+          <p style={{ fontSize: 10, color: '#444444', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: 6 }}>En uzun seri</p>
+          <p className="text-2xl font-bold text-ink-primary">{longestStreak} <span className="text-sm font-normal text-ink-muted">gün</span></p>
+        </div>
+        <div className="flex-1 bg-surface-card/80 border border-border-subtle p-4" style={{ borderRadius: 4 }}>
+          <p style={{ fontSize: 10, color: '#444444', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: 6 }}>Bu ay oran</p>
+          <p className="text-2xl font-bold text-ink-primary">%{thisMonthRate}</p>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ─── BreakArchive — cross-habit break analysis + history ─────────────────────
 
 const TR_MONTHS_FULL = ['OCAK','ŞUBAT','MART','NİSAN','MAYIS','HAZİRAN','TEMMUZ','AĞUSTOS','EYLÜL','EKİM','KASIM','ARALIK']

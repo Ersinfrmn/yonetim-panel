@@ -949,6 +949,7 @@ export default function Habits() {
         {[
           { key: 'habits',  label: 'Alışkanlıklar'  },
           { key: 'archive', label: 'Kırılma Arşivi' },
+          { key: 'yearly',  label: 'Yıllık Görünüm' },
         ].map(({ key, label }) => (
           <button key={key} onClick={() => setHabitsTab(key)}
             className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-colors ${

@@ -231,11 +231,8 @@ export default function Dashboard() {
   const quote = dailyQuote()
 
   return (
-    <>
-      <ParticleCanvas />
-
-      <div>
-        {/* ── Header ──────────────────────────────────────────────────────── */}
+    <div>
+      {/* ── Header ──────────────────────────────────────────────────────── */}
         <div className="mb-6">
           <h2 className="text-2xl font-semibold text-ink-primary">Bugünün Komuta Merkezi</h2>
           <p className="text-sm text-ink-secondary mt-0.5 capitalize">

@@ -449,7 +449,7 @@ export default function Pomodoro() {
     <div className="flex items-center gap-3 mt-3">
       {phase === 'idle' && (
         <button onClick={beginFocus}
-          className="flex items-center gap-2 px-9 py-3 bg-primary-500 hover:bg-primary-600 active:scale-95 text-white rounded-2xl text-sm font-semibold transition-all">
+          className="w-full flex items-center justify-center gap-2 px-9 py-3.5 bg-primary-500 hover:bg-primary-600 active:scale-95 text-white rounded-sm text-base font-bold uppercase tracking-wider transition-all">
           <Play size={16} fill="currentColor" /> Başla
         </button>
       )}

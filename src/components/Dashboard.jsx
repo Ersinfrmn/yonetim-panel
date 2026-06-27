@@ -308,6 +308,21 @@ export default function Dashboard() {
           <p className="text-sm text-ink-secondary mt-0.5 capitalize">
             {format(today, 'd MMMM yyyy, EEEE', { locale: tr })}
           </p>
+          {xpData && (
+            <div style={{ marginTop: 12 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                <span style={{ fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase', color: '#444444' }}>
+                  SEVİYE {xpData.level}
+                </span>
+                <span style={{ fontSize: 10, color: '#444444' }}>
+                  {xpData.total_xp % 100} / 100 XP
+                </span>
+              </div>
+              <div style={{ height: 2, background: 'rgba(255,255,255,0.06)', borderRadius: 1 }}>
+                <div style={{ height: '100%', borderRadius: 1, background: '#b91c1c', width: `${(xpData.total_xp % 100)}%`, transition: 'width 600ms ease' }} />
+              </div>
+            </div>
+          )}
         </div>
 
         {loading ? <Skeleton /> : (

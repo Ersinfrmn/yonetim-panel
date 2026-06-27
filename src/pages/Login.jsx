@@ -5,7 +5,7 @@ export default function Login() {
   const { signInWithGoogle } = useAuth()
 
   return (
-    <div className="min-h-screen bg-surface flex items-center justify-center p-4">
+    <div className="min-h-screen flex items-center justify-center p-4">
       <div className="bg-surface-card/80 backdrop-blur-md border border-border-subtle rounded-xl p-8 w-full max-w-sm text-center">
         <div className="w-16 h-16 bg-primary-500/10 border border-border-subtle rounded-xl flex items-center justify-center mx-auto mb-4">
           <Zap size={28} className="text-primary-400" />

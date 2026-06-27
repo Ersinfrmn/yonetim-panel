@@ -23,26 +23,66 @@ const SUGGESTIONS = [
 const R    = 110               // ring radius px
 const CIRC = 2 * Math.PI * R  // circumference ≈ 691
 
-// ── Web Audio (no asset files needed) ────────────────────────────────────────
+// ── Web Audio sound engine ────────────────────────────────────────────────────
 
-function chime(kind) {
+function createSound(type, volume = 0.8) {
   try {
-    const ctx   = new (window.AudioContext || window.webkitAudioContext)()
-    // 'focus' = three ascending tones; 'break' = single soft sine
-    const notes = kind === 'focus' ? [880, 1108, 1318] : [528]
-    notes.forEach((freq, i) => {
-      const osc = ctx.createOscillator()
-      const g   = ctx.createGain()
-      osc.connect(g); g.connect(ctx.destination)
-      osc.type = 'sine'
-      const t = ctx.currentTime + i * 0.28
-      osc.frequency.setValueAtTime(freq, t)
-      g.gain.setValueAtTime(0, t)
-      g.gain.linearRampToValueAtTime(kind === 'focus' ? 0.28 : 0.18, t + 0.04)
-      g.gain.exponentialRampToValueAtTime(0.001, t + 0.9)
-      osc.start(t); osc.stop(t + 0.9)
-    })
-    setTimeout(() => ctx.close(), 3500)
+    const AudioContext = window.AudioContext || window.webkitAudioContext
+    const ctx = new AudioContext()
+    const gainNode = ctx.createGain()
+    gainNode.gain.setValueAtTime(volume, ctx.currentTime)
+    gainNode.connect(ctx.destination)
+
+    switch (type) {
+      case 'alarm': {
+        [0, 0.3, 0.6, 0.9, 1.2, 1.5].forEach((time, i) => {
+          const osc = ctx.createOscillator()
+          osc.connect(gainNode)
+          osc.frequency.setValueAtTime(i % 2 === 0 ? 880 : 660, ctx.currentTime + time)
+          osc.start(ctx.currentTime + time)
+          osc.stop(ctx.currentTime + time + 0.25)
+        })
+        break
+      }
+      case 'beep': {
+        [0, 0.2, 0.4].forEach(time => {
+          const osc = ctx.createOscillator()
+          osc.connect(gainNode)
+          osc.type = 'square'
+          osc.frequency.setValueAtTime(1000, ctx.currentTime + time)
+          osc.start(ctx.currentTime + time)
+          osc.stop(ctx.currentTime + time + 0.15)
+        })
+        break
+      }
+      case 'zen': {
+        const osc = ctx.createOscillator()
+        const envGain = ctx.createGain()
+        osc.connect(envGain)
+        envGain.connect(ctx.destination)
+        osc.type = 'sine'
+        osc.frequency.setValueAtTime(528, ctx.currentTime)
+        envGain.gain.setValueAtTime(0, ctx.currentTime)
+        envGain.gain.linearRampToValueAtTime(volume, ctx.currentTime + 0.1)
+        envGain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 2.5)
+        osc.start(ctx.currentTime)
+        osc.stop(ctx.currentTime + 2.5)
+        break
+      }
+      case 'digital': {
+        [0, 0.15, 0.3, 0.45].forEach((time, i) => {
+          const osc = ctx.createOscillator()
+          osc.connect(gainNode)
+          osc.type = 'sawtooth'
+          osc.frequency.setValueAtTime(800 - (i * 150), ctx.currentTime + time)
+          osc.start(ctx.currentTime + time)
+          osc.stop(ctx.currentTime + time + 0.12)
+        })
+        break
+      }
+      default: break
+    }
+    setTimeout(() => ctx.close(), 4000)
   } catch {}
 }
 

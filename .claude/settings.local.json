@@ -16,7 +16,10 @@
       "Skill(update-config:*)",
       "Bash(node -e ' *)",
       "Bash(git commit *)",
-      "Bash(git checkout *)"
+      "Bash(git checkout *)",
+      "Bash(cat vercel.json)",
+      "Bash(ls .vercel)",
+      "Bash(npx vercel *)"
     ]
   },
   "hooks": {

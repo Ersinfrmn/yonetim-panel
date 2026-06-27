@@ -800,7 +800,7 @@ export default function Pomodoro() {
                         style={{
                           backgroundColor: count === 0
                             ? 'rgba(255,255,255,0.03)'
-                            : `rgba(108,63,232,${0.15 + (count / maxH) * 0.8})`,
+                            : `rgba(185,28,28,${0.15 + (count / maxH) * 0.8})`,
                           transition: 'background-color 0.2s',
                         }}
                       />

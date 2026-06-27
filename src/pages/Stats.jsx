@@ -414,7 +414,7 @@ export default function Stats() {
         <div className="bg-surface-card/80 backdrop-blur-md border border-border-subtle rounded-xl p-4 hover:border-border-glow transition-colors duration-200 mb-6">
           <h3 className="text-[11px] font-semibold text-white/60 uppercase tracking-wider mb-4">Hedef İlerlemesi</h3>
           {extras.goals.length === 0 ? (
-            <p className="text-sm text-ink-muted text-center py-6">Henüz hedef eklenmedi</p>
+            <p className="text-sm text-white/20 text-center py-6">Henüz hedef eklenmedi</p>
           ) : (
             <div className="space-y-4">
               {extras.goals.map(goal => {

@@ -394,17 +394,17 @@ export default function Goals() {
 
       {/* ── Empty state ───────────────────────────────────────────────────── */}
       {filtered.length === 0 && (
-        <div className="text-center py-16 text-ink-muted">
-          <Target size={40} className="mx-auto mb-3 opacity-20 text-ink-muted" />
-          <p className="text-sm">
-            {filter === 'all' ? 'Henüz hedef yok.' : 'Bu filtrede hedef yok.'}
+        <div className="text-center py-20">
+          <Target size={56} strokeWidth={1.5} className="mx-auto mb-4 text-white/10" />
+          <p className="text-xs uppercase tracking-widest text-white/30">
+            {filter === 'all' ? 'Henüz hedef yok' : 'Bu filtrede hedef yok'}
           </p>
           {filter === 'all' && (
             <button
               onClick={() => setShowForm(true)}
-              className="mt-3 text-sm text-primary-400 hover:underline"
+              className="mt-4 px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white text-xs font-bold uppercase tracking-wider rounded-sm transition-colors"
             >
-              İlk hedefini ekle →
+              İlk Hedefini Ekle
             </button>
           )}
         </div>

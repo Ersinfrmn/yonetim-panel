@@ -966,6 +966,9 @@ export default function Habits() {
   const [expanded,     setExpanded]     = useState({})
   const [habitsTab,    setHabitsTab]    = useState('habits')
 
+  const jokerMonthKey = `streak_joker_used_${new Date().toISOString().slice(0, 7)}`
+  const [jokerUsed, setJokerUsed] = useState(() => !!localStorage.getItem(`streak_joker_used_${new Date().toISOString().slice(0, 7)}`))
+
   async function load() {
     const [{ data: h }, { data: l }, { data: br }, { data: hn }] = await Promise.all([
       supabase.from('habits').select('*').eq('user_id', user.id).order('created_at'),

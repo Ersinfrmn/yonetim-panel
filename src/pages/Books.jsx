@@ -256,7 +256,7 @@ export default function Books() {
     <div>
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-        <p style={{ fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase', color: '#444444', margin: 0 }}>
+        <p style={{ fontSize: 24, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#ffffff', margin: 0 }}>
           KİTAPLAR
         </p>
         <button

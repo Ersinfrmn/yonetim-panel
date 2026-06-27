@@ -13,6 +13,8 @@ import Pomodoro from './pages/Pomodoro'
 import Stats from './pages/Stats'
 import WeeklyPlan from './pages/WeeklyPlan'
 import Addiction from './pages/Addiction'
+import Books from './pages/Books'
+import BookDetail from './pages/BookDetail'
 
 function PrivateRoute({ children }) {
   const { user, loading } = useAuth()

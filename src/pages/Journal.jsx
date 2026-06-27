@@ -303,11 +303,11 @@ export default function Journal() {
             <ResponsiveContainer width="100%" height={110}>
               <LineChart data={chartData} margin={{ top: 5, right: 5, bottom: 0, left: -28 }}>
                 <XAxis dataKey="date"
-                  tick={{ fontSize: 10, fill: '#6B6B8A' }} tickLine={false} axisLine={false}
+                  tick={{ fontSize: 10, fill: '#888888' }} tickLine={false} axisLine={false}
                   interval={summaryPeriod <= 7 ? 0 : Math.floor(summaryPeriod / 7)}
                 />
                 <YAxis domain={[1, 5]} ticks={[1, 2, 3, 4, 5]}
-                  tick={{ fontSize: 10, fill: '#6B6B8A' }} tickLine={false} axisLine={false}
+                  tick={{ fontSize: 10, fill: '#888888' }} tickLine={false} axisLine={false}
                 />
                 <Tooltip
                   content={({ payload, label }) => {

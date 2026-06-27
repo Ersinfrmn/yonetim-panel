@@ -935,7 +935,7 @@ export default function Todos() {
                     {label}
                   </button>
                 ))}
-                <span className="ml-auto text-sm text-ink-muted self-center whitespace-nowrap">
+                <span className="ml-auto self-center whitespace-nowrap text-[10px] uppercase tracking-wider text-white/30">
                   {filtered.filter(t => !t.completed).length} kalan
                 </span>
               </div>

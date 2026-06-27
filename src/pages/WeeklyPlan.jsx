@@ -202,8 +202,9 @@ export default function WeeklyPlan() {
             <ChevronLeft size={16} />
           </button>
           <span
-            className="text-sm font-medium px-3 py-1"
+            className="text-base font-bold px-3 py-1 text-center"
             style={{
+              minWidth: 150,
               color: isThisWeek ? '#ffffff' : '#888888',
               border: isThisWeek ? '1px solid rgba(185,28,28,0.4)' : '1px solid transparent',
               borderRadius: 2,

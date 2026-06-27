@@ -329,7 +329,7 @@ export default function Stats() {
     <div>
       {/* Header + CSV button */}
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-semibold text-ink-primary">İstatistikler</h2>
+        <h2 className="text-2xl font-bold tracking-widest uppercase text-ink-primary">İstatistikler</h2>
         <button
           onClick={downloadCSV}
           className="flex items-center gap-2 px-3 py-2 rounded-xl border border-border-subtle bg-white/5 text-ink-secondary text-xs font-medium hover:text-ink-primary hover:bg-white/10 transition-colors"

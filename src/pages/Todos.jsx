@@ -300,7 +300,7 @@ function MatrixView({ tasks, subtasksMap, onDrop, onToggle, onEdit, onDelete }) 
                             </span>
                           )}
                           {(task.tags || []).map(t => (
-                            <span key={t} className={`px-1.5 py-0 rounded-full text-xs font-medium ${tagStyle(t)}`}>#{t}</span>
+                            <span key={t} className={`px-1.5 py-0 rounded-sm text-xs font-medium ${tagStyle(t)}`}>#{t}</span>
                           ))}
                           {subList.length > 0 && (
                             <span className="text-xs text-ink-muted">{subDone}/{subList.length} alt</span>
@@ -634,7 +634,7 @@ function CalendarView({ tasks, onToggle }) {
                         <Flag size={9} />{p.label}
                       </span>
                       {(task.tags || []).map(t => (
-                        <span key={t} className={`px-1.5 py-0 rounded-full text-xs font-medium ${tagStyle(t)}`}>#{t}</span>
+                        <span key={t} className={`px-1.5 py-0 rounded-sm text-xs font-medium ${tagStyle(t)}`}>#{t}</span>
                       ))}
                     </div>
                   </div>
@@ -693,7 +693,7 @@ function CalendarView({ tasks, onToggle }) {
                         <div className="flex flex-wrap items-center gap-1.5 mt-1">
                           <span className={`text-xs px-1.5 py-0.5 rounded-md ${p.color} ${p.bg}`}>{p.label}</span>
                           {(task.tags || []).map(t => (
-                            <span key={t} className={`px-1.5 py-0 rounded-full text-xs font-medium ${tagStyle(t)}`}>#{t}</span>
+                            <span key={t} className={`px-1.5 py-0 rounded-sm text-xs font-medium ${tagStyle(t)}`}>#{t}</span>
                           ))}
                         </div>
                       </div>
@@ -1051,7 +1051,7 @@ export default function Todos() {
                                 <div className="flex flex-wrap gap-1 mt-1.5">
                                   {tags.map(t => (
                                     <button key={t} onClick={() => setTagFilter(t)}
-                                      className={`px-1.5 py-0 rounded-full text-xs font-medium ${tagStyle(t)} hover:ring-1 hover:ring-primary-400 transition-all`}>
+                                      className={`px-1.5 py-0 rounded-sm text-xs font-medium ${tagStyle(t)} hover:ring-1 hover:ring-primary-400 transition-all`}>
                                       #{t}
                                     </button>
                                   ))}

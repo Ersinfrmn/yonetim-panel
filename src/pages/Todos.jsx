@@ -13,9 +13,9 @@ import toast from 'react-hot-toast'
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 const PRIORITY = {
-  low:    { label: 'Düşük',  color: 'text-blue-500',   bg: 'bg-blue-50 dark:bg-blue-900/20'    },
-  medium: { label: 'Orta',   color: 'text-yellow-500', bg: 'bg-yellow-50 dark:bg-yellow-900/20' },
-  high:   { label: 'Yüksek', color: 'text-red-500',    bg: 'bg-red-50 dark:bg-red-900/20'      },
+  low:    { label: 'Düşük',  color: 'text-blue-300',   bg: 'bg-blue-900/20'    },
+  medium: { label: 'Orta',   color: 'text-yellow-300', bg: 'bg-yellow-900/20'  },
+  high:   { label: 'Yüksek', color: 'text-red-400',    bg: 'bg-red-900/20'     },
 }
 
 const RECURRENCE = {
@@ -28,38 +28,38 @@ const RECURRENCE = {
 const PRESET_TAGS = ['iş', 'kişisel', 'acil', 'özel']
 
 const TAG_COLORS = {
-  iş:      'bg-blue-100   text-blue-700   dark:bg-blue-900/30   dark:text-blue-300',
-  kişisel: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300',
-  acil:    'bg-red-100    text-red-700    dark:bg-red-900/30    dark:text-red-300',
-  özel:    'bg-green-100  text-green-700  dark:bg-green-900/30  dark:text-green-300',
+  iş:      'bg-blue-900/30   text-blue-300',
+  kişisel: 'bg-purple-900/30 text-purple-300',
+  acil:    'bg-red-900/30    text-red-300',
+  özel:    'bg-green-900/30  text-green-300',
 }
-const TAG_DEF = 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300'
+const TAG_DEF = 'bg-white/10 text-ink-secondary'
 const tagStyle = name => TAG_COLORS[name] || TAG_DEF
 
 // Eisenhower quadrants ─ top-left, top-right, bottom-left, bottom-right
 const QUADRANTS = [
   {
     id: 'q1', title: 'Acil + Önemli',        sub: 'Hemen Yap',
-    border: 'border-red-300 dark:border-red-700/50',
-    hdr:    'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300',
+    border: 'border-red-700/50',
+    hdr:    'bg-red-900/20 text-red-300',
     drop:   { priority: 'high',   importance: 'important' },
   },
   {
     id: 'q2', title: 'Önemli, Acil Değil',   sub: 'Planla',
-    border: 'border-blue-300 dark:border-blue-700/50',
-    hdr:    'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300',
+    border: 'border-blue-700/50',
+    hdr:    'bg-blue-900/20 text-blue-300',
     drop:   { priority: 'medium', importance: 'important' },
   },
   {
     id: 'q3', title: 'Acil, Önemsiz',        sub: 'Devret',
-    border: 'border-yellow-300 dark:border-yellow-700/50',
-    hdr:    'bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-300',
+    border: 'border-yellow-700/50',
+    hdr:    'bg-yellow-900/20 text-yellow-300',
     drop:   { priority: 'high',   importance: 'normal' },
   },
   {
     id: 'q4', title: 'Acil Değil, Önemsiz',  sub: 'Elemele',
-    border: 'border-slate-200 dark:border-slate-600/50',
-    hdr:    'bg-slate-50 dark:bg-slate-700/50 text-slate-500 dark:text-slate-400',
+    border: 'border-border-subtle',
+    hdr:    'bg-white/5 text-ink-muted',
     drop:   { priority: 'low',    importance: 'normal' },
   },
 ]
@@ -93,10 +93,10 @@ const MONTH_TR    = ['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz',
 const WEEK_SHORT  = ['Paz', 'Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cts']
 
 function pillBg(task) {
-  if (task.priority === 'high')   return 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300'
-  if (task.priority === 'medium') return 'bg-yellow-100 text-yellow-700 dark:bg-amber-900/40 dark:text-yellow-300'
-  if (task.priority === 'low')    return 'bg-slate-100 text-slate-500 dark:bg-slate-600 dark:text-slate-300'
-  return 'bg-primary-100 text-primary-700 dark:bg-primary-900/40 dark:text-primary-300'
+  if (task.priority === 'high')   return 'bg-red-900/40 text-red-300'
+  if (task.priority === 'medium') return 'bg-amber-900/40 text-yellow-300'
+  if (task.priority === 'low')    return 'bg-white/10 text-ink-secondary'
+  return 'bg-primary-500/20 text-primary-300'
 }
 
 // ─── TagInput ─────────────────────────────────────────────────────────────────
@@ -119,14 +119,14 @@ function TagInput({ value = [], onChange }) {
     <div className="flex flex-wrap gap-1.5 items-center">
       {PRESET_TAGS.map(t => (
         <button key={t} type="button" onClick={() => toggle(t)}
-          className={`px-2 py-0.5 rounded-full text-xs font-medium transition-all ${tagStyle(t)} ${value.includes(t) ? 'ring-2 ring-offset-1 ring-primary-400' : 'opacity-70 hover:opacity-100'}`}>
+          className={`px-2 py-0.5 rounded-full text-xs font-medium transition-all ${tagStyle(t)} ${value.includes(t) ? 'ring-2 ring-offset-1 ring-offset-surface-card ring-primary-400' : 'opacity-70 hover:opacity-100'}`}>
           #{t}
         </button>
       ))}
       {customTags.map(t => (
         <span key={t} className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${TAG_DEF}`}>
           #{t}
-          <button type="button" onClick={() => toggle(t)} className="hover:text-red-500 transition-colors"><X size={9} /></button>
+          <button type="button" onClick={() => toggle(t)} className="hover:text-status-error transition-colors"><X size={9} /></button>
         </span>
       ))}
       <input
@@ -138,7 +138,7 @@ function TagInput({ value = [], onChange }) {
           }
         }}
         placeholder="Özel etiket + Enter"
-        className="flex-1 min-w-[110px] px-2 py-0.5 text-xs rounded-lg border border-slate-200 dark:border-slate-600 bg-transparent text-slate-800 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-primary-400"
+        className="flex-1 min-w-[110px] px-2 py-0.5 text-xs rounded-lg border border-border-subtle bg-white/5 text-ink-primary placeholder-ink-muted focus:outline-none focus:ring-1 focus:ring-primary-400"
       />
     </div>
   )
@@ -147,7 +147,7 @@ function TagInput({ value = [], onChange }) {
 // ─── FormFields — shared between create form and edit modal ──────────────────
 
 function FormFields({ f, set, compact = false }) {
-  const inp = `px-3 py-${compact ? '1.5' : '2'} text-sm rounded-lg border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 w-full`
+  const inp = `px-3 py-${compact ? '1.5' : '2'} text-sm rounded-lg border border-border-subtle bg-white/5 text-ink-primary focus:outline-none focus:ring-2 focus:ring-primary-500 w-full`
   return (
     <>
       <div className="flex gap-2 flex-wrap">
@@ -169,7 +169,7 @@ function FormFields({ f, set, compact = false }) {
         </select>
       </div>
       <div className="flex gap-2 items-center">
-        <Tag size={13} className="text-slate-400 shrink-0" />
+        <Tag size={13} className="text-ink-muted shrink-0" />
         <TagInput value={f.tags} onChange={tags => set('tags', tags)} />
       </div>
     </>
@@ -203,19 +203,19 @@ function SubtasksList({ taskId, userId, subtasksMap, onUpdate }) {
   }
 
   return (
-    <div className="mt-2 pt-3 border-t border-slate-100 dark:border-slate-700/60 space-y-1.5">
+    <div className="mt-2 pt-3 border-t border-border-subtle space-y-1.5">
       {list.map(sub => (
         <div key={sub.id} className="flex items-center gap-2 group">
           <button onClick={() => toggle(sub)} className="shrink-0">
             {sub.completed
-              ? <CheckSquare size={15} className="text-green-500" />
-              : <Square      size={15} className="text-slate-400"  />}
+              ? <CheckSquare size={15} className="text-status-success" />
+              : <Square      size={15} className="text-ink-muted"  />}
           </button>
-          <span className={`flex-1 text-sm ${sub.completed ? 'line-through text-slate-400 dark:text-slate-500' : 'text-slate-700 dark:text-slate-300'}`}>
+          <span className={`flex-1 text-sm ${sub.completed ? 'line-through text-ink-muted' : 'text-ink-secondary'}`}>
             {sub.title}
           </span>
           <button onClick={() => remove(sub.id)}
-            className="opacity-0 group-hover:opacity-100 text-slate-300 hover:text-red-400 transition-all shrink-0">
+            className="opacity-0 group-hover:opacity-100 text-ink-muted hover:text-status-error transition-all shrink-0">
             <X size={13} />
           </button>
         </div>
@@ -226,10 +226,10 @@ function SubtasksList({ taskId, userId, subtasksMap, onUpdate }) {
           onChange={e => setNewTitle(e.target.value)}
           onKeyDown={e => e.key === 'Enter' && add()}
           placeholder="Alt görev ekle..."
-          className="flex-1 px-3 py-1.5 text-sm rounded-lg border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700/50 text-slate-800 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-400"
+          className="flex-1 px-3 py-1.5 text-sm rounded-lg border border-border-subtle bg-white/5 text-ink-primary placeholder-ink-muted focus:outline-none focus:ring-2 focus:ring-primary-400"
         />
         <button onClick={add}
-          className="px-2.5 rounded-lg bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 hover:bg-primary-200 dark:hover:bg-primary-900/50 transition-colors">
+          className="px-2.5 rounded-lg bg-primary-500/20 text-primary-400 hover:bg-primary-500/30 transition-colors">
           <Plus size={15} />
         </button>
       </div>
@@ -249,7 +249,7 @@ function MatrixView({ tasks, subtasksMap, onDrop, onToggle, onEdit, onDelete }) 
         const qTasks = activeTasks.filter(t => getQuadrant(t) === q.id)
         return (
           <div key={q.id}
-            className={`rounded-2xl border-2 overflow-hidden transition-all ${q.border} ${hoveredQ === q.id ? 'shadow-lg scale-[1.01]' : ''}`}
+            className={`rounded-xl border-2 overflow-hidden transition-all ${q.border} ${hoveredQ === q.id ? 'scale-[1.01]' : ''}`}
             onDragOver={e => { e.preventDefault(); setHoveredQ(q.id) }}
             onDragLeave={() => setHoveredQ(null)}
             onDrop={e => {
@@ -262,9 +262,9 @@ function MatrixView({ tasks, subtasksMap, onDrop, onToggle, onEdit, onDelete }) 
               <p className="text-xs font-bold">{q.title}</p>
               <p className="text-xs opacity-70">{q.sub}</p>
             </div>
-            <div className="p-2 min-h-[110px] space-y-1.5">
+            <div className="p-2 min-h-[110px] space-y-1.5 bg-surface-card/40">
               {qTasks.length === 0 && (
-                <p className="text-xs text-slate-400 dark:text-slate-600 text-center pt-5 select-none">Boş</p>
+                <p className="text-xs text-ink-muted text-center pt-5 select-none">Boş</p>
               )}
               {qTasks.map(task => {
                 const subList = subtasksMap[task.id] || []
@@ -273,16 +273,16 @@ function MatrixView({ tasks, subtasksMap, onDrop, onToggle, onEdit, onDelete }) 
                   <div key={task.id}
                     draggable
                     onDragStart={e => e.dataTransfer.setData('taskId', task.id)}
-                    className="bg-white dark:bg-slate-800 rounded-xl px-3 py-2 shadow-sm border border-slate-100 dark:border-slate-700 cursor-grab active:cursor-grabbing select-none group">
+                    className="bg-surface-card/80 backdrop-blur-md rounded-xl px-3 py-2 border border-border-subtle cursor-grab active:cursor-grabbing select-none group hover:border-border-glow transition-colors">
                     <div className="flex items-start gap-2">
                       <button onClick={() => onToggle(task)} className="mt-0.5 shrink-0">
-                        <Square size={14} className="text-slate-400 hover:text-primary-600 transition-colors" />
+                        <Square size={14} className="text-ink-muted hover:text-primary-400 transition-colors" />
                       </button>
                       <div className="flex-1 min-w-0">
-                        <p className="text-xs font-medium text-slate-800 dark:text-white leading-snug">{task.title}</p>
+                        <p className="text-xs font-medium text-ink-primary leading-snug">{task.title}</p>
                         <div className="flex flex-wrap gap-1 mt-1">
                           {task.due_date && (
-                            <span className={`text-xs ${isToday(parseISO(task.due_date)) ? 'text-orange-500' : 'text-slate-400'}`}>
+                            <span className={`text-xs ${isToday(parseISO(task.due_date)) ? 'text-status-warning' : 'text-ink-muted'}`}>
                               📅 {format(parseISO(task.due_date), 'd MMM', { locale: tr })}
                             </span>
                           )}
@@ -290,18 +290,18 @@ function MatrixView({ tasks, subtasksMap, onDrop, onToggle, onEdit, onDelete }) 
                             <span key={t} className={`px-1.5 py-0 rounded-full text-xs font-medium ${tagStyle(t)}`}>#{t}</span>
                           ))}
                           {subList.length > 0 && (
-                            <span className="text-xs text-slate-400">{subDone}/{subList.length} alt</span>
+                            <span className="text-xs text-ink-muted">{subDone}/{subList.length} alt</span>
                           )}
                           {task.recurrence && task.recurrence !== 'none' && (
-                            <span className="text-xs text-slate-400 flex items-center gap-0.5">
+                            <span className="text-xs text-ink-muted flex items-center gap-0.5">
                               <RotateCcw size={9} />{RECURRENCE[task.recurrence]}
                             </span>
                           )}
                         </div>
                       </div>
                       <div className="flex gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
-                        <button onClick={() => onEdit(task)} className="p-1 text-slate-400 hover:text-primary-500 transition-colors"><Edit2 size={12} /></button>
-                        <button onClick={() => onDelete(task.id)} className="p-1 text-slate-400 hover:text-red-500 transition-colors"><Trash2 size={12} /></button>
+                        <button onClick={() => onEdit(task)} className="p-1 text-ink-muted hover:text-primary-400 transition-colors"><Edit2 size={12} /></button>
+                        <button onClick={() => onDelete(task.id)} className="p-1 text-ink-muted hover:text-status-error transition-colors"><Trash2 size={12} /></button>
                       </div>
                     </div>
                   </div>
@@ -361,7 +361,7 @@ function CalendarView({ tasks, onToggle }) {
   const month        = calDate.getMonth()
   const firstOfMonth = new Date(year, month, 1)
   const daysInMonth  = new Date(year, month + 1, 0).getDate()
-  const startOffset  = firstOfMonth.getDay()                                   // 0=Sun
+  const startOffset  = firstOfMonth.getDay()
   const totalCells   = Math.ceil((startOffset + daysInMonth) / 7) * 7
   const monthCells   = Array.from({ length: totalCells }, (_, i) => {
     const d = i - startOffset + 1
@@ -400,7 +400,7 @@ function CalendarView({ tasks, onToggle }) {
   return (
     <div>
       {/* Sub-view toggle */}
-      <div className="flex gap-1 mb-4 bg-slate-100 dark:bg-slate-700/60 p-1 rounded-xl">
+      <div className="flex gap-1 mb-4 bg-surface-card p-1 rounded-xl border border-border-subtle">
         {[
           { key: 'monthly', label: 'Aylık'   },
           { key: 'weekly',  label: 'Haftalık' },
@@ -409,8 +409,8 @@ function CalendarView({ tasks, onToggle }) {
           <button key={key} onClick={() => { setCalView(key); setPopoverDate(null) }}
             className={`flex-1 py-1.5 rounded-lg text-sm font-medium transition-colors ${
               calView === key
-                ? 'bg-white dark:bg-slate-700 text-slate-800 dark:text-white shadow'
-                : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+                ? 'bg-white/10 text-ink-primary'
+                : 'text-ink-muted hover:text-ink-secondary'
             }`}>
             {label}
           </button>
@@ -420,12 +420,12 @@ function CalendarView({ tasks, onToggle }) {
       {/* Navigation bar */}
       <div className="flex items-center gap-3 mb-4">
         <button onClick={prevPeriod}
-          className="p-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
+          className="p-2 rounded-lg bg-white/5 border border-border-subtle text-ink-secondary hover:bg-white/10 transition-colors">
           <ChevronLeft size={16} />
         </button>
-        <p className="flex-1 text-center font-semibold text-slate-800 dark:text-white">{periodLabel}</p>
+        <p className="flex-1 text-center font-semibold text-ink-primary">{periodLabel}</p>
         <button onClick={nextPeriod}
-          className="p-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
+          className="p-2 rounded-lg bg-white/5 border border-border-subtle text-ink-secondary hover:bg-white/10 transition-colors">
           <ChevronRight size={16} />
         </button>
       </div>
@@ -435,7 +435,7 @@ function CalendarView({ tasks, onToggle }) {
         <div className="flex justify-center mb-4">
           <input type="date" value={dailyStr}
             onChange={e => e.target.value && setCalDate(parseISO(e.target.value))}
-            className="px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+            className="px-4 py-2 rounded-xl border border-border-subtle bg-white/5 text-ink-primary text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
           />
         </div>
       )}
@@ -444,15 +444,15 @@ function CalendarView({ tasks, onToggle }) {
       {calView === 'monthly' && (
         <>
           {/* Desktop calendar grid */}
-          <div className="hidden sm:block overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-700">
+          <div className="hidden sm:block overflow-hidden rounded-xl border border-border-subtle">
             {/* Day-of-week headers */}
-            <div className="grid grid-cols-7 border-b border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700/50">
+            <div className="grid grid-cols-7 border-b border-border-subtle bg-white/5">
               {DAY_HEADERS.map(h => (
-                <div key={h} className="py-2 text-center text-xs font-semibold text-slate-500 dark:text-slate-400">{h}</div>
+                <div key={h} className="py-2 text-center text-xs font-semibold text-ink-muted">{h}</div>
               ))}
             </div>
             {/* Cells */}
-            <div className="grid grid-cols-7 gap-px bg-slate-200 dark:bg-slate-600/60">
+            <div className="grid grid-cols-7 gap-px bg-border-subtle">
               {monthCells.map((cell, i) => {
                 const ds        = cell ? format(cell, 'yyyy-MM-dd') : null
                 const dayTasks  = ds ? (tasksByDate[ds] || []) : []
@@ -463,9 +463,9 @@ function CalendarView({ tasks, onToggle }) {
                   <div key={i}
                     onClick={() => cell && setPopoverDate(ds)}
                     className={[
-                      'bg-white dark:bg-slate-800 min-h-[88px] p-1.5 transition-colors',
-                      cell ? 'cursor-pointer hover:bg-primary-50/60 dark:hover:bg-primary-900/10' : 'bg-slate-50/80 dark:bg-slate-800/40 pointer-events-none',
-                      todayCell ? 'ring-1 ring-inset ring-primary-500 dark:ring-primary-400' : '',
+                      'bg-surface-card min-h-[88px] p-1.5 transition-colors',
+                      cell ? 'cursor-pointer hover:bg-primary-500/5' : 'bg-surface/80 pointer-events-none',
+                      todayCell ? 'ring-1 ring-inset ring-primary-500' : '',
                     ].join(' ')}
                   >
                     {cell && (
@@ -473,7 +473,7 @@ function CalendarView({ tasks, onToggle }) {
                         <div className={`mb-1 w-6 h-6 text-xs font-semibold flex items-center justify-center rounded-full ${
                           todayCell
                             ? 'bg-primary-600 text-white'
-                            : 'text-slate-700 dark:text-slate-200'
+                            : 'text-ink-secondary'
                         }`}>
                           {cell.getDate()}
                         </div>
@@ -485,7 +485,7 @@ function CalendarView({ tasks, onToggle }) {
                             </div>
                           ))}
                           {extra > 0 && (
-                            <p className="text-[10px] text-slate-400 dark:text-slate-500 pl-0.5">+{extra} daha</p>
+                            <p className="text-[10px] text-ink-muted pl-0.5">+{extra} daha</p>
                           )}
                         </div>
                       </>
@@ -507,11 +507,11 @@ function CalendarView({ tasks, onToggle }) {
                 .sort(([a], [b]) => a.localeCompare(b))
 
               if (!entries.length)
-                return <p className="text-center text-sm text-slate-400 py-10">Bu ay görev yok</p>
+                return <p className="text-center text-sm text-ink-muted py-10">Bu ay görev yok</p>
 
               return entries.map(([d, dayTasks]) => (
-                <div key={d} className="rounded-xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 p-3">
-                  <p className={`text-sm font-semibold mb-2 ${isToday(parseISO(d)) ? 'text-primary-600 dark:text-primary-400' : 'text-slate-700 dark:text-slate-200'}`}>
+                <div key={d} className="rounded-xl bg-surface-card/80 border border-border-subtle p-3">
+                  <p className={`text-sm font-semibold mb-2 ${isToday(parseISO(d)) ? 'text-primary-400' : 'text-ink-primary'}`}>
                     {format(parseISO(d), 'd MMMM', { locale: tr })}
                     {isToday(parseISO(d)) && <span className="ml-1.5 text-xs font-normal opacity-70">Bugün</span>}
                   </p>
@@ -520,10 +520,10 @@ function CalendarView({ tasks, onToggle }) {
                       <div key={task.id} className="flex items-center gap-2">
                         <button onClick={() => onToggle(task)} className="shrink-0">
                           {task.completed
-                            ? <CheckSquare size={13} className="text-green-500" />
-                            : <Square size={13} className="text-slate-400" />}
+                            ? <CheckSquare size={13} className="text-status-success" />
+                            : <Square size={13} className="text-ink-muted" />}
                         </button>
-                        <span className={`flex-1 text-xs ${task.completed ? 'line-through text-slate-400' : 'text-slate-700 dark:text-slate-200'}`}>
+                        <span className={`flex-1 text-xs ${task.completed ? 'line-through text-ink-muted' : 'text-ink-secondary'}`}>
                           {task.title}
                         </span>
                         <span className={`shrink-0 text-[10px] px-1.5 py-0.5 rounded-full ${pillBg(task)}`}>
@@ -549,28 +549,28 @@ function CalendarView({ tasks, onToggle }) {
               const todayDay = isToday(day)
               return (
                 <div key={i} className={`rounded-xl border overflow-hidden flex flex-col ${
-                  todayDay ? 'border-primary-500 dark:border-primary-400' : 'border-slate-200 dark:border-slate-600'
+                  todayDay ? 'border-primary-500' : 'border-border-subtle'
                 }`}>
                   {/* Column header */}
-                  <div className={`py-2 px-1 text-center shrink-0 ${todayDay ? 'bg-primary-600' : 'bg-slate-50 dark:bg-slate-700/60'}`}>
-                    <p className={`text-[10px] font-bold uppercase tracking-wider ${todayDay ? 'text-primary-200' : 'text-slate-400 dark:text-slate-500'}`}>
+                  <div className={`py-2 px-1 text-center shrink-0 ${todayDay ? 'bg-primary-600' : 'bg-white/5'}`}>
+                    <p className={`text-[10px] font-bold uppercase tracking-wider ${todayDay ? 'text-primary-200' : 'text-ink-muted'}`}>
                       {WEEK_SHORT[day.getDay()]}
                     </p>
-                    <p className={`text-lg font-bold leading-none mt-0.5 ${todayDay ? 'text-white' : 'text-slate-800 dark:text-white'}`}>
+                    <p className={`text-lg font-bold leading-none mt-0.5 ${todayDay ? 'text-white' : 'text-ink-primary'}`}>
                       {day.getDate()}
                     </p>
                   </div>
                   {/* Task list */}
-                  <div className="p-1.5 bg-white dark:bg-slate-800 flex-1 min-h-[130px] space-y-1">
+                  <div className="p-1.5 bg-surface-card flex-1 min-h-[130px] space-y-1">
                     {dt.length === 0
-                      ? <p className="text-[10px] text-slate-300 dark:text-slate-600 text-center pt-6">—</p>
+                      ? <p className="text-[10px] text-ink-muted text-center pt-6">—</p>
                       : dt.map(task => (
                           <div key={task.id}
                             className={`rounded-lg p-1.5 ${pillBg(task)} ${task.completed ? 'opacity-40' : ''}`}>
                             <div className="flex items-start gap-1">
                               <button onClick={() => onToggle(task)} className="shrink-0 mt-px">
                                 {task.completed
-                                  ? <CheckSquare size={11} className="text-green-600 dark:text-green-400" />
+                                  ? <CheckSquare size={11} className="text-status-success" />
                                   : <Square size={11} className="opacity-60" />}
                               </button>
                               <span className={`text-[10px] leading-snug ${task.completed ? 'line-through' : ''}`}>
@@ -592,7 +592,7 @@ function CalendarView({ tasks, onToggle }) {
       {calView === 'daily' && (
         <div className="space-y-2">
           {dailyTasks.length === 0 ? (
-            <div className="text-center py-12 text-slate-400">
+            <div className="text-center py-12 text-ink-muted">
               <CheckSquare size={32} className="mx-auto mb-2 opacity-30" />
               <p className="text-sm">Bu tarihte görev yok</p>
             </div>
@@ -603,17 +603,17 @@ function CalendarView({ tasks, onToggle }) {
                 <div key={task.id}
                   className={`flex items-start gap-3 p-3 rounded-xl border transition-colors ${
                     task.completed
-                      ? 'bg-slate-50 dark:bg-slate-800/50 border-slate-100 dark:border-slate-700/50 opacity-70'
-                      : 'bg-white dark:bg-slate-800 border-slate-100 dark:border-slate-700'
+                      ? 'bg-surface-card/40 border-border-subtle opacity-70'
+                      : 'bg-surface-card/80 border-border-subtle hover:border-border-glow'
                   }`}>
                   <button onClick={() => onToggle(task)}
-                    className="shrink-0 mt-0.5 text-slate-400 hover:text-primary-600 transition-colors">
+                    className="shrink-0 mt-0.5 text-ink-muted hover:text-primary-400 transition-colors">
                     {task.completed
-                      ? <CheckSquare size={18} className="text-green-500" />
+                      ? <CheckSquare size={18} className="text-status-success" />
                       : <Square size={18} />}
                   </button>
                   <div className="flex-1 min-w-0">
-                    <p className={`text-sm font-medium ${task.completed ? 'line-through text-slate-400' : 'text-slate-800 dark:text-white'}`}>
+                    <p className={`text-sm font-medium ${task.completed ? 'line-through text-ink-muted' : 'text-ink-primary'}`}>
                       {task.title}
                     </p>
                     <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-1">
@@ -635,28 +635,28 @@ function CalendarView({ tasks, onToggle }) {
       {/* ── Day detail modal (monthly click) ─────────────────────────────── */}
       {popoverDate && (
         <div
-          className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4"
+          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
           onClick={() => setPopoverDate(null)}>
           <div
-            className="bg-white dark:bg-slate-800 rounded-2xl w-full max-w-sm max-h-[80vh] flex flex-col overflow-hidden shadow-2xl"
+            className="bg-surface-card border border-border-subtle rounded-xl w-full max-w-sm max-h-[80vh] flex flex-col overflow-hidden"
             onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100 dark:border-slate-700 shrink-0">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-border-subtle shrink-0">
               <div>
-                <p className="font-semibold text-slate-800 dark:text-white">
+                <p className="font-semibold text-ink-primary">
                   {format(parseISO(popoverDate), 'd MMMM yyyy', { locale: tr })}
                 </p>
                 {isToday(parseISO(popoverDate)) && (
-                  <p className="text-xs text-primary-500 dark:text-primary-400 mt-0.5">Bugün</p>
+                  <p className="text-xs text-primary-400 mt-0.5">Bugün</p>
                 )}
               </div>
               <button onClick={() => setPopoverDate(null)}
-                className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
+                className="p-1.5 text-ink-muted hover:text-ink-primary rounded-lg hover:bg-white/5 transition-colors">
                 <X size={18} />
               </button>
             </div>
             <div className="overflow-y-auto flex-1 p-4 space-y-2">
               {(tasksByDate[popoverDate] || []).length === 0 ? (
-                <p className="text-center text-sm text-slate-400 py-8">Bu tarihte görev yok</p>
+                <p className="text-center text-sm text-ink-muted py-8">Bu tarihte görev yok</p>
               ) : (
                 (tasksByDate[popoverDate] || []).map(task => {
                   const p = PRIORITY[task.priority] || PRIORITY.medium
@@ -664,17 +664,17 @@ function CalendarView({ tasks, onToggle }) {
                     <div key={task.id}
                       className={`flex items-start gap-3 p-3 rounded-xl border ${
                         task.completed
-                          ? 'bg-slate-50 dark:bg-slate-700/30 border-slate-100 dark:border-slate-700 opacity-60'
-                          : 'bg-slate-50 dark:bg-slate-700/40 border-slate-100 dark:border-slate-600'
+                          ? 'bg-white/5 border-border-subtle opacity-60'
+                          : 'bg-white/5 border-border-subtle hover:border-border-glow'
                       }`}>
                       <button onClick={() => onToggle(task)}
-                        className="shrink-0 mt-0.5 text-slate-400 hover:text-primary-600 transition-colors">
+                        className="shrink-0 mt-0.5 text-ink-muted hover:text-primary-400 transition-colors">
                         {task.completed
-                          ? <CheckSquare size={16} className="text-green-500" />
+                          ? <CheckSquare size={16} className="text-status-success" />
                           : <Square size={16} />}
                       </button>
                       <div className="flex-1 min-w-0">
-                        <p className={`text-sm font-medium ${task.completed ? 'line-through text-slate-400' : 'text-slate-800 dark:text-white'}`}>
+                        <p className={`text-sm font-medium ${task.completed ? 'line-through text-ink-muted' : 'text-ink-primary'}`}>
                           {task.title}
                         </p>
                         <div className="flex flex-wrap items-center gap-1.5 mt-1">
@@ -842,12 +842,16 @@ export default function Todos() {
 
   const allTags = [...new Set(tasks.flatMap(t => t.tags || []))]
 
-  if (loading) return <div className="text-center py-20 text-slate-400">Yükleniyor...</div>
+  if (loading) return (
+    <div className="text-center py-20">
+      <div className="w-6 h-6 border-2 border-primary-500 border-t-transparent rounded-full animate-spin mx-auto" />
+    </div>
+  )
 
   return (
     <div>
       {/* ── Main tab bar ── */}
-      <div className="flex gap-2 mb-5 bg-slate-100 dark:bg-slate-700/60 p-1 rounded-xl">
+      <div className="flex gap-2 mb-5 bg-surface-card p-1 rounded-xl border border-border-subtle">
         {[
           { key: 'tasks',    label: '📋 Görevler' },
           { key: 'calendar', label: '📅 Takvim'   },
@@ -855,8 +859,8 @@ export default function Todos() {
           <button key={key} onClick={() => setMainTab(key)}
             className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-colors ${
               mainTab === key
-                ? 'bg-white dark:bg-slate-700 text-slate-800 dark:text-white shadow'
-                : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+                ? 'bg-white/10 text-ink-primary'
+                : 'text-ink-muted hover:text-ink-secondary'
             }`}>
             {label}
           </button>
@@ -868,14 +872,14 @@ export default function Todos() {
         <>
           {/* Header + view toggle */}
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Görev Listesi</h2>
-            <div className="flex gap-1 bg-slate-100 dark:bg-slate-700/60 rounded-lg p-1">
+            <h2 className="text-2xl font-semibold text-ink-primary">Görev Listesi</h2>
+            <div className="flex gap-1 bg-surface-card rounded-lg p-1 border border-border-subtle">
               {[
                 { mode: 'list',   Icon: ListIcon,    title: 'Liste'   },
                 { mode: 'matrix', Icon: LayoutGrid,  title: 'Matris'  },
               ].map(({ mode, Icon, title }) => (
                 <button key={mode} onClick={() => setViewMode(mode)} title={title}
-                  className={`p-1.5 rounded-md transition-colors ${viewMode === mode ? 'bg-white dark:bg-slate-600 shadow text-primary-600' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}>
+                  className={`p-1.5 rounded-md transition-colors ${viewMode === mode ? 'bg-white/10 text-primary-400' : 'text-ink-muted hover:text-ink-secondary'}`}>
                   <Icon size={16} />
                 </button>
               ))}
@@ -883,17 +887,17 @@ export default function Todos() {
           </div>
 
           {/* Create form */}
-          <div className="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-100 dark:border-slate-700 mb-6 space-y-3">
+          <div className="bg-surface-card/80 backdrop-blur-md border border-border-subtle rounded-xl p-4 mb-6 space-y-3">
             <div className="flex gap-2">
               <input
                 value={form.title}
                 onChange={e => setF('title', e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && addTask()}
                 placeholder="Görev başlığı..."
-                className="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="flex-1 px-4 py-2.5 rounded-xl border border-border-subtle bg-white/5 text-ink-primary placeholder-ink-muted focus:outline-none focus:ring-2 focus:ring-primary-500"
               />
               <button onClick={addTask}
-                className="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-xl flex items-center gap-2 text-sm transition-colors shrink-0">
+                className="bg-primary-500 hover:bg-primary-600 text-white px-4 py-2 rounded-xl flex items-center gap-2 text-sm transition-colors shrink-0">
                 <Plus size={16} /> Ekle
               </button>
             </div>
@@ -908,29 +912,29 @@ export default function Todos() {
                   <button key={key} onClick={() => setFilter(key)}
                     className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
                       filter === key
-                        ? 'bg-primary-600 text-white'
-                        : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700'
+                        ? 'bg-primary-500 text-white'
+                        : 'bg-white/5 text-ink-secondary border border-border-subtle hover:bg-white/10'
                     }`}>
                     {label}
                   </button>
                 ))}
-                <span className="ml-auto text-sm text-slate-400 self-center whitespace-nowrap">
+                <span className="ml-auto text-sm text-ink-muted self-center whitespace-nowrap">
                   {filtered.filter(t => !t.completed).length} kalan
                 </span>
               </div>
 
               {allTags.length > 0 && (
                 <div className="flex flex-wrap gap-1.5 items-center">
-                  <span className="text-xs text-slate-400 shrink-0">Etiket:</span>
+                  <span className="text-xs text-ink-muted shrink-0">Etiket:</span>
                   {tagFilter && (
                     <button onClick={() => setTagFilter(null)}
-                      className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors">
+                      className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-white/10 text-ink-muted hover:bg-white/15 transition-colors">
                       <X size={9} /> Temizle
                     </button>
                   )}
                   {allTags.map(t => (
                     <button key={t} onClick={() => setTagFilter(tagFilter === t ? null : t)}
-                      className={`px-2 py-0.5 rounded-full text-xs font-medium transition-all ${tagStyle(t)} ${tagFilter === t ? 'ring-2 ring-offset-1 ring-primary-400' : 'opacity-80 hover:opacity-100'}`}>
+                      className={`px-2 py-0.5 rounded-full text-xs font-medium transition-all ${tagStyle(t)} ${tagFilter === t ? 'ring-2 ring-offset-1 ring-offset-surface ring-primary-400' : 'opacity-80 hover:opacity-100'}`}>
                       #{t}
                     </button>
                   ))}
@@ -954,8 +958,8 @@ export default function Todos() {
           {/* List view */}
           {viewMode === 'list' && (
             filtered.length === 0 ? (
-              <div className="text-center py-12 text-slate-400">
-                <CheckSquare size={36} className="mx-auto mb-2 opacity-40" />
+              <div className="text-center py-12 text-ink-muted">
+                <CheckSquare size={36} className="mx-auto mb-2 opacity-30" />
                 <p>Burada görev yok!</p>
               </div>
             ) : (
@@ -972,8 +976,8 @@ export default function Todos() {
                     <div key={task.id}
                       className={`rounded-xl border transition-colors ${
                         task.completed
-                          ? 'bg-slate-50 dark:bg-slate-800/50 border-slate-100 dark:border-slate-700/50'
-                          : 'bg-white dark:bg-slate-800 border-slate-100 dark:border-slate-700'
+                          ? 'bg-surface-card/40 border-border-subtle opacity-70'
+                          : 'bg-surface-card/80 border-border-subtle hover:border-border-glow'
                       }`}>
 
                       {isEditing ? (
@@ -983,16 +987,16 @@ export default function Todos() {
                             value={editForm.title}
                             onChange={e => setEF('title', e.target.value)}
                             onKeyDown={e => e.key === 'Enter' && saveEdit()}
-                            className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+                            className="w-full px-3 py-2 text-sm rounded-lg border border-border-subtle bg-white/5 text-ink-primary focus:outline-none focus:ring-2 focus:ring-primary-500"
                           />
                           <FormFields f={editForm} set={setEF} compact />
                           <div className="flex gap-2">
                             <button onClick={() => setEditingId(null)}
-                              className="flex-1 py-1.5 rounded-lg border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
+                              className="flex-1 py-1.5 rounded-lg border border-border-subtle text-ink-secondary text-sm font-medium hover:bg-white/5 transition-colors">
                               İptal
                             </button>
                             <button onClick={saveEdit}
-                              className="flex-1 py-1.5 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium transition-colors">
+                              className="flex-1 py-1.5 rounded-lg bg-primary-500 hover:bg-primary-600 text-white text-sm font-medium transition-colors">
                               Kaydet
                             </button>
                           </div>
@@ -1000,19 +1004,19 @@ export default function Todos() {
                       ) : (
                         <div className="p-3">
                           <div className="flex items-center gap-3">
-                            <button onClick={() => toggleTask(task)} className="shrink-0 text-slate-400 hover:text-primary-600 transition-colors">
+                            <button onClick={() => toggleTask(task)} className="shrink-0 text-ink-muted hover:text-primary-400 transition-colors">
                               {task.completed
-                                ? <CheckSquare size={20} className="text-green-500" />
+                                ? <CheckSquare size={20} className="text-status-success" />
                                 : <Square size={20} />
                               }
                             </button>
                             <div className="flex-1 min-w-0">
-                              <p className={`font-medium truncate ${task.completed ? 'line-through text-slate-400' : 'text-slate-800 dark:text-white'}`}>
+                              <p className={`font-medium truncate ${task.completed ? 'line-through text-ink-muted' : 'text-ink-primary'}`}>
                                 {task.title}
                               </p>
                               <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-1">
                                 {task.due_date && (
-                                  <span className={`flex items-center gap-1 text-xs ${isToday(parseISO(task.due_date)) ? 'text-orange-500' : 'text-slate-400'}`}>
+                                  <span className={`flex items-center gap-1 text-xs ${isToday(parseISO(task.due_date)) ? 'text-status-warning' : 'text-ink-muted'}`}>
                                     <Calendar size={11} />
                                     {format(parseISO(task.due_date), 'd MMM', { locale: tr })}
                                   </span>
@@ -1021,7 +1025,7 @@ export default function Todos() {
                                   <Flag size={10} /> {p.label}
                                 </span>
                                 {hasRec && (
-                                  <span className="flex items-center gap-1 text-xs text-slate-400 dark:text-slate-500">
+                                  <span className="flex items-center gap-1 text-xs text-ink-muted">
                                     <RotateCcw size={10} /> {RECURRENCE[task.recurrence]}
                                   </span>
                                 )}
@@ -1041,15 +1045,15 @@ export default function Todos() {
                               <button onClick={() => toggleOpenSubs(task.id)}
                                 className={`p-1.5 rounded-lg text-xs font-medium transition-colors flex items-center gap-1 ${
                                   openSubs.has(task.id)
-                                    ? 'bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400'
-                                    : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'
+                                    ? 'bg-primary-500/15 text-primary-400'
+                                    : 'text-ink-muted hover:text-ink-secondary'
                                 }`}
                                 title="Alt görevler">
                                 {subList.length > 0 && <span className="text-xs">{subDone}/{subList.length}</span>}
                                 {openSubs.has(task.id) ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
                               </button>
-                              <button onClick={() => startEdit(task)} className="p-1.5 text-slate-400 hover:text-primary-500 transition-colors"><Edit2 size={14} /></button>
-                              <button onClick={() => deleteTask(task.id)} className="p-1.5 text-slate-400 hover:text-red-500 transition-colors"><Trash2 size={14} /></button>
+                              <button onClick={() => startEdit(task)} className="p-1.5 text-ink-muted hover:text-primary-400 transition-colors"><Edit2 size={14} /></button>
+                              <button onClick={() => deleteTask(task.id)} className="p-1.5 text-ink-muted hover:text-status-error transition-colors"><Trash2 size={14} /></button>
                             </div>
                           </div>
 
@@ -1073,11 +1077,11 @@ export default function Todos() {
           {/* Edit modal (matrix view only) */}
           {editingId && viewMode === 'matrix' && (
             <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-              <div className="bg-white dark:bg-slate-800 rounded-2xl w-full max-w-sm shadow-2xl p-6">
+              <div className="bg-surface-card border border-border-subtle rounded-xl w-full max-w-sm p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-bold text-slate-800 dark:text-white">Görevi Düzenle</h3>
+                  <h3 className="text-base font-semibold text-ink-primary">Görevi Düzenle</h3>
                   <button onClick={() => setEditingId(null)}
-                    className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors">
+                    className="p-1.5 text-ink-muted hover:text-ink-primary transition-colors">
                     <X size={18} />
                   </button>
                 </div>
@@ -1086,16 +1090,16 @@ export default function Todos() {
                     value={editForm.title}
                     onChange={e => setEF('title', e.target.value)}
                     onKeyDown={e => e.key === 'Enter' && saveEdit()}
-                    className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    className="w-full px-3 py-2 text-sm rounded-lg border border-border-subtle bg-white/5 text-ink-primary focus:outline-none focus:ring-2 focus:ring-primary-500"
                   />
                   <FormFields f={editForm} set={setEF} compact />
                   <div className="flex gap-2 pt-1">
                     <button onClick={() => setEditingId(null)}
-                      className="flex-1 py-2 rounded-lg border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-sm font-medium transition-colors">
+                      className="flex-1 py-2 rounded-lg border border-border-subtle text-ink-secondary text-sm font-medium hover:bg-white/5 transition-colors">
                       İptal
                     </button>
                     <button onClick={saveEdit}
-                      className="flex-1 py-2 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium transition-colors">
+                      className="flex-1 py-2 rounded-lg bg-primary-500 hover:bg-primary-600 text-white text-sm font-medium transition-colors">
                       Kaydet
                     </button>
                   </div>

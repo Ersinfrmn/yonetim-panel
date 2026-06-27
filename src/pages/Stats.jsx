@@ -357,8 +357,8 @@ export default function Stats() {
       {extras && (
         <div className="mb-6 bg-surface-card/80 backdrop-blur-md border border-border-subtle rounded-xl p-4 hover:border-border-glow transition-colors duration-200">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-status-warning/10 flex items-center justify-center shrink-0">
-              <Trophy size={22} className="text-amber-500" />
+            <div className="w-12 h-12 rounded-sm bg-primary-500/15 flex items-center justify-center shrink-0">
+              <Trophy size={22} className="text-primary-400" />
             </div>
             <div>
               <p className="text-[11px] font-medium text-ink-secondary uppercase tracking-widest">En Verimli Günüm</p>

@@ -723,6 +723,7 @@ export default function Habits() {
   const [editModal,    setEditModal]    = useState(null)
   const [breakModal,   setBreakModal]   = useState(null)
   const [expanded,     setExpanded]     = useState({})
+  const [habitsTab,    setHabitsTab]    = useState('habits')
 
   async function load() {
     const [{ data: h }, { data: l }, { data: br }, { data: hn }] = await Promise.all([

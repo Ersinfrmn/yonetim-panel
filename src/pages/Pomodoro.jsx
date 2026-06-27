@@ -720,7 +720,7 @@ export default function Pomodoro() {
           <select
             value={linkedHabit?.id || ''}
             onChange={e => setLinkedHabit(habits.find(h => h.id === e.target.value) || null)}
-            className="w-full px-3 py-2.5 rounded-xl border border-border-subtle bg-white/5 text-sm text-ink-secondary focus:outline-none focus:ring-2 focus:ring-primary-500"
+            className="w-full px-3 py-2.5 rounded-sm border border-white/10 bg-white/5 text-sm text-ink-secondary focus:outline-none focus:ring-1 focus:ring-primary-500"
           >
             <option value="">Alışkanlık seç (opsiyonel)</option>
             {habits.map(h => <option key={h.id} value={h.id}>{h.name}</option>)}

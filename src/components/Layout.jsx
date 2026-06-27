@@ -80,7 +80,7 @@ function OrbitalGlow() {
         ].join(', '),
         animation: 'orbitalSpin 24s linear infinite',
         opacity: 0.55,
-        zIndex: 0,
+        zIndex: -1,
       }}
     />
   )

@@ -311,7 +311,7 @@ export default function Dashboard() {
 
               <div className="md:col-span-2">
                 <div className="h-full bg-surface-card/80 backdrop-blur-md border border-border-subtle rounded-xl p-5 flex flex-col hover:border-border-glow transition-colors duration-200">
-                  <p className="text-[11px] font-medium text-ink-secondary uppercase tracking-widest mb-4">
+                  <p className="text-[10px] font-medium text-ink-muted uppercase tracking-[0.15em] mb-4">
                     Motivasyon
                   </p>
                   {journalHasContent ? (

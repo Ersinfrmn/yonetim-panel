@@ -640,7 +640,7 @@ export default function Pomodoro() {
         {ringJSX}
         {controlsJSX}
         <button onClick={() => setFocusMode(true)}
-          className="mt-5 flex items-center gap-1.5 text-xs text-ink-muted hover:text-ink-secondary transition-colors">
+          className="mt-5 flex items-center gap-1.5 text-xs text-white/40 hover:text-white/70 transition-colors">
           <Maximize2 size={11} /> Odak Modu
         </button>
       </div>

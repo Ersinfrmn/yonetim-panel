@@ -314,7 +314,7 @@ export default function Pomodoro() {
   const progress   = total > 0 ? (total - secs) / total : 0
   const dashOffset = CIRC * (1 - progress)
   const isBreakish = phase === 'break' || (phase === 'cdown' && cTarget === 'focus')
-  const ringColor  = isBreakish ? '#10b981' : '#818cf8'
+  const ringColor  = isBreakish ? '#10b981' : '#6C3FE8'
 
   const phaseLabel =
     phase === 'idle'                               ? 'HAZIR' :
@@ -382,16 +382,16 @@ export default function Pomodoro() {
         })}
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center select-none">
-        <span className="text-[10px] uppercase tracking-[0.2em] text-slate-400 mb-1 font-medium">
+        <span className="text-[10px] uppercase tracking-[0.2em] text-ink-muted mb-1 font-medium">
           {phaseLabel}
         </span>
         {phase === 'cdown'
-          ? <span className="text-8xl font-bold text-white tabular-nums leading-none">{cdown}</span>
-          : <span className="text-7xl font-bold text-white tabular-nums leading-none tracking-tight">
+          ? <span className="text-8xl font-bold text-ink-primary tabular-nums leading-none">{cdown}</span>
+          : <span className="text-7xl font-bold text-ink-primary tabular-nums leading-none tracking-tight">
               {fmt(secs)}
             </span>
         }
-        <span className="text-xs text-slate-500 mt-2">
+        <span className="text-xs text-ink-muted mt-2">
           {phase === 'idle'                    && `${cfg.focus} dk odak`}
           {(phase === 'focus' || phase === 'paused') && `🍅 ${pCount + 1} / 4`}
           {phase === 'break'                   && (pCount === 0 ? 'uzun mola' : 'kısa mola')}
@@ -404,25 +404,25 @@ export default function Pomodoro() {
     <div className="flex items-center gap-3 mt-3">
       {phase === 'idle' && (
         <button onClick={beginFocus}
-          className="flex items-center gap-2 px-9 py-3 bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-white rounded-2xl text-sm font-semibold transition-all shadow-lg shadow-indigo-900/30">
+          className="flex items-center gap-2 px-9 py-3 bg-primary-500 hover:bg-primary-600 active:scale-95 text-white rounded-2xl text-sm font-semibold transition-all">
           <Play size={16} fill="currentColor" /> Başla
         </button>
       )}
       {phase === 'focus' && (<>
         <button onClick={pauseFocus}
-          className="flex items-center gap-2 px-6 py-3 bg-slate-700 hover:bg-slate-600 active:scale-95 text-white rounded-2xl text-sm font-medium transition-all">
+          className="flex items-center gap-2 px-6 py-3 bg-white/10 hover:bg-white/15 active:scale-95 text-white rounded-2xl text-sm font-medium transition-all">
           <Pause size={15} /> Duraklat
         </button>
-        <button onClick={stopAll} className="p-3 text-slate-600 hover:text-red-400 transition-colors">
+        <button onClick={stopAll} className="p-3 text-ink-muted hover:text-status-error transition-colors">
           <RotateCcw size={15} />
         </button>
       </>)}
       {phase === 'paused' && (<>
         <button onClick={resumeFocus}
-          className="flex items-center gap-2 px-6 py-3 bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-white rounded-2xl text-sm font-medium transition-all">
+          className="flex items-center gap-2 px-6 py-3 bg-primary-500 hover:bg-primary-600 active:scale-95 text-white rounded-2xl text-sm font-medium transition-all">
           <Play size={15} fill="currentColor" /> Devam
         </button>
-        <button onClick={stopAll} className="p-3 text-slate-600 hover:text-red-400 transition-colors">
+        <button onClick={stopAll} className="p-3 text-ink-muted hover:text-status-error transition-colors">
           <RotateCcw size={15} />
         </button>
       </>)}
@@ -439,13 +439,13 @@ export default function Pomodoro() {
 
   if (focusMode) {
     return (
-      <div className="fixed inset-0 z-50 bg-slate-950 flex flex-col items-center justify-center">
+      <div className="fixed inset-0 z-50 bg-surface flex flex-col items-center justify-center">
         <button onClick={() => setFocusMode(false)}
-          className="absolute top-5 right-5 p-2 text-slate-600 hover:text-white transition-colors rounded-lg">
+          className="absolute top-5 right-5 p-2 text-ink-muted hover:text-ink-primary transition-colors rounded-lg">
           <Minimize2 size={20} />
         </button>
         {linkedTask && (
-          <p className="text-slate-500 text-xs mb-6 px-4 py-1.5 bg-slate-800/60 rounded-full max-w-xs truncate">
+          <p className="text-ink-muted text-xs mb-6 px-4 py-1.5 bg-surface-card/60 rounded-full max-w-xs truncate">
             📌 {linkedTask.title}
           </p>
         )}
@@ -454,14 +454,14 @@ export default function Pomodoro() {
         {showSuggest && (
           <div className="mt-8 flex flex-col gap-3 max-w-xs w-full px-4">
             {suggestions.map((s, i) => (
-              <div key={i} className="flex items-center gap-4 p-4 bg-slate-800 rounded-2xl">
+              <div key={i} className="flex items-center gap-4 p-4 bg-surface-card/80 backdrop-blur-md rounded-xl border border-border-subtle">
                 <span className="text-3xl">{s.emoji}</span>
-                <p className="text-sm text-slate-300">{s.text}</p>
+                <p className="text-sm text-ink-secondary">{s.text}</p>
               </div>
             ))}
           </div>
         )}
-        <p className="absolute bottom-5 text-slate-700 text-xs">ESC — çık</p>
+        <p className="absolute bottom-5 text-ink-muted text-xs">ESC — çık</p>
       </div>
     )
   }
@@ -473,19 +473,19 @@ export default function Pomodoro() {
 
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Pomodoro</h2>
+        <h2 className="text-2xl font-semibold text-ink-primary">Pomodoro</h2>
         <div className="flex gap-1">
           <button
             onClick={() => { setDraft({ ...cfg }); setShowCfg(s => !s) }}
             className={`p-2 rounded-lg transition-colors ${showCfg
-              ? 'bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-white'
-              : 'text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}
+              ? 'bg-white/10 text-ink-primary'
+              : 'text-ink-muted hover:text-ink-primary'}`}
           >
             <Settings size={18} />
           </button>
           <button
             onClick={() => setFocusMode(true)}
-            className="p-2 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 rounded-lg transition-colors"
+            className="p-2 text-ink-muted hover:text-ink-primary rounded-lg transition-colors"
           >
             <Maximize2 size={18} />
           </button>
@@ -494,8 +494,8 @@ export default function Pomodoro() {
 
       {/* Settings panel */}
       {showCfg && (
-        <div className="mb-5 p-4 bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700">
-          <p className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-3">Süre Ayarları</p>
+        <div className="mb-5 p-4 bg-surface-card/80 backdrop-blur-md border border-border-subtle rounded-xl hover:border-border-glow transition-colors duration-200">
+          <p className="text-sm font-semibold text-ink-primary mb-3">Süre Ayarları</p>
           <div className="flex gap-3">
             {[
               { k: 'focus', l: 'Odak (dk)' },
@@ -503,21 +503,21 @@ export default function Pomodoro() {
               { k: 'long',  l: 'Uzun Mola' },
             ].map(({ k, l }) => (
               <div key={k} className="flex-1">
-                <label className="text-xs text-slate-500 block mb-1">{l}</label>
+                <label className="text-xs text-ink-muted block mb-1">{l}</label>
                 <input type="number" min={1} max={99} value={draft[k]}
                   onChange={e => setDraft(d => ({ ...d, [k]: parseInt(e.target.value) || 1 }))}
-                  className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-white text-sm text-center focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-3 py-2 rounded-xl border border-border-subtle bg-white/5 text-ink-primary text-sm text-center focus:outline-none focus:ring-2 focus:ring-primary-500"
                 />
               </div>
             ))}
           </div>
           <div className="flex gap-2 mt-3">
             <button onClick={saveCfg}
-              className="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white py-2 rounded-xl text-sm font-medium transition-colors">
+              className="flex-1 bg-primary-500 hover:bg-primary-600 text-white py-2 rounded-xl text-sm font-medium transition-colors">
               Kaydet
             </button>
             <button onClick={() => setShowCfg(false)}
-              className="px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-sm transition-colors hover:bg-slate-50 dark:hover:bg-slate-700">
+              className="px-4 py-2 rounded-xl border border-border-subtle text-ink-secondary text-sm transition-colors hover:bg-white/5">
               İptal
             </button>
           </div>
@@ -525,16 +525,16 @@ export default function Pomodoro() {
       )}
 
       {/* ── Timer card ──────────────────────────────────────────────────────── */}
-      <div className="mb-5 bg-slate-800 rounded-3xl py-8 px-6 flex flex-col items-center shadow-xl">
+      <div className="mb-5 bg-surface-card/80 backdrop-blur-md border border-border-subtle rounded-xl py-8 px-6 flex flex-col items-center hover:border-border-glow transition-colors duration-200">
         {linkedTask && (
-          <p className="text-slate-500 text-xs mb-4 px-3 py-1 bg-slate-700/60 rounded-full max-w-[220px] truncate">
+          <p className="text-ink-muted text-xs mb-4 px-3 py-1 bg-white/5 rounded-full max-w-[220px] truncate">
             📌 {linkedTask.title}
           </p>
         )}
         {ringJSX}
         {controlsJSX}
         <button onClick={() => setFocusMode(true)}
-          className="mt-5 flex items-center gap-1.5 text-xs text-slate-600 hover:text-slate-400 transition-colors">
+          className="mt-5 flex items-center gap-1.5 text-xs text-ink-muted hover:text-ink-secondary transition-colors">
           <Maximize2 size={11} /> Odak Modu
         </button>
       </div>
@@ -544,11 +544,11 @@ export default function Pomodoro() {
         <div className="mb-5 space-y-2">
           {suggestions.map((s, i) => (
             <div key={i}
-              className="flex items-center gap-4 p-4 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-800/50 rounded-2xl"
+              className="flex items-center gap-4 p-4 bg-status-success/10 border border-status-success/20 rounded-xl"
               style={{ animation: 'pomFadeIn 0.4s ease both', animationDelay: `${i * 80}ms` }}
             >
               <span className="text-3xl shrink-0">{s.emoji}</span>
-              <p className="text-sm text-emerald-800 dark:text-emerald-200 font-medium">{s.text}</p>
+              <p className="text-sm text-status-success font-medium">{s.text}</p>
             </div>
           ))}
         </div>
@@ -556,8 +556,8 @@ export default function Pomodoro() {
 
       {/* ── Task / Habit linking (only when not mid-session) ─────────────────── */}
       {(phase === 'idle' || phase === 'paused') && (
-        <div className="mb-5 bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 p-4">
-          <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-3">
+        <div className="mb-5 bg-surface-card/80 backdrop-blur-md border border-border-subtle rounded-xl hover:border-border-glow transition-colors duration-200 p-4">
+          <p className="text-[11px] font-semibold text-ink-secondary uppercase tracking-widest mb-3">
             Bağlantı
           </p>
 
@@ -565,40 +565,40 @@ export default function Pomodoro() {
           <div className="mb-2 relative">
             <button
               onClick={() => setShowTaskPicker(v => !v)}
-              className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-sm hover:bg-slate-100 dark:hover:bg-slate-600 transition-colors"
+              className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl border border-border-subtle bg-white/5 text-sm hover:bg-white/10 transition-colors"
             >
-              <span className={linkedTask ? 'text-slate-800 dark:text-white' : 'text-slate-400'}>
+              <span className={linkedTask ? 'text-ink-primary' : 'text-ink-muted'}>
                 {linkedTask ? `📌 ${linkedTask.title}` : 'Görev seç (opsiyonel)'}
               </span>
               {linkedTask
-                ? <X size={14} className="text-slate-400 hover:text-red-400 shrink-0"
+                ? <X size={14} className="text-ink-muted hover:text-status-error shrink-0"
                     onClick={e => { e.stopPropagation(); setLinkedTask(null) }} />
-                : <ChevronDown size={14} className="text-slate-400 shrink-0" />
+                : <ChevronDown size={14} className="text-ink-muted shrink-0" />
               }
             </button>
 
             {showTaskPicker && (
-              <div className="absolute z-20 mt-1 w-full bg-white dark:bg-slate-700 rounded-xl border border-slate-200 dark:border-slate-600 shadow-xl overflow-hidden">
-                <div className="p-2 border-b border-slate-100 dark:border-slate-600">
+              <div className="absolute z-20 mt-1 w-full bg-surface-card border border-border-subtle rounded-xl overflow-hidden">
+                <div className="p-2 border-b border-border-subtle">
                   <input
                     autoFocus
                     placeholder="Görev ara..."
                     value={taskSearch}
                     onChange={e => setTaskSearch(e.target.value)}
-                    className="w-full px-3 py-1.5 rounded-lg bg-slate-50 dark:bg-slate-600 text-sm text-slate-800 dark:text-white placeholder-slate-400 focus:outline-none"
+                    className="w-full px-3 py-1.5 rounded-lg bg-white/5 text-sm text-ink-primary placeholder-ink-muted focus:outline-none"
                   />
                 </div>
                 <div className="max-h-44 overflow-y-auto">
                   {filteredTasks.length === 0
-                    ? <p className="text-xs text-slate-400 text-center py-4">Görev bulunamadı</p>
+                    ? <p className="text-xs text-ink-muted text-center py-4">Görev bulunamadı</p>
                     : filteredTasks.map(t => (
                         <button key={t.id}
                           onClick={() => { setLinkedTask(t); setShowTaskPicker(false); setTaskSearch('') }}
-                          className="w-full text-left px-3 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-600 flex items-center justify-between transition-colors"
+                          className="w-full text-left px-3 py-2 text-sm text-ink-primary hover:bg-white/5 flex items-center justify-between transition-colors"
                         >
                           <span className="truncate">{t.title}</span>
                           {(t.pomodoro_count || 0) > 0 && (
-                            <span className="text-xs text-slate-400 ml-2 shrink-0">
+                            <span className="text-xs text-ink-muted ml-2 shrink-0">
                               🍅 {t.pomodoro_count}
                             </span>
                           )}
@@ -614,7 +614,7 @@ export default function Pomodoro() {
           <select
             value={linkedHabit?.id || ''}
             onChange={e => setLinkedHabit(habits.find(h => h.id === e.target.value) || null)}
-            className="w-full px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-sm text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-full px-3 py-2.5 rounded-xl border border-border-subtle bg-white/5 text-sm text-ink-secondary focus:outline-none focus:ring-2 focus:ring-primary-500"
           >
             <option value="">Alışkanlık seç (opsiyonel)</option>
             {habits.map(h => <option key={h.id} value={h.id}>{h.name}</option>)}
@@ -623,24 +623,24 @@ export default function Pomodoro() {
       )}
 
       {/* ── Weekly report (collapsible) ──────────────────────────────────────── */}
-      <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 overflow-hidden">
+      <div className="bg-surface-card/80 backdrop-blur-md border border-border-subtle rounded-xl hover:border-border-glow transition-colors duration-200 overflow-hidden">
         <button
           onClick={() => {
             const next = !showReport
             setShowReport(next)
             if (next && sessions.length === 0) loadSessions()
           }}
-          className="w-full flex items-center justify-between px-4 py-3.5 text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors"
+          className="w-full flex items-center justify-between px-4 py-3.5 text-sm font-semibold text-ink-primary hover:bg-white/5 transition-colors"
         >
           <span>📊 Bu Haftanın Odak Özeti</span>
           {showReport ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
         </button>
 
         {showReport && (
-          <div className="border-t border-slate-100 dark:border-slate-700 px-4 pb-5">
+          <div className="border-t border-border-subtle px-4 pb-5">
             {loadingRpt ? (
               <div className="flex justify-center py-10">
-                <div className="w-5 h-5 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+                <div className="w-5 h-5 border-2 border-primary-500 border-t-transparent rounded-full animate-spin" />
               </div>
             ) : (<>
 
@@ -651,32 +651,32 @@ export default function Pomodoro() {
                   { label: 'Odak Süresi', value: `${Math.floor(totalMin / 60)}s ${totalMin % 60}dk` },
                   { label: 'Zirve Saat', value: peakHour.count > 0 ? `${p2(peakHour.hour)}:00` : '—' },
                 ].map(({ label, value }) => (
-                  <div key={label} className="bg-slate-50 dark:bg-slate-700 rounded-xl p-3 text-center">
-                    <p className="text-[10px] text-slate-400 mb-0.5">{label}</p>
-                    <p className="text-base font-bold text-slate-800 dark:text-white leading-tight">{value}</p>
+                  <div key={label} className="bg-white/5 rounded-xl p-3 text-center">
+                    <p className="text-[10px] text-ink-muted mb-0.5">{label}</p>
+                    <p className="text-base font-bold text-ink-primary leading-tight">{value}</p>
                   </div>
                 ))}
               </div>
 
               {/* Bar chart — daily pomodoros */}
               <div className="mb-5">
-                <p className="text-xs text-slate-400 mb-2">Günlük Pomodoro</p>
+                <p className="text-xs text-ink-muted mb-2">Günlük Pomodoro</p>
                 <ResponsiveContainer width="100%" height={90}>
                   <BarChart data={chartData} margin={{ top: 0, right: 0, left: -28, bottom: 0 }}>
                     <XAxis dataKey="day"
-                      tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
+                      tick={{ fontSize: 11, fill: '#6B6B8A' }} axisLine={false} tickLine={false} />
                     <YAxis
-                      tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false}
+                      tick={{ fontSize: 11, fill: '#6B6B8A' }} axisLine={false} tickLine={false}
                       allowDecimals={false} />
                     <Tooltip
-                      contentStyle={{ background: '#1e293b', border: 'none', borderRadius: 8, fontSize: 12 }}
-                      itemStyle={{ color: '#e2e8f0' }}
-                      labelStyle={{ color: '#94a3b8' }}
+                      contentStyle={{ background: '#111128', border: 'none', borderRadius: 8, fontSize: 12 }}
+                      itemStyle={{ color: '#F0F0FF' }}
+                      labelStyle={{ color: '#6B6B8A' }}
                       formatter={v => [v, 'Pomodoro']}
                     />
                     <Bar dataKey="count" radius={[4, 4, 0, 0]}>
                       {chartData.map((_, i) => (
-                        <Cell key={i} fill={i === 6 ? '#818cf8' : '#334155'} />
+                        <Cell key={i} fill={i === 6 ? '#6C3FE8' : 'rgba(108,63,232,0.2)'} />
                       ))}
                     </Bar>
                   </BarChart>
@@ -685,7 +685,7 @@ export default function Pomodoro() {
 
               {/* Hour heatmap */}
               <div>
-                <p className="text-xs text-slate-400 mb-2">Saat Yoğunluğu (0–23)</p>
+                <p className="text-xs text-ink-muted mb-2">Saat Yoğunluğu (0–23)</p>
                 <div className="flex gap-0.5">
                   {hourCounts.map(({ hour, count }) => (
                     <div key={hour} className="flex-1 group relative">
@@ -693,18 +693,18 @@ export default function Pomodoro() {
                         className="h-5 rounded-sm"
                         style={{
                           backgroundColor: count === 0
-                            ? 'rgba(255,255,255,0.04)'
-                            : `rgba(129,140,248,${0.2 + (count / maxH) * 0.8})`,
+                            ? 'rgba(255,255,255,0.03)'
+                            : `rgba(108,63,232,${0.15 + (count / maxH) * 0.8})`,
                           transition: 'background-color 0.2s',
                         }}
                       />
-                      <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 hidden group-hover:block z-10 bg-slate-900 text-white text-[10px] px-1.5 py-0.5 rounded whitespace-nowrap pointer-events-none">
+                      <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 hidden group-hover:block z-10 bg-surface-card text-ink-primary text-[10px] px-1.5 py-0.5 rounded whitespace-nowrap pointer-events-none">
                         {p2(hour)}:00 · {count}
                       </div>
                     </div>
                   ))}
                 </div>
-                <div className="flex justify-between text-[10px] text-slate-500 mt-1 px-0.5">
+                <div className="flex justify-between text-[10px] text-ink-muted mt-1 px-0.5">
                   <span>00</span><span>06</span><span>12</span><span>18</span><span>23</span>
                 </div>
               </div>

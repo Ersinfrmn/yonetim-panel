@@ -32,12 +32,12 @@ const RECURRENCE = {
 const PRESET_TAGS = ['iş', 'kişisel', 'acil', 'özel']
 
 const TAG_COLORS = {
-  iş:      'bg-blue-900/30   text-blue-300',
-  kişisel: 'bg-purple-900/30 text-purple-300',
-  acil:    'bg-red-900/30    text-red-300',
-  özel:    'bg-green-900/30  text-green-300',
+  iş:      'bg-primary-500/10 text-primary-400',
+  kişisel: 'bg-primary-500/10 text-primary-400',
+  acil:    'bg-primary-500/10 text-primary-400',
+  özel:    'bg-primary-500/10 text-primary-400',
 }
-const TAG_DEF = 'bg-white/10 text-ink-secondary'
+const TAG_DEF = 'bg-primary-500/10 text-primary-400'
 const tagStyle = name => TAG_COLORS[name] || TAG_DEF
 
 // Eisenhower quadrants ─ top-left, top-right, bottom-left, bottom-right

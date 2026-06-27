@@ -109,7 +109,10 @@ export default function Journal() {
     }
     if (result) {
       setEntries(e => ({ ...e, [selectedDate]: result }))
-      if (notify) toast.success('Kaydedildi!', { duration: 1000 })
+      if (notify) {
+        toast.success('Kaydedildi!', { duration: 1000 })
+        awardXP(supabase, user.id, 'journal_write')
+      }
     }
     setSaving(false)
   }

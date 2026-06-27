@@ -72,6 +72,7 @@ export default function BookDetail() {
           borderRadius: 4, overflow: 'hidden',
           border: '1px solid rgba(255,255,255,0.08)',
           background: '#111111',
+          boxShadow: '0 8px 32px rgba(185,28,28,0.25)',
         }}>
           {book.cover_url
             ? <img src={book.cover_url} alt={book.title} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />

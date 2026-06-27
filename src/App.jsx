@@ -45,6 +45,7 @@ function AnimatedRoutes() {
                 <Route path="/pomodoro"  element={<Pomodoro />} />
                 <Route path="/stats"       element={<Stats />} />
                 <Route path="/weekly-plan" element={<WeeklyPlan />} />
+                <Route path="/addiction"   element={<Addiction />} />
               </Routes>
             </div>
           </Layout>

@@ -368,7 +368,7 @@ export default function Stats() {
                 </p>
                 <p className="text-xs text-ink-muted mt-0.5">{extras.bestDay.count} pomodoro tamamlandı</p>
               </>) : (
-                <p className="text-sm text-ink-muted mt-0.5">Henüz tamamlanan pomodoro yok</p>
+                <p className="text-sm text-white/20 mt-0.5">Henüz tamamlanan pomodoro yok</p>
               )}
             </div>
           </div>

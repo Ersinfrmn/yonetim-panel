@@ -100,7 +100,7 @@ export default function AddictionPanel({ isOpen, onClose }) {
       backgroundColor: '#0d0d0d',
       borderRight: '1px solid rgba(255,255,255,0.08)',
       zIndex: 100,
-      transform: isOpen ? 'translateX(0)' : 'translateX(-100%)',
+      transform: isOpen ? 'translateX(0)' : 'translateX(-280px)',
       transition: 'transform 250ms ease',
       overflowY: 'auto',
       padding: '20px 16px',

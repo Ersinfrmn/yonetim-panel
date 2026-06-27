@@ -52,12 +52,12 @@ function Skeleton() {
 
 // ─── Stat Card ────────────────────────────────────────────────────────────────
 
-function StatCard({ emoji, title, primary, secondary, error }) {
+function StatCard({ icon: Icon, title, primary, secondary, error }) {
   return (
     <div className="bg-surface-card/80 backdrop-blur-md border border-border-subtle rounded-xl p-5 flex flex-col gap-1.5 hover:border-border-glow transition-colors duration-200">
       <div className="flex items-center gap-2">
-        <span className="text-lg leading-none">{emoji}</span>
-        <p className="text-[11px] font-medium text-ink-secondary uppercase tracking-widest truncate">{title}</p>
+        <Icon size={16} style={{ color: '#b91c1c', flexShrink: 0 }} />
+        <p className="text-[10px] font-medium text-ink-muted uppercase tracking-[0.15em] truncate">{title}</p>
       </div>
       {error ? (
         <p className="text-xs text-status-error">Veri yüklenemedi</p>

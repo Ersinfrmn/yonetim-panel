@@ -927,10 +927,10 @@ export default function Todos() {
               <div className="flex gap-2 overflow-x-auto pb-1">
                 {STATUS_FILTERS.map(({ key, label }) => (
                   <button key={key} onClick={() => setFilter(key)}
-                    className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
+                    className={`px-3 py-1.5 rounded-sm text-[11px] font-bold uppercase tracking-wider transition-colors whitespace-nowrap ${
                       filter === key
                         ? 'bg-primary-500 text-white'
-                        : 'bg-white/5 text-ink-secondary border border-border-subtle hover:bg-white/10'
+                        : 'bg-white/5 text-white/40 hover:text-white/70'
                     }`}>
                     {label}
                   </button>

@@ -488,8 +488,8 @@ function HabitCreateModal({ onClose, onCreate }) {
     })
   }
 
-  const btnSec = 'flex-1 py-2.5 rounded-xl text-sm font-medium border border-border-subtle text-ink-secondary hover:bg-white/5 transition-colors'
-  const btnPri = ok => `flex-1 py-2.5 rounded-xl text-sm font-medium transition-colors ${ok ? 'bg-primary-500 hover:bg-primary-600 text-white' : 'bg-white/5 text-ink-muted cursor-not-allowed'}`
+  const btnSec = 'flex-1 py-2.5 rounded-sm text-xs font-bold uppercase tracking-wider border border-white/20 text-white/70 hover:bg-white/5 transition-colors'
+  const btnPri = ok => `flex-1 py-2.5 rounded-sm text-xs font-bold uppercase tracking-wider transition-colors ${ok ? 'bg-primary-500 hover:bg-primary-600 text-white' : 'bg-white/5 text-ink-muted cursor-not-allowed'}`
 
   return (
     <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">

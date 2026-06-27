@@ -104,19 +104,21 @@ export default function AddictionPanel({ isOpen, onClose }) {
 
   return (
     <div style={{
-      position:    'fixed',
-      left:        64,
-      top:         32,
-      width:       280,
-      height:      'calc(100vh - 32px)',
-      background:  '#0d0d0d',
-      borderRight: '1px solid rgba(255,255,255,0.06)',
-      zIndex:      60,
-      overflowY:   'auto',
-      padding:     '20px 16px',
-      boxSizing:   'border-box',
-      transform:   isOpen ? 'translateX(0)' : 'translateX(-100%)',
-      transition:  'transform 250ms ease',
+      position:        'fixed',
+      left:            '64px',
+      top:             '32px',
+      width:           '280px',
+      height:          'calc(100vh - 32px)',
+      backgroundColor: '#0d0d0d',
+      borderRight:     '1px solid rgba(255,255,255,0.1)',
+      zIndex:          100,
+      transform:       isOpen ? 'translateX(0)' : 'translateX(-100%)',
+      transition:      'transform 250ms ease',
+      overflowY:       'auto',
+      padding:         '20px 16px',
+      display:         'flex',
+      flexDirection:   'column',
+      gap:             '16px',
     }}>
 
       {/* Header */}

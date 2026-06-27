@@ -123,12 +123,12 @@ function TagInput({ value = [], onChange }) {
     <div className="flex flex-wrap gap-1.5 items-center">
       {PRESET_TAGS.map(t => (
         <button key={t} type="button" onClick={() => toggle(t)}
-          className={`px-2 py-0.5 rounded-full text-xs font-medium transition-all ${tagStyle(t)} ${value.includes(t) ? 'ring-2 ring-offset-1 ring-offset-surface-card ring-primary-400' : 'opacity-70 hover:opacity-100'}`}>
+          className={`px-2 py-0.5 rounded-sm text-xs font-medium transition-all ${tagStyle(t)} ${value.includes(t) ? 'ring-2 ring-offset-1 ring-offset-surface-card ring-primary-400' : 'opacity-70 hover:opacity-100'}`}>
           #{t}
         </button>
       ))}
       {customTags.map(t => (
-        <span key={t} className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${TAG_DEF}`}>
+        <span key={t} className={`flex items-center gap-1 px-2 py-0.5 rounded-sm text-xs font-medium ${TAG_DEF}`}>
           #{t}
           <button type="button" onClick={() => toggle(t)} className="hover:text-status-error transition-colors"><X size={9} /></button>
         </span>
@@ -951,7 +951,7 @@ export default function Todos() {
                   )}
                   {allTags.map(t => (
                     <button key={t} onClick={() => setTagFilter(tagFilter === t ? null : t)}
-                      className={`px-2 py-0.5 rounded-full text-xs font-medium transition-all ${tagStyle(t)} ${tagFilter === t ? 'ring-2 ring-offset-1 ring-offset-surface ring-primary-400' : 'opacity-80 hover:opacity-100'}`}>
+                      className={`px-2 py-0.5 rounded-sm text-xs font-medium transition-all ${tagStyle(t)} ${tagFilter === t ? 'ring-2 ring-offset-1 ring-offset-surface ring-primary-400' : 'opacity-80 hover:opacity-100'}`}>
                       #{t}
                     </button>
                   ))}

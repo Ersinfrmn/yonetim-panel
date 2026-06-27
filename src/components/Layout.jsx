@@ -523,7 +523,7 @@ export default function Layout({ children }) {
         )}
 
         {/* ── Addiction panel ──────────────────────────────────────────── */}
-        {user && <AddictionPanel user={user} open={showPanel} onClose={() => setShowPanel(false)} />}
+        {user && <AddictionPanel user={user} open={showPanel} onClose={() => setShowPanel(false)} expanded={expanded} />}
 
         {/* ── Main content — padded left to clear the fixed sidebar ─────── */}
         <main

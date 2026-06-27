@@ -889,7 +889,7 @@ export default function Todos() {
         <>
           {/* Header + view toggle */}
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-semibold text-ink-primary">Görev Listesi</h2>
+            <h2 className="text-2xl font-bold tracking-widest uppercase text-ink-primary">Görev Listesi</h2>
             <div className="flex gap-1 bg-surface-card rounded-lg p-1 border border-border-subtle">
               {[
                 { mode: 'list',   Icon: ListIcon,    title: 'Liste'   },

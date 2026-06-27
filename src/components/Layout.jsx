@@ -1,7 +1,7 @@
 import { NavLink, useNavigate } from 'react-router-dom'
 import {
   CheckSquare, BookOpen, Target, Timer, BarChart2,
-  LogOut, Sun, Moon, Flame, ChevronLeft, ChevronRight,
+  LogOut, Sun, Moon, Flame, ChevronLeft, ChevronRight, Home,
 } from 'lucide-react'
 import { useRef, useState } from 'react'
 import { useAuth } from '../contexts/AuthContext'

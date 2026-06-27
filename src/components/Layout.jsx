@@ -50,19 +50,21 @@ function TopBar() {
   )
 }
 
-// ─── Nav items ────────────────────────────────────────────────────────────────
+// ─── Nav config ───────────────────────────────────────────────────────────────
 
 const NAV = [
-  { to: '/dashboard', icon: Home        },
-  { to: '/habits',    icon: Repeat      },
-  { to: '/todos',     icon: CheckSquare },
-  { to: '/journal',   icon: BookOpen    },
-  { to: '/goals',     icon: Target      },
-  { to: '/pomodoro',  icon: Timer       },
-  { to: '/stats',     icon: BarChart2   },
+  { to: '/dashboard', icon: Home,        label: 'Dashboard'     },
+  { to: '/habits',    icon: Repeat,      label: 'Alışkanlıklar' },
+  { to: '/todos',     icon: CheckSquare, label: 'Görevler'      },
+  { to: '/journal',   icon: BookOpen,    label: 'Günlük'        },
+  { to: '/goals',     icon: Target,      label: 'Hedefler'      },
+  { to: '/pomodoro',  icon: Timer,       label: 'Pomodoro'      },
+  { to: '/stats',     icon: BarChart2,   label: 'İstatistikler' },
 ]
 
-function NavItem({ to, icon: Icon, mobile = false }) {
+// ─── Nav item ─────────────────────────────────────────────────────────────────
+
+function NavItem({ to, icon: Icon, label = '', expanded = false, mobile = false }) {
   if (mobile) {
     return (
       <NavLink to={to} className={({ isActive }) =>
@@ -76,15 +78,32 @@ function NavItem({ to, icon: Icon, mobile = false }) {
   }
 
   return (
-    <NavLink to={to}>
+    <NavLink to={to} className="block w-full">
       {({ isActive }) => (
         <div
-          className={`w-10 h-10 flex items-center justify-center transition-all duration-150 ${
+          className={`h-10 flex items-center transition-colors duration-150 ${
             isActive ? 'text-white' : 'text-ink-muted hover:text-ink-secondary hover:bg-white/5'
           }`}
-          style={isActive ? { background: 'rgba(255,255,255,0.04)', borderLeft: '2px solid #b91c1c' } : undefined}
+          style={isActive ? {
+            background: 'rgba(255,255,255,0.04)',
+            borderLeft: '2px solid #b91c1c',
+          } : undefined}
         >
-          <Icon size={20} strokeWidth={1.5} />
+          {/* Icon column — fixed 64px so icon position never moves */}
+          <div style={{ width: 64, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <Icon size={20} strokeWidth={1.5} />
+          </div>
+          {/* Label — fades in as sidebar widens */}
+          <span style={{
+            opacity: expanded ? 1 : 0,
+            transition: 'opacity 200ms ease',
+            fontSize: 12,
+            color: isActive ? '#ffffff' : '#888888',
+            whiteSpace: 'nowrap',
+            userSelect: 'none',
+          }}>
+            {label}
+          </span>
         </div>
       )}
     </NavLink>
@@ -94,8 +113,9 @@ function NavItem({ to, icon: Icon, mobile = false }) {
 // ─── Layout ───────────────────────────────────────────────────────────────────
 
 export default function Layout({ children }) {
-  const { signOut } = useAuth()
-  const navigate     = useNavigate()
+  const { signOut }              = useAuth()
+  const navigate                 = useNavigate()
+  const [expanded, setExpanded]  = useState(false)
 
   async function handleSignOut() {
     await signOut()
@@ -108,37 +128,66 @@ export default function Layout({ children }) {
       {/* ── Top bar — full width ──────────────────────────────────────────── */}
       <TopBar />
 
-      {/* ── Sidebar + content row ─────────────────────────────────────────── */}
+      {/* ── Content area — sidebar is fixed so main fills full width ─────── */}
       <div className="flex flex-1 overflow-hidden">
 
-        {/* ── Desktop sidebar ────────────────────────────────────────────── */}
+        {/* ── Desktop sidebar — fixed, overlays content on hover ─────────── */}
         <aside
-          className="hidden md:flex flex-col items-center shrink-0 w-16"
-          style={{ background: 'transparent' }}
+          className="hidden md:flex flex-col"
+          onMouseEnter={() => setExpanded(true)}
+          onMouseLeave={() => setExpanded(false)}
+          style={{
+            position: 'fixed',
+            left: 0,
+            top: 32,
+            bottom: 0,
+            zIndex: 50,
+            width: expanded ? 220 : 64,
+            overflow: 'hidden',
+            background: expanded ? 'rgba(5,5,5,0.95)' : 'transparent',
+            backdropFilter: expanded ? 'blur(8px)' : 'none',
+            transition: 'width 250ms ease, background 250ms ease, backdrop-filter 250ms ease',
+          }}
         >
           {/* Monogram */}
-          <div className="h-16 flex items-center justify-center shrink-0">
-            <span className="font-bold text-lg leading-none select-none" style={{ color: '#b91c1c' }}>EF</span>
+          <div style={{ height: 64, display: 'flex', alignItems: 'center', flexShrink: 0 }}>
+            <div style={{ width: 64, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <span className="font-bold text-lg leading-none select-none" style={{ color: '#b91c1c' }}>EF</span>
+            </div>
           </div>
 
           {/* Nav */}
-          <nav className="flex-1 flex flex-col items-center gap-1 pt-1">
-            {NAV.map(item => <NavItem key={item.to} {...item} />)}
+          <nav className="flex-1 flex flex-col gap-1 pt-1">
+            {NAV.map(item => <NavItem key={item.to} {...item} expanded={expanded} />)}
           </nav>
 
           {/* Logout */}
-          <div className="h-16 flex items-center justify-center shrink-0">
+          <div style={{ height: 64, display: 'flex', alignItems: 'center', flexShrink: 0 }}>
             <button
               onClick={handleSignOut}
-              className="w-10 h-10 flex items-center justify-center text-ink-muted hover:text-white hover:bg-white/5 transition-colors duration-150"
+              style={{ width: 64, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
+              className="text-ink-muted hover:text-white hover:bg-white/5 transition-colors duration-150"
             >
               <LogOut size={20} strokeWidth={1.5} />
             </button>
+            <span style={{
+              opacity: expanded ? 1 : 0,
+              transition: 'opacity 200ms ease',
+              fontSize: 12,
+              color: '#888888',
+              whiteSpace: 'nowrap',
+              userSelect: 'none',
+            }}>
+              Çıkış
+            </span>
           </div>
         </aside>
 
-        {/* ── Main content ──────────────────────────────────────────────── */}
-        <main className="flex-1 overflow-y-auto pb-14 md:pb-0" style={{ position: 'relative', zIndex: 1 }}>
+        {/* ── Main content — padded left to clear the fixed sidebar ─────── */}
+        <main
+          className="flex-1 overflow-y-auto pb-14 md:pb-0"
+          style={{ position: 'relative', zIndex: 1, paddingLeft: 64 }}
+        >
           <div className="max-w-4xl mx-auto p-4 md:p-6">
             {children}
           </div>

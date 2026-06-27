@@ -254,7 +254,7 @@ export default function Dashboard() {
                 error={errs.habits}
               />
               <StatCard
-                emoji="✅"
+                icon={CheckSquare}
                 title="Görevler"
                 primary={`${completedTodayTasks.length} tamamlandı bugün`}
                 secondary={pendingTodayTasks.length > 0 ? `${pendingTodayTasks.length} görev bekliyor` : d.todayTasks.length === 0 ? 'Bugün görev yok' : 'Tümü bitti ✅'}

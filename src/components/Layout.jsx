@@ -71,8 +71,7 @@ export default function Layout({ children }) {
       <aside
         className="hidden md:flex flex-col items-center shrink-0 w-16"
         style={{
-          background:  'transparent',
-          borderRight: '1px solid rgba(255,255,255,0.06)',
+          background: 'transparent',
         }}
       >
         {/* Monogram */}

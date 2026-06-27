@@ -308,14 +308,8 @@ export default function Dashboard() {
           <p className="text-sm text-ink-secondary mt-0.5 capitalize">
             {format(today, 'd MMMM yyyy, EEEE', { locale: tr })}
           </p>
-          <div style={{ marginBottom: '16px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-              <span style={{ fontSize: '9px', letterSpacing: '0.15em', textTransform: 'uppercase', color: '#ffffff' }}>SEVİYE 1</span>
-              <span style={{ fontSize: '9px', color: '#ffffff' }}>0 / 100 XP</span>
-            </div>
-            <div style={{ height: '2px', background: 'rgba(255,255,255,0.2)', borderRadius: '1px' }}>
-              <div style={{ height: '100%', width: '30%', background: '#b91c1c', borderRadius: '1px' }} />
-            </div>
+          <div style={{ background: 'red', color: 'white', fontSize: '24px', padding: '20px', marginBottom: '20px' }}>
+            XP BAR TEST - GÖRÜNÜYOR MUSUN?
           </div>
         </div>
 

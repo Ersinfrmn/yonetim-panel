@@ -171,10 +171,6 @@ export default function Goals() {
     // Optimistic state update
     setGoals(g => g.map(x => x.id === goal.id ? { ...x, progress: newPct, milestones: newCelebrated } : x))
 
-    if (newPct === 100) {
-      confetti({ particleCount: 80, spread: 60, colors: ['#b91c1c', '#ffffff', '#7f1d1d'], origin: { y: 0.6 } })
-    }
-
     // Debounce Supabase write (600ms)
     clearTimeout(progressTimers.current[goal.id])
     progressTimers.current[goal.id] = setTimeout(async () => {

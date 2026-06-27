@@ -1097,7 +1097,7 @@ export default function Habits() {
 
       {habitsTab === 'habits' && (<>
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-semibold text-ink-primary">Alışkanlık Takibi</h2>
+        <h2 className="text-2xl font-bold tracking-widest uppercase text-ink-primary">Alışkanlık Takibi</h2>
         <button
           onClick={() => setCreateModal(true)}
           className="bg-primary-500 hover:bg-primary-600 text-white px-4 py-2.5 rounded-xl flex items-center gap-2 transition-colors text-sm font-medium"

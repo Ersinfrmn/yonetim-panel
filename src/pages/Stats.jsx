@@ -44,8 +44,9 @@ function MoodTick({ x, y, payload }) {
 
 export default function Stats() {
   const { user } = useAuth()
-  const [data,   setData]   = useState(null)
-  const [extras, setExtras] = useState(null)
+  const [data,          setData]          = useState(null)
+  const [extras,        setExtras]        = useState(null)
+  const [habitMoodCorr, setHabitMoodCorr] = useState(null)
 
   // ── Existing data load (unchanged) ────────────────────────────────────────
 

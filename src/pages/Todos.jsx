@@ -785,7 +785,7 @@ export default function Todos() {
         user_id: user.id, completed: false,
         title: form.title.trim(), due_date: form.due_date || null,
         priority: form.priority, importance: form.importance,
-        recurrence: form.recurrence, tags: form.tags,
+        recurrence: form.recurrence, tags: form.tags, goal_id: form.goal_id || null,
       }).select().single()
     if (error) { toast.error('Görev eklenemedi'); return }
     setTasks(ts => [data, ...ts])

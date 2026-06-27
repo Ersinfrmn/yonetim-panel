@@ -385,7 +385,7 @@ export default function Stats() {
             <YAxis domain={[0, 100]} tick={{ fontSize: 12, fill: '#888888' }} unit="%" />
             <Tooltip
               formatter={v => [`${v}%`, 'Tamamlanma']}
-              contentStyle={{ background: '#111128', border: 'none', borderRadius: 8, color: '#f8fafc' }}
+              contentStyle={{ background: '#111111', border: 'none', borderRadius: 4, color: '#ffffff' }}
             />
             <Bar dataKey="rate" fill="#6C3FE8" radius={[4, 4, 0, 0]} />
           </BarChart>
@@ -402,7 +402,7 @@ export default function Stats() {
             <YAxis domain={[0, 100]} tick={{ fontSize: 12, fill: '#888888' }} unit="%" />
             <Tooltip
               formatter={v => [`${v}%`, 'Oran']}
-              contentStyle={{ background: '#111128', border: 'none', borderRadius: 8, color: '#f8fafc' }}
+              contentStyle={{ background: '#111111', border: 'none', borderRadius: 4, color: '#ffffff' }}
             />
             <Line type="monotone" dataKey="rate" stroke="#6C3FE8" strokeWidth={2} dot={{ r: 3, fill: '#6C3FE8' }} />
           </LineChart>

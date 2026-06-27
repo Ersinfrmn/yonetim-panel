@@ -110,32 +110,6 @@ function ParticleCanvas() {
   )
 }
 
-// ─── Orbital Glow Ring ────────────────────────────────────────────────────────
-
-function OrbitalGlow() {
-  return (
-    <div
-      className="fixed pointer-events-none hidden md:block"
-      style={{
-        width: 580,
-        height: 580,
-        top: '50%',
-        right: '10%',
-        borderRadius: '50%',
-        border: '1.5px solid rgba(139,92,246,0.45)',
-        boxShadow: [
-          '0 0 40px 6px rgba(139,92,246,0.18)',
-          '0 0 100px 24px rgba(108,63,232,0.08)',
-          'inset 0 0 50px rgba(108,63,232,0.06)',
-        ].join(', '),
-        animation: 'orbitalSpin 24s linear infinite',
-        opacity: 0.55,
-        zIndex: 0,
-      }}
-    />
-  )
-}
-
 // ─── Loading Skeleton ─────────────────────────────────────────────────────────
 
 function Skeleton() {

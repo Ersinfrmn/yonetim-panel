@@ -151,7 +151,7 @@ function TagInput({ value = [], onChange }) {
 // ─── FormFields — shared between create form and edit modal ──────────────────
 
 function FormFields({ f, set, compact = false, goals = [] }) {
-  const inp = `px-3 py-${compact ? '1.5' : '2'} text-sm rounded-lg border border-border-subtle bg-white/5 text-ink-primary focus:outline-none focus:ring-2 focus:ring-primary-500 w-full`
+  const inp = `px-3 py-${compact ? '1.5' : '2'} text-sm border-b border-white/10 bg-white/5 text-ink-primary focus:outline-none focus:border-primary-500 w-full`
   return (
     <>
       <div className="flex gap-2 flex-wrap">

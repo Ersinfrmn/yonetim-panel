@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { Flame, CheckSquare, Timer, BookOpen, Zap } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
-import { format, subDays, parseISO } from 'date-fns'
+import { format, subDays, parseISO, startOfWeek } from 'date-fns'
 import { tr } from 'date-fns/locale'
 
 // ─── Constants ────────────────────────────────────────────────────────────────

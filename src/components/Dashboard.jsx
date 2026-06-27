@@ -247,7 +247,7 @@ export default function Dashboard() {
             {/* ── Section 1: Günün Özeti ─────────────────────────────────── */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
               <StatCard
-                emoji="🔥"
+                icon={Flame}
                 title="Alışkanlıklar"
                 primary={todayHabits.length === 0 ? 'Bugün hedef gün yok' : `${completedTodayHabits.length} / ${todayHabits.length} tamamlandı`}
                 secondary={todayHabits.length > 0 ? (incompleteHabits.length > 0 ? `${incompleteHabits.length} bekliyor` : 'Tümü tamam 🎯') : undefined}

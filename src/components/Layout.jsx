@@ -135,7 +135,7 @@ function NavItem({ to, icon: Icon, label = '', expanded = false, mobile = false 
       {({ isActive }) => (
         <div
           className={`h-10 flex items-center transition-colors duration-150 ${
-            isActive ? 'text-white' : 'text-ink-muted hover:text-ink-secondary hover:bg-white/5'
+            isActive ? 'text-primary-500' : 'text-ink-muted hover:text-ink-secondary hover:bg-white/5'
           }`}
           style={isActive ? {
             background:  'rgba(255,255,255,0.04)',

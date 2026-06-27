@@ -26,19 +26,28 @@ function AnimatedRoutes() {
   const { user } = useAuth()
   const location = useLocation()
   return (
-    <div key={location.pathname} className="page-enter">
-      <Routes>
-        <Route path="/login"     element={user ? <Navigate to="/dashboard" replace /> : <Login />} />
-        <Route path="/"          element={<Navigate to="/dashboard" replace />} />
-        <Route path="/dashboard" element={<PrivateRoute><Layout><Dashboard /></Layout></PrivateRoute>} />
-        <Route path="/habits"    element={<PrivateRoute><Layout><Habits /></Layout></PrivateRoute>} />
-        <Route path="/todos"     element={<PrivateRoute><Layout><Todos /></Layout></PrivateRoute>} />
-        <Route path="/journal"   element={<PrivateRoute><Layout><Journal /></Layout></PrivateRoute>} />
-        <Route path="/goals"     element={<PrivateRoute><Layout><Goals /></Layout></PrivateRoute>} />
-        <Route path="/pomodoro"  element={<PrivateRoute><Layout><Pomodoro /></Layout></PrivateRoute>} />
-        <Route path="/stats"     element={<PrivateRoute><Layout><Stats /></Layout></PrivateRoute>} />
-      </Routes>
-    </div>
+    <Routes>
+      <Route path="/login" element={user ? <Navigate to="/dashboard" replace /> : <Login />} />
+      <Route path="/"      element={<Navigate to="/dashboard" replace />} />
+      {/* Layout mounts once here — sidebar never animates or re-mounts */}
+      <Route path="*" element={
+        <PrivateRoute>
+          <Layout>
+            <div key={location.pathname} className="page-enter">
+              <Routes>
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/habits"    element={<Habits />} />
+                <Route path="/todos"     element={<Todos />} />
+                <Route path="/journal"   element={<Journal />} />
+                <Route path="/goals"     element={<Goals />} />
+                <Route path="/pomodoro"  element={<Pomodoro />} />
+                <Route path="/stats"     element={<Stats />} />
+              </Routes>
+            </div>
+          </Layout>
+        </PrivateRoute>
+      } />
+    </Routes>
   )
 }
 

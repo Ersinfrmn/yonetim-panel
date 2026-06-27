@@ -895,7 +895,7 @@ function BreakArchive({ breakReasons, habits }) {
 
   return (
     <div className="space-y-5">
-      <h2 className="text-2xl font-semibold text-ink-primary">Kırılma Arşivi</h2>
+      <h2 className="text-2xl font-bold tracking-widest uppercase text-ink-primary">Kırılma Arşivi</h2>
 
       {/* Pattern Analysis */}
       <div className="flex gap-3 flex-wrap">

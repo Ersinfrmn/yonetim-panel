@@ -205,10 +205,10 @@ function BookCard({ book, onClick }) {
       {/* Hover overlay */}
       <div style={{
         position: 'absolute', inset: 0,
-        background: 'rgba(185,28,28,0.9)',
+        background: 'linear-gradient(to top, rgba(185,28,28,0.85) 0%, rgba(185,28,28,0.55) 45%, rgba(185,28,28,0) 100%)',
         display: 'flex', flexDirection: 'column',
-        alignItems: 'center', justifyContent: 'center',
-        padding: 10, textAlign: 'center',
+        alignItems: 'flex-start', justifyContent: 'flex-end',
+        padding: 10, textAlign: 'left',
         opacity: hovered ? 1 : 0,
         transition: 'opacity 180ms ease',
         pointerEvents: 'none',

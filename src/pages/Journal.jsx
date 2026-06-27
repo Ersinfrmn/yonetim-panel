@@ -313,7 +313,7 @@ export default function Journal() {
                   content={({ payload, label }) => {
                     if (!payload?.length || payload[0].value == null) return null
                     return (
-                      <div style={{ background: '#111128', border: '1px solid rgba(108,63,232,0.25)', borderRadius: 8, padding: '4px 8px' }}>
+                      <div style={{ background: '#111111', border: '1px solid rgba(185,28,28,0.25)', borderRadius: 4, padding: '4px 8px' }}>
                         <span className="text-ink-muted text-xs mr-1">{label}</span>
                         <span className="text-base">{MOOD_EMOJIS[payload[0].value - 1]}</span>
                       </div>

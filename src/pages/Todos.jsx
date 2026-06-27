@@ -914,7 +914,7 @@ export default function Todos() {
                 className="flex-1 px-3 py-2 text-sm border-b border-white/10 bg-white/5 text-ink-primary placeholder:text-white/30 focus:outline-none focus:border-primary-500"
               />
               <button onClick={addTask}
-                className="bg-primary-500 hover:bg-primary-600 text-white px-4 py-2 rounded-xl flex items-center gap-2 text-sm transition-colors shrink-0">
+                className="bg-primary-500 hover:bg-primary-600 text-white px-4 py-2 rounded-sm flex items-center gap-2 text-xs font-bold uppercase tracking-wider transition-colors shrink-0">
                 <Plus size={16} /> Ekle
               </button>
             </div>

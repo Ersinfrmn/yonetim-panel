@@ -387,7 +387,7 @@ export default function Stats() {
               formatter={v => [`${v}%`, 'Tamamlanma']}
               contentStyle={{ background: '#111111', border: 'none', borderRadius: 4, color: '#ffffff' }}
             />
-            <Bar dataKey="rate" fill="#6C3FE8" radius={[4, 4, 0, 0]} />
+            <Bar dataKey="rate" fill="#b91c1c" radius={[4, 4, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </div>

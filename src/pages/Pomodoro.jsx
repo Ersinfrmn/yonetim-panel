@@ -272,7 +272,7 @@ export default function Pomodoro() {
       setPhase('cdown'); setCTarget('break'); setCdown(3)
 
     } else if (curPhase === 'break') {
-      chime('break')
+      createSound(cfgRef.current.soundType, cfgRef.current.soundVolume)
       setPhase('cdown'); setCTarget('focus'); setCdown(3)
     }
   }

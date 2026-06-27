@@ -782,7 +782,7 @@ export default function Pomodoro() {
                     />
                     <Bar dataKey="count" radius={[4, 4, 0, 0]}>
                       {chartData.map((_, i) => (
-                        <Cell key={i} fill={i === 6 ? '#6C3FE8' : 'rgba(108,63,232,0.2)'} />
+                        <Cell key={i} fill={i === 6 ? '#b91c1c' : 'rgba(185,28,28,0.25)'} />
                       ))}
                     </Bar>
                   </BarChart>

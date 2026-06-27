@@ -161,7 +161,7 @@ function DayPicker({ value, onChange }) {
   }
   return (
     <div>
-      <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">
+      <p className="text-xs font-semibold text-ink-secondary uppercase tracking-wider mb-2">
         Hangi Günler?
       </p>
       <div className="flex gap-1">
@@ -172,8 +172,8 @@ function DayPicker({ value, onChange }) {
             onClick={() => toggle(dow)}
             className={`flex-1 py-2 rounded-lg text-xs font-semibold transition-colors ${
               value.includes(dow)
-                ? 'bg-primary-600 text-white'
-                : 'bg-slate-100 dark:bg-slate-700 text-slate-400 dark:text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-600'
+                ? 'bg-primary-500 text-white'
+                : 'bg-white/5 text-ink-muted hover:bg-white/10'
             }`}
           >
             {label}
@@ -201,16 +201,16 @@ function ChainBoxes({ logs, habitId, targetDays, onToggleToday }) {
 
   const C = dark ? {
     activeFill:  '#f59e0b', activeStroke: '#78350f', activeX: '#fef3c7', activeConn: '#f59e0b',
-    doneFill:    '#334155', doneStroke:   '#1e293b', doneX:   '#94a3b8', doneConn:   '#334155',
-    emptyFill:   '#1e293b', emptyStroke:  '#334155',
-    skipFill:    '#0f1623', skipStroke:   '#1a2232', skipDash: '#1e2d3d',
-    todayStroke: '#38bdf8', todayLabel:   '#38bdf8',
+    doneFill:    '#1a1a3a', doneStroke:   '#0D0D1A', doneX:   '#3D3D5C', doneConn:   '#1a1a3a',
+    emptyFill:   '#0D0D1A', emptyStroke:  'rgba(108,63,232,0.2)',
+    skipFill:    '#080810', skipStroke:   'rgba(108,63,232,0.1)', skipDash: 'rgba(108,63,232,0.15)',
+    todayStroke: '#8b6dff', todayLabel:   '#8b6dff',
   } : {
     activeFill:  '#fbbf24', activeStroke: '#92400e', activeX: '#ffffff', activeConn: '#fbbf24',
     doneFill:    '#cbd5e1', doneStroke:   '#64748b', doneX:   '#1e293b', doneConn:   '#cbd5e1',
     emptyFill:   '#f8fafc', emptyStroke:  '#e2e8f0',
     skipFill:    '#f1f3f6', skipStroke:   '#e5e8ee', skipDash: '#c8d0da',
-    todayStroke: '#0ea5e9', todayLabel:   '#0ea5e9',
+    todayStroke: '#6C3FE8', todayLabel:   '#6C3FE8',
   }
 
   return (
@@ -320,13 +320,13 @@ function YearHeatmap({ logs, habitId }) {
     }
   })
 
-  const emptyFill = dark ? '#1e293b' : '#f1f5f9'
+  const emptyFill = '#1a1a2e'
   const doneFill  = '#22c55e'
-  const textFill  = dark ? '#475569' : '#94a3b8'
+  const textFill  = '#3D3D5C'
   const dayLabels = { 1: 'Pzt', 3: 'Çar', 5: 'Cum' }
 
   return (
-    <div className="mt-4 overflow-x-auto rounded-xl bg-slate-50 dark:bg-slate-900/50 p-3">
+    <div className="mt-4 overflow-x-auto rounded-xl bg-white/5 p-3">
       <svg width={SVG_W} height={SVG_H} style={{ display: 'block' }}>
         {monthLabels.map((m, i) => (
           <text key={i} x={m.x} y={12} fontSize={8} fill={textFill} fontWeight="600">{m.label}</text>
@@ -347,7 +347,7 @@ function YearHeatmap({ logs, habitId }) {
             <rect key={dateStr}
               x={x} y={y} width={CELL} height={CELL} rx={2}
               fill={completed ? doneFill : emptyFill}
-              stroke={isToday ? '#0ea5e9' : 'none'}
+              stroke={isToday ? '#8b6dff' : 'none'}
               strokeWidth={isToday ? 1.5 : 0}>
               <title>
                 {format(d, 'd MMMM yyyy EEEE', { locale: tr })} — {completed ? '✓ Tamamlandı' : '○ Yapılmadı'}
@@ -388,7 +388,7 @@ function HabitNotes({ habitId, userId, initialNotes, onSaved }) {
   return (
     <div className="mt-3 space-y-3">
       <div>
-        <p className="text-xs font-semibold text-orange-500 dark:text-orange-400 uppercase tracking-wider mb-1.5">
+        <p className="text-xs font-semibold text-status-warning uppercase tracking-wider mb-1.5">
           🆘 Kriz Yönetimi
         </p>
         <textarea
@@ -396,11 +396,11 @@ function HabitNotes({ habitId, userId, initialNotes, onSaved }) {
           onChange={e => { setCrisis(e.target.value); persistNotes(e.target.value, general) }}
           placeholder="Zor anlarda kendine ne söylersin? Motivasyon notlarını buraya yaz..."
           rows={3}
-          className="w-full px-3 py-2 text-sm rounded-xl border border-orange-200 dark:border-orange-800/40 bg-orange-50 dark:bg-orange-900/10 text-slate-800 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-400 resize-none"
+          className="w-full px-3 py-2 text-sm rounded-xl border border-status-warning/30 bg-status-warning/5 text-ink-primary placeholder-ink-muted focus:outline-none focus:ring-2 focus:ring-status-warning resize-none"
         />
       </div>
       <div>
-        <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">
+        <p className="text-xs font-semibold text-ink-secondary uppercase tracking-wider mb-1.5">
           📝 Notlar
         </p>
         <textarea
@@ -408,7 +408,7 @@ function HabitNotes({ habitId, userId, initialNotes, onSaved }) {
           onChange={e => { setGeneral(e.target.value); persistNotes(crisis, e.target.value) }}
           placeholder="Bu alışkanlıkla ilgili düşüncelerini, planlarını, gözlemlerini yaz..."
           rows={3}
-          className="w-full px-3 py-2 text-sm rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700/50 text-slate-800 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none"
+          className="w-full px-3 py-2 text-sm rounded-xl border border-border-subtle bg-white/5 text-ink-primary placeholder-ink-muted focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none"
         />
       </div>
     </div>
@@ -426,7 +426,7 @@ function BreakHistory({ breakReasons, habitId }) {
     return (
       <div className="mt-3 text-center py-6">
         <span className="text-2xl block mb-2">🎉</span>
-        <p className="text-xs text-slate-400">Henüz zincir kırılması yok. Harika gidiyorsun!</p>
+        <p className="text-xs text-ink-muted">Henüz zincir kırılması yok. Harika gidiyorsun!</p>
       </div>
     )
   }
@@ -442,9 +442,9 @@ function BreakHistory({ breakReasons, habitId }) {
   return (
     <div className="mt-3 space-y-3">
       {pctMore > 20 && maxCount > 1 && (
-        <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700/40 rounded-xl px-3 py-2.5 flex items-start gap-2">
+        <div className="bg-status-warning/10 border border-status-warning/20 rounded-xl px-3 py-2.5 flex items-start gap-2">
           <span className="shrink-0 mt-0.5">💡</span>
-          <p className="text-xs text-amber-700 dark:text-amber-300">
+          <p className="text-xs text-status-warning">
             <strong>{dayNames[maxDow]}</strong> günleri %{pctMore} daha fazla zincir kırıyorsun.
             Bu gün için ekstra hazırlık yap!
           </p>
@@ -452,11 +452,11 @@ function BreakHistory({ breakReasons, habitId }) {
       )}
       <div className="space-y-2 max-h-52 overflow-y-auto">
         {habitBreaks.map(b => (
-          <div key={b.break_date} className="rounded-xl border border-slate-100 dark:border-slate-700 p-3">
-            <p className="text-xs font-semibold text-red-500 dark:text-red-400 mb-1">
+          <div key={b.break_date} className="rounded-xl border border-border-subtle p-3">
+            <p className="text-xs font-semibold text-status-error mb-1">
               💔 {format(parseISO(b.break_date), 'd MMMM yyyy, EEEE', { locale: tr })}
             </p>
-            <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">{b.reason}</p>
+            <p className="text-xs text-ink-secondary leading-relaxed">{b.reason}</p>
           </div>
         ))}
       </div>
@@ -488,28 +488,28 @@ function HabitCreateModal({ onClose, onCreate }) {
     })
   }
 
-  const btnSec = 'flex-1 py-2.5 rounded-xl text-sm font-medium border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors'
-  const btnPri = ok => `flex-1 py-2.5 rounded-xl text-sm font-medium transition-colors ${ok ? 'bg-primary-600 hover:bg-primary-700 text-white' : 'bg-slate-100 dark:bg-slate-700 text-slate-400 cursor-not-allowed'}`
+  const btnSec = 'flex-1 py-2.5 rounded-xl text-sm font-medium border border-border-subtle text-ink-secondary hover:bg-white/5 transition-colors'
+  const btnPri = ok => `flex-1 py-2.5 rounded-xl text-sm font-medium transition-colors ${ok ? 'bg-primary-500 hover:bg-primary-600 text-white' : 'bg-white/5 text-ink-muted cursor-not-allowed'}`
 
   return (
     <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="bg-white dark:bg-slate-800 rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden">
+      <div className="bg-surface-card border border-border-subtle rounded-xl w-full max-w-sm shadow-none overflow-hidden">
         {/* Step bar (4 steps) */}
         <div className="flex">
           {[1, 2, 3, 4].map(s => (
-            <div key={s} className={`flex-1 h-1 transition-colors ${step >= s ? 'bg-primary-500' : 'bg-slate-200 dark:bg-slate-700'}`} />
+            <div key={s} className={`flex-1 h-1 transition-colors ${step >= s ? 'bg-primary-500' : 'bg-white/5'}`} />
           ))}
         </div>
         <div className="p-6">
 
           {step === 1 && (
             <>
-              <p className="text-xs text-slate-400 uppercase tracking-wider mb-1">Adım 1 / 4</p>
-              <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-4">Alışkanlık Adı</h3>
+              <p className="text-xs text-ink-muted uppercase tracking-widest mb-1">Adım 1 / 4</p>
+              <h3 className="text-base font-semibold text-ink-primary mb-4">Alışkanlık Adı</h3>
               <input autoFocus value={name} onChange={e => setName(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && name.trim() && setStep(2)}
                 placeholder="Örn: Her gün 30 dk koşmak"
-                className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700/50 text-slate-800 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500" />
+                className="w-full px-4 py-3 rounded-xl border border-border-subtle bg-white/5 text-ink-primary placeholder-ink-muted focus:outline-none focus:ring-2 focus:ring-primary-500" />
               <div className="flex gap-3 mt-5">
                 <button onClick={onClose} className={btnSec}>İptal</button>
                 <button onClick={() => setStep(2)} disabled={!name.trim()} className={btnPri(name.trim())}>İleri →</button>
@@ -519,15 +519,15 @@ function HabitCreateModal({ onClose, onCreate }) {
 
           {step === 2 && (
             <>
-              <p className="text-xs text-slate-400 uppercase tracking-wider mb-1">Adım 2 / 4</p>
-              <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-4">Süre Belirle</h3>
+              <p className="text-xs text-ink-muted uppercase tracking-widest mb-1">Adım 2 / 4</p>
+              <h3 className="text-base font-semibold text-ink-primary mb-4">Süre Belirle</h3>
               <div className="grid grid-cols-2 gap-2">
                 {DURATION_OPTIONS.map(opt => (
                   <button key={opt.label} onClick={() => setDuration(opt)}
                     className={`py-3 px-4 rounded-xl border text-sm font-medium transition-colors ${
                       duration?.label === opt.label
-                        ? 'bg-primary-600 border-primary-600 text-white'
-                        : 'border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:border-primary-400'
+                        ? 'bg-primary-500 border-primary-500 text-white'
+                        : 'border-border-subtle text-ink-secondary hover:border-border-glow'
                     }`}>{opt.label}</button>
                 ))}
               </div>
@@ -540,15 +540,15 @@ function HabitCreateModal({ onClose, onCreate }) {
 
           {step === 3 && (
             <>
-              <p className="text-xs text-slate-400 uppercase tracking-wider mb-1">Adım 3 / 4</p>
-              <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-4">Şablon Seç</h3>
+              <p className="text-xs text-ink-muted uppercase tracking-widest mb-1">Adım 3 / 4</p>
+              <h3 className="text-base font-semibold text-ink-primary mb-4">Şablon Seç</h3>
               <div className="grid grid-cols-2 gap-2">
                 {TEMPLATES.map(t => (
                   <button key={t.id} onClick={() => pickTemplate(t)}
                     className={`py-3 px-4 rounded-xl border text-sm font-medium transition-colors flex items-center gap-2 ${
                       template?.id === t.id
-                        ? 'bg-primary-600 border-primary-600 text-white'
-                        : 'border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:border-primary-400'
+                        ? 'bg-primary-500 border-primary-500 text-white'
+                        : 'border-border-subtle text-ink-secondary hover:border-border-glow'
                     }`}>
                     <span>{t.emoji}</span> {t.label}
                   </button>
@@ -563,10 +563,10 @@ function HabitCreateModal({ onClose, onCreate }) {
 
           {step === 4 && (
             <>
-              <p className="text-xs text-slate-400 uppercase tracking-wider mb-1">Adım 4 / 4</p>
-              <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-4">Günleri Seç</h3>
+              <p className="text-xs text-ink-muted uppercase tracking-widest mb-1">Adım 4 / 4</p>
+              <h3 className="text-base font-semibold text-ink-primary mb-4">Günleri Seç</h3>
               <DayPicker value={targetDays} onChange={setTargetDays} />
-              <p className="text-xs text-slate-400 mt-2 text-center">{targetDays.length} / 7 gün seçili</p>
+              <p className="text-xs text-ink-muted mt-2 text-center">{targetDays.length} / 7 gün seçili</p>
               <div className="flex gap-3 mt-5">
                 <button onClick={() => setStep(3)} className={btnSec}>← Geri</button>
                 <button onClick={submit} className={btnPri(true)}>Oluştur ✓</button>
@@ -601,27 +601,27 @@ function HabitEditModal({ habit, onClose, onSave }) {
 
   return (
     <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="bg-white dark:bg-slate-800 rounded-2xl w-full max-w-sm shadow-2xl p-6">
+      <div className="bg-surface-card border border-border-subtle rounded-xl w-full max-w-sm shadow-none p-6">
         <div className="flex items-center justify-between mb-5">
-          <h3 className="text-lg font-bold text-slate-800 dark:text-white">Alışkanlığı Düzenle</h3>
-          <button onClick={onClose} className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors">
+          <h3 className="text-base font-semibold text-ink-primary">Alışkanlığı Düzenle</h3>
+          <button onClick={onClose} className="p-1.5 text-ink-secondary hover:text-ink-primary transition-colors">
             <X size={18} />
           </button>
         </div>
 
-        <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1 block">Ad</label>
+        <label className="text-xs font-semibold text-ink-secondary uppercase tracking-wider mb-1 block">Ad</label>
         <input autoFocus value={name} onChange={e => setName(e.target.value)}
           onKeyDown={e => e.key === 'Enter' && submit()}
-          className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700/50 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 mb-4" />
+          className="w-full px-4 py-2.5 rounded-xl border border-border-subtle bg-white/5 text-ink-primary focus:outline-none focus:ring-2 focus:ring-primary-500 mb-4" />
 
-        <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2 block">Süre</label>
+        <label className="text-xs font-semibold text-ink-secondary uppercase tracking-wider mb-2 block">Süre</label>
         <div className="grid grid-cols-2 gap-2 mb-5">
           {DURATION_OPTIONS.map(opt => (
             <button key={opt.label} onClick={() => setDuration(opt)}
               className={`py-2.5 px-3 rounded-xl border text-sm font-medium transition-colors ${
                 duration?.label === opt.label
-                  ? 'bg-primary-600 border-primary-600 text-white'
-                  : 'border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:border-primary-400'
+                  ? 'bg-primary-500 border-primary-500 text-white'
+                  : 'border-border-subtle text-ink-secondary hover:border-border-glow'
               }`}>{opt.label}</button>
           ))}
         </div>
@@ -632,12 +632,12 @@ function HabitEditModal({ habit, onClose, onSave }) {
 
         <div className="flex gap-3">
           <button onClick={onClose}
-            className="flex-1 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-sm font-medium">
+            className="flex-1 py-2.5 rounded-xl border border-border-subtle text-ink-secondary text-sm font-medium hover:bg-white/5 transition-colors">
             İptal
           </button>
           <button onClick={submit} disabled={!name.trim()}
             className={`flex-1 py-2.5 rounded-xl text-sm font-medium ${
-              name.trim() ? 'bg-primary-600 hover:bg-primary-700 text-white' : 'bg-slate-100 dark:bg-slate-700 text-slate-400 cursor-not-allowed'
+              name.trim() ? 'bg-primary-500 hover:bg-primary-600 text-white' : 'bg-white/5 text-ink-muted cursor-not-allowed'
             }`}>
             Kaydet
           </button>
@@ -656,18 +656,18 @@ function ChainBreakModal({ habit, onSubmit, onClose }) {
 
   return (
     <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="bg-white dark:bg-slate-800 rounded-2xl w-full max-w-md shadow-2xl overflow-hidden">
-        <div className="bg-red-50 dark:bg-red-900/20 px-6 pt-6 pb-4 border-b border-red-100 dark:border-red-800/30">
+      <div className="bg-surface-card border border-border-subtle rounded-xl w-full max-w-md shadow-none overflow-hidden">
+        <div className="bg-status-error/10 px-6 pt-6 pb-4 border-b border-status-error/20">
           <div className="flex items-start justify-between">
             <div>
               <p className="text-2xl mb-1">💔</p>
-              <h3 className="text-lg font-bold text-slate-800 dark:text-white">Zincir Neden Kırıldı?</h3>
-              <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-                <span className="font-semibold text-slate-700 dark:text-slate-200">{habit.name}</span>{' '}
+              <h3 className="text-base font-semibold text-ink-primary">Zincir Neden Kırıldı?</h3>
+              <p className="text-sm text-ink-secondary mt-1">
+                <span className="font-semibold text-ink-primary">{habit.name}</span>{' '}
                 zinciri kırıldı. Devam edebilmek için sebebini açıkla.
               </p>
             </div>
-            <button onClick={onClose} className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors">
+            <button onClick={onClose} className="p-1.5 text-ink-secondary hover:text-ink-primary transition-colors">
               <X size={18} />
             </button>
           </div>
@@ -676,30 +676,30 @@ function ChainBreakModal({ habit, onSubmit, onClose }) {
           <textarea value={reason} onChange={e => setReason(e.target.value)}
             placeholder="Zincirinin neden kırıldığını detaylıca açıkla..."
             rows={5} autoFocus
-            className="w-full px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700/50 text-slate-800 dark:text-white text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none" />
+            className="w-full px-3 py-2.5 rounded-xl border border-border-subtle bg-white/5 text-ink-primary text-sm placeholder-ink-muted focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none" />
           <div className="flex items-center justify-between mt-2 mb-5">
             <div className="flex items-center gap-2">
-              <div className="h-1.5 w-32 bg-slate-200 dark:bg-slate-600 rounded-full overflow-hidden">
+              <div className="h-1.5 w-32 bg-white/5 rounded-full overflow-hidden">
                 <div className={`h-full rounded-full transition-all ${ready ? 'bg-green-500' : 'bg-primary-500'}`}
                   style={{ width: `${Math.min(100, (reason.length / MIN_BREAK_CHARS) * 100)}%` }} />
               </div>
-              <span className={`text-xs font-mono font-medium ${ready ? 'text-green-500' : 'text-slate-400'}`}>
+              <span className={`text-xs font-mono font-medium ${ready ? 'text-green-500' : 'text-ink-muted'}`}>
                 {reason.length} / {MIN_BREAK_CHARS}
               </span>
             </div>
             {!ready
-              ? <span className="text-xs text-slate-400">{remaining} karakter daha</span>
+              ? <span className="text-xs text-ink-muted">{remaining} karakter daha</span>
               : <span className="text-xs text-green-500 font-medium">✓ Hazır</span>
             }
           </div>
           <div className="flex gap-3">
             <button onClick={onClose}
-              className="flex-1 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-sm font-medium">
+              className="flex-1 py-2.5 rounded-xl border border-border-subtle text-ink-secondary text-sm font-medium hover:bg-white/5 transition-colors">
               İptal
             </button>
             <button onClick={() => ready && onSubmit(reason)} disabled={!ready}
               className={`flex-1 py-2.5 rounded-xl text-sm font-medium transition-colors ${
-                ready ? 'bg-primary-600 hover:bg-primary-700 text-white' : 'bg-slate-100 dark:bg-slate-700 text-slate-400 cursor-not-allowed'
+                ready ? 'bg-primary-500 hover:bg-primary-600 text-white' : 'bg-white/5 text-ink-muted cursor-not-allowed'
               }`}>
               Zincirim Devam Ediyor →
             </button>
@@ -827,7 +827,7 @@ export default function Habits() {
     await markToday(habit)
   }
 
-  if (loading) return <div className="text-center py-20 text-slate-400">Yükleniyor...</div>
+  if (loading) return <div className="text-center py-20 text-ink-muted">Yükleniyor...</div>
 
   const SECTION_BTNS = [
     { key: 'notes',   Icon: FileText, label: 'Notlar'          },
@@ -840,21 +840,21 @@ export default function Habits() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Alışkanlık Takibi</h2>
+        <h2 className="text-2xl font-semibold text-ink-primary">Alışkanlık Takibi</h2>
         <button
           onClick={() => setCreateModal(true)}
-          className="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2.5 rounded-xl flex items-center gap-2 transition-colors text-sm font-medium"
+          className="bg-primary-500 hover:bg-primary-600 text-white px-4 py-2.5 rounded-xl flex items-center gap-2 transition-colors text-sm font-medium"
         >
           <Plus size={16} /> Yeni Alışkanlık
         </button>
       </div>
 
       {habits.length === 0 ? (
-        <div className="text-center py-16 text-slate-400">
+        <div className="text-center py-16 text-ink-muted">
           <Flame size={40} className="mx-auto mb-3 opacity-40" />
           <p className="mb-3">Henüz alışkanlık yok.</p>
           <button onClick={() => setCreateModal(true)}
-            className="text-primary-600 dark:text-primary-400 text-sm font-medium hover:underline">
+            className="text-primary-400 text-sm font-medium hover:underline">
             İlk alışkanlığını oluştur →
           </button>
         </div>
@@ -874,7 +874,7 @@ export default function Habits() {
 
             return (
               <div key={habit.id}
-                className={`bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-100 dark:border-slate-700 transition-opacity ${
+                className={`bg-surface-card/80 backdrop-blur-md rounded-xl p-4 border border-border-subtle hover:border-border-glow transition-colors duration-200 transition-opacity ${
                   !isTargetDay ? 'opacity-60' : ''
                 }`}>
 
@@ -887,26 +887,26 @@ export default function Habits() {
                       doneToday
                         ? 'bg-amber-400 border-amber-400 text-white'
                         : isTargetDay
-                          ? 'border-slate-300 dark:border-slate-500 hover:border-amber-400'
-                          : 'border-slate-200 dark:border-slate-600 cursor-not-allowed'
+                          ? 'border-ink-muted hover:border-amber-400'
+                          : 'border-ink-muted/30 cursor-not-allowed'
                     }`}>
                     {doneToday && <Check size={16} />}
                   </button>
                   <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-slate-800 dark:text-white truncate">{habit.name}</p>
+                    <p className="font-semibold text-ink-primary truncate">{habit.name}</p>
                     {!isTargetDay && (
-                      <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">Bugün hedef gün değil</p>
+                      <p className="text-xs text-ink-muted mt-0.5">Bugün hedef gün değil</p>
                     )}
                   </div>
                   {tplEmoji && habit.template !== 'custom' && (
                     <span className="text-base shrink-0">{tplEmoji}</span>
                   )}
                   <button onClick={() => setEditModal(habit)}
-                    className="p-1.5 text-slate-400 hover:text-primary-500 transition-colors shrink-0">
+                    className="p-1.5 text-ink-secondary hover:text-primary-500 transition-colors shrink-0">
                     <Edit2 size={14} />
                   </button>
                   <button onClick={() => deleteHabit(habit.id)}
-                    className="p-1.5 text-slate-400 hover:text-red-500 transition-colors shrink-0">
+                    className="p-1.5 text-ink-secondary hover:text-red-500 transition-colors shrink-0">
                     <Trash2 size={14} />
                   </button>
                 </div>
@@ -914,17 +914,17 @@ export default function Habits() {
                 {/* ── Progress bar (limited duration only) ── */}
                 {progress && (
                   <div className="mt-3">
-                    <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 mb-1">
+                    <div className="flex items-center justify-between text-xs text-ink-secondary mb-1">
                       <span>{progress.completions} / {progress.total} gün tamamlandı</span>
                       <span className={progress.remaining === 0 ? 'text-green-500 font-semibold' : ''}>
                         {progress.remaining === 0 ? '🎉 Tamamlandı!' : `${progress.remaining} gün kaldı`}
                       </span>
                     </div>
-                    <div className="h-1.5 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+                    <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
                       <div className="h-full bg-primary-500 rounded-full transition-all"
                         style={{ width: `${progress.pct}%` }} />
                     </div>
-                    <div className="text-right text-xs text-primary-500 dark:text-primary-400 font-medium mt-0.5">
+                    <div className="text-right text-xs text-primary-400 font-medium mt-0.5">
                       %{progress.pct}
                     </div>
                   </div>
@@ -939,43 +939,43 @@ export default function Habits() {
                 />
 
                 {/* ── Stats row ── */}
-                <div className="flex flex-wrap gap-x-4 gap-y-1.5 mt-3 pt-3 border-t border-slate-100 dark:border-slate-700">
+                <div className="flex flex-wrap gap-x-4 gap-y-1.5 mt-3 pt-3 border-t border-border-subtle">
                   <span className="flex items-center gap-1.5 text-xs">
                     <Flame size={13} className="text-orange-400 shrink-0" />
-                    <span className="text-slate-600 dark:text-slate-300">
-                      Mevcut seri: <strong className="text-slate-800 dark:text-white">{current}</strong> gün
+                    <span className="text-ink-secondary">
+                      Mevcut seri: <strong className="text-ink-primary">{current}</strong> gün
                     </span>
                   </span>
                   <span className="flex items-center gap-1.5 text-xs">
                     <Trophy size={13} className="text-amber-400 shrink-0" />
-                    <span className="text-slate-600 dark:text-slate-300">
-                      En uzun: <strong className="text-slate-800 dark:text-white">{longest}</strong> gün
+                    <span className="text-ink-secondary">
+                      En uzun: <strong className="text-ink-primary">{longest}</strong> gün
                     </span>
                   </span>
                   {lastBroke && (
                     <span className="flex items-center gap-1.5 text-xs">
                       <span className="shrink-0">💔</span>
-                      <span className="text-slate-400 dark:text-slate-500">
+                      <span className="text-ink-muted">
                         Son kırılma: {format(parseISO(lastBroke), 'd MMM', { locale: tr })}
                       </span>
                     </span>
                   )}
                   {/* Target days badge */}
                   {td.length < 7 && (
-                    <span className="flex items-center gap-1.5 text-xs text-slate-400 dark:text-slate-500">
+                    <span className="flex items-center gap-1.5 text-xs text-ink-muted">
                       📅 {td.map(d => DAY_LABELS[d]).join('/')}
                     </span>
                   )}
                 </div>
 
                 {/* ── Section toggles ── */}
-                <div className="flex flex-wrap gap-2 mt-3 pt-3 border-t border-slate-100 dark:border-slate-700">
+                <div className="flex flex-wrap gap-2 mt-3 pt-3 border-t border-border-subtle">
                   {SECTION_BTNS.map(({ key, Icon, label }) => (
                     <button key={key} onClick={() => toggleSection(habit.id, key)}
                       className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium transition-colors ${
                         isExp[key]
-                          ? 'bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400'
-                          : 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-600'
+                          ? 'bg-primary-500/15 text-primary-400'
+                          : 'bg-white/5 text-ink-muted hover:bg-white/10'
                       }`}>
                       <Icon size={12} />
                       {label}

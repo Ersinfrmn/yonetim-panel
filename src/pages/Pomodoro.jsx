@@ -556,7 +556,68 @@ export default function Pomodoro() {
               </div>
             ))}
           </div>
-          <div className="flex gap-2 mt-3">
+          {/* ── Ses Ayarları ─────────────────────────────────────────── */}
+          <div className="mt-5 pt-4 border-t border-border-subtle">
+            <p className="text-[10px] font-medium text-ink-muted uppercase tracking-[0.15em] mb-3">Ses Ayarları</p>
+
+            {/* Sound type selector */}
+            <p className="text-xs text-ink-muted mb-1.5">Ses Türü</p>
+            <div className="flex gap-1.5 mb-4">
+              {[
+                { value: 'alarm',   label: 'Alarm'   },
+                { value: 'beep',    label: 'Bip'     },
+                { value: 'zen',     label: 'Zen'     },
+                { value: 'digital', label: 'Dijital' },
+              ].map(({ value, label }) => {
+                const active = draft.soundType === value
+                return (
+                  <div key={value} className="flex-1 flex">
+                    <button
+                      onClick={() => setDraft(d => ({ ...d, soundType: value }))}
+                      style={{
+                        flex: 1, padding: '5px 0', fontSize: 11, cursor: 'pointer',
+                        borderRadius: '6px 0 0 6px',
+                        border: active ? '1px solid #b91c1c' : '1px solid rgba(255,255,255,0.08)',
+                        borderRight: 'none',
+                        background: active ? 'rgba(185,28,28,0.15)' : 'transparent',
+                        color: active ? '#ffffff' : '#888888',
+                        transition: 'all 150ms',
+                      }}
+                    >{label}</button>
+                    <button
+                      onClick={() => createSound(value, draft.soundVolume)}
+                      title="Önizle"
+                      className="hover:text-white transition-colors"
+                      style={{
+                        padding: '5px 6px', fontSize: 9, cursor: 'pointer',
+                        borderRadius: '0 6px 6px 0',
+                        border: active ? '1px solid #b91c1c' : '1px solid rgba(255,255,255,0.08)',
+                        borderLeft: '1px solid rgba(255,255,255,0.06)',
+                        background: 'transparent', color: '#666666',
+                      }}
+                    >▶</button>
+                  </div>
+                )
+              })}
+            </div>
+
+            {/* Volume slider */}
+            <div className="flex items-center justify-between mb-1.5">
+              <p className="text-[10px] font-medium text-ink-muted uppercase tracking-[0.15em]">Ses Seviyesi</p>
+              <span className="text-xs font-semibold text-ink-secondary">
+                {Math.round(draft.soundVolume * 100)}%
+              </span>
+            </div>
+            <input
+              type="range" min={0.1} max={1.0} step={0.1}
+              value={draft.soundVolume}
+              onChange={e => setDraft(d => ({ ...d, soundVolume: parseFloat(e.target.value) }))}
+              className="w-full"
+              style={{ accentColor: '#b91c1c' }}
+            />
+          </div>
+
+          <div className="flex gap-2 mt-4">
             <button onClick={saveCfg}
               className="flex-1 bg-primary-500 hover:bg-primary-600 text-white py-2 rounded-xl text-sm font-medium transition-colors">
               Kaydet

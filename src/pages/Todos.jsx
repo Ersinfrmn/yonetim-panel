@@ -722,6 +722,7 @@ export default function Todos() {
   const [editForm,      setEditFormState] = useState({})
   const [openSubs,      setOpenSubs]      = useState(new Set())
   const [mainTab,       setMainTab]       = useState('tasks')
+  const [goals,         setGoals]         = useState([])
 
   // ── helpers ──
   const setF  = (k, v) => setFormState(f => ({ ...f, [k]: v }))

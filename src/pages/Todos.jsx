@@ -150,7 +150,7 @@ function TagInput({ value = [], onChange }) {
 
 // ─── FormFields — shared between create form and edit modal ──────────────────
 
-function FormFields({ f, set, compact = false }) {
+function FormFields({ f, set, compact = false, goals = [] }) {
   const inp = `px-3 py-${compact ? '1.5' : '2'} text-sm rounded-lg border border-border-subtle bg-white/5 text-ink-primary focus:outline-none focus:ring-2 focus:ring-primary-500 w-full`
   return (
     <>
@@ -172,6 +172,15 @@ function FormFields({ f, set, compact = false }) {
           <option value="monthly">Aylık</option>
         </select>
       </div>
+      {goals.length > 0 && (
+        <div>
+          <p className="text-[10px] font-medium text-ink-muted uppercase tracking-[0.15em] mb-1">Hedef Bağlantısı</p>
+          <select value={f.goal_id || ''} onChange={e => set('goal_id', e.target.value || null)} className={inp}>
+            <option value="">Bağlantı yok</option>
+            {goals.map(g => <option key={g.id} value={g.id}>{g.title}</option>)}
+          </select>
+        </div>
+      )}
       <div className="flex gap-2 items-center">
         <Tag size={13} className="text-ink-muted shrink-0" />
         <TagInput value={f.tags} onChange={tags => set('tags', tags)} />

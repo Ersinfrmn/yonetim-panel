@@ -261,7 +261,7 @@ export default function Books() {
         </p>
         <button
           onClick={() => setShowModal(true)}
-          style={{ display: 'flex', alignItems: 'center', gap: 6, background: '#b91c1c', border: 'none', borderRadius: 2, color: '#fff', padding: '6px 14px', fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', cursor: 'pointer', fontFamily: 'inherit' }}
+          style={{ display: 'flex', alignItems: 'center', gap: 6, background: '#b91c1c', border: 'none', borderRadius: 2, color: '#fff', padding: '6px 14px', fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', cursor: 'pointer', fontFamily: 'inherit' }}
         >
           <Plus size={14} /> Kitap Ekle
         </button>

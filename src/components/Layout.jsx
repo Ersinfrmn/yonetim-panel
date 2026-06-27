@@ -2,9 +2,10 @@ import { useState, useEffect } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import {
   Home, Repeat, CheckSquare, BookOpen, Target,
-  Timer, BarChart2, LogOut, CalendarDays,
+  Timer, BarChart2, LogOut, CalendarDays, ShieldOff, X,
 } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
+import { supabase } from '../lib/supabase'
 
 // ─── Top Bar ──────────────────────────────────────────────────────────────────
 

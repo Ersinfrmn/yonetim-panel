@@ -303,9 +303,6 @@ export default function Dashboard() {
           <p className="text-sm text-ink-secondary mt-0.5 capitalize">
             {format(today, 'd MMMM yyyy, EEEE', { locale: tr })}
           </p>
-          <div style={{ background: 'red', color: 'white', fontSize: '24px', padding: '20px', marginBottom: '20px' }}>
-            XP BAR TEST - GÖRÜNÜYOR MUSUN?
-          </div>
         </div>
 
         {loading ? <Skeleton /> : (

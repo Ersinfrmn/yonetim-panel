@@ -13,8 +13,8 @@
   padding: 0;
 }
 
-html, body {
-  background: #080810;
+html {
+  background: #05050f;
 }
 
 body {
@@ -23,9 +23,18 @@ body {
   color: #F0F0FF;
 }
 
+body, #root {
+  background: #05050f;
+  background-image:
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(108,63,232,0.35) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 40% at 80% 80%,  rgba(76,29,149,0.2)  0%, transparent 50%),
+    radial-gradient(ellipse 40% 30% at 20% 60%,  rgba(139,92,246,0.1) 0%, transparent 40%);
+  background-attachment: fixed;
+  min-height: 100vh;
+}
+
 #root {
   width: 100%;
-  min-height: 100vh;
 }
 
 /* Scrollbar */

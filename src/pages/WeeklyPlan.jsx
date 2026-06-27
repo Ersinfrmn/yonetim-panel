@@ -271,12 +271,14 @@ export default function WeeklyPlan() {
                       key={key}
                       className="flex flex-col min-h-[140px]"
                       style={{
-                        borderLeft:  isToday ? '2px solid #b91c1c' : '1px solid rgba(255,255,255,0.04)',
+                        borderTop:   isToday ? '2px solid #b91c1c' : '2px solid transparent',
+                        borderLeft:  '1px solid rgba(255,255,255,0.04)',
                         paddingLeft: 8,
+                        paddingTop:  6,
                       }}
                     >
                       {/* Column header */}
-                      <p className={`text-[10px] font-semibold uppercase tracking-[0.1em] mb-0.5 ${isToday ? 'text-white' : 'text-ink-muted'}`}>
+                      <p className={`text-[10px] font-bold uppercase tracking-[0.1em] mb-0.5 ${isToday ? 'text-white' : 'text-ink-muted'}`}>
                         {DAY_LABELS[i]}
                       </p>
                       <p className={`text-[10px] mb-2 ${isToday ? 'text-ink-secondary' : 'text-ink-muted/50'}`}>

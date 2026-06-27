@@ -945,7 +945,7 @@ export default function Todos() {
                   <span className="text-xs text-ink-muted shrink-0">Etiket:</span>
                   {tagFilter && (
                     <button onClick={() => setTagFilter(null)}
-                      className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-white/10 text-ink-muted hover:bg-white/15 transition-colors">
+                      className="flex items-center gap-1 px-2 py-0.5 rounded-sm text-xs bg-white/10 text-ink-muted hover:bg-white/15 transition-colors">
                       <X size={9} /> Temizle
                     </button>
                   )}

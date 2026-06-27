@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import { ThemeProvider } from './contexts/ThemeContext'
@@ -15,27 +15,30 @@ import Stats from './pages/Stats'
 function PrivateRoute({ children }) {
   const { user, loading } = useAuth()
   if (loading) return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center">
-      <div className="w-8 h-8 border-4 border-primary-500 border-t-transparent rounded-full animate-spin" />
+    <div className="min-h-screen bg-surface flex items-center justify-center">
+      <div className="w-8 h-8 border-2 border-primary-500 border-t-transparent rounded-full animate-spin" />
     </div>
   )
   return user ? children : <Navigate to="/login" replace />
 }
 
-function AppRoutes() {
+function AnimatedRoutes() {
   const { user } = useAuth()
+  const location = useLocation()
   return (
-    <Routes>
-      <Route path="/login" element={user ? <Navigate to="/dashboard" replace /> : <Login />} />
-      <Route path="/" element={<Navigate to="/dashboard" replace />} />
-      <Route path="/dashboard" element={<PrivateRoute><Layout><Dashboard /></Layout></PrivateRoute>} />
-      <Route path="/habits" element={<PrivateRoute><Layout><Habits /></Layout></PrivateRoute>} />
-      <Route path="/todos" element={<PrivateRoute><Layout><Todos /></Layout></PrivateRoute>} />
-      <Route path="/journal" element={<PrivateRoute><Layout><Journal /></Layout></PrivateRoute>} />
-      <Route path="/goals" element={<PrivateRoute><Layout><Goals /></Layout></PrivateRoute>} />
-      <Route path="/pomodoro" element={<PrivateRoute><Layout><Pomodoro /></Layout></PrivateRoute>} />
-      <Route path="/stats" element={<PrivateRoute><Layout><Stats /></Layout></PrivateRoute>} />
-    </Routes>
+    <div key={location.pathname} className="page-enter">
+      <Routes>
+        <Route path="/login"     element={user ? <Navigate to="/dashboard" replace /> : <Login />} />
+        <Route path="/"          element={<Navigate to="/dashboard" replace />} />
+        <Route path="/dashboard" element={<PrivateRoute><Layout><Dashboard /></Layout></PrivateRoute>} />
+        <Route path="/habits"    element={<PrivateRoute><Layout><Habits /></Layout></PrivateRoute>} />
+        <Route path="/todos"     element={<PrivateRoute><Layout><Todos /></Layout></PrivateRoute>} />
+        <Route path="/journal"   element={<PrivateRoute><Layout><Journal /></Layout></PrivateRoute>} />
+        <Route path="/goals"     element={<PrivateRoute><Layout><Goals /></Layout></PrivateRoute>} />
+        <Route path="/pomodoro"  element={<PrivateRoute><Layout><Pomodoro /></Layout></PrivateRoute>} />
+        <Route path="/stats"     element={<PrivateRoute><Layout><Stats /></Layout></PrivateRoute>} />
+      </Routes>
+    </div>
   )
 }
 
@@ -44,11 +47,17 @@ export default function App() {
     <ThemeProvider>
       <AuthProvider>
         <BrowserRouter>
-          <AppRoutes />
+          <AnimatedRoutes />
           <Toaster
             position="top-right"
             toastOptions={{
-              style: { background: '#1e293b', color: '#f8fafc', borderRadius: '12px' },
+              style: {
+                background: '#111128',
+                color: '#F0F0FF',
+                borderRadius: '10px',
+                border: '1px solid rgba(108,63,232,0.25)',
+                fontSize: '14px',
+              },
             }}
           />
         </BrowserRouter>

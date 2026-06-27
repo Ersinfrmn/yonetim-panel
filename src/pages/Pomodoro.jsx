@@ -407,7 +407,7 @@ export default function Pomodoro() {
       <svg width="260" height="260" viewBox="0 0 260 260" className="absolute inset-0">
         {/* Track */}
         <circle cx="130" cy="130" r={R} fill="none"
-          stroke="rgba(255,255,255,0.06)" strokeWidth="12" />
+          stroke="rgba(255,255,255,0.05)" strokeWidth="12" />
         {/* Progress — rotate so origin = 12 o'clock */}
         <circle cx="130" cy="130" r={R} fill="none"
           stroke={ringColor} strokeWidth="12" strokeLinecap="round"

@@ -54,17 +54,17 @@ function Skeleton() {
 
 function StatCard({ icon: Icon, title, primary, secondary, error }) {
   return (
-    <div className="bg-surface-card/80 backdrop-blur-md border border-border-subtle rounded-xl p-5 flex flex-col gap-1.5 hover:border-border-glow transition-colors duration-200">
+    <div className="bg-surface-card/80 backdrop-blur-md border border-border-subtle rounded-xl p-5 flex flex-col gap-1.5 h-full hover:border-border-glow transition-colors duration-200">
       <div className="flex items-center gap-2">
         <Icon size={16} style={{ color: '#b91c1c', flexShrink: 0 }} />
-        <p className="text-[10px] font-medium text-ink-muted uppercase tracking-[0.15em] truncate">{title}</p>
+        <p className="text-[10px] font-bold text-primary-500 uppercase tracking-[0.15em] truncate">{title}</p>
       </div>
       {error ? (
         <p className="text-xs text-status-error">Veri yüklenemedi</p>
       ) : (
         <>
-          <p className="text-sm font-semibold text-ink-primary leading-snug">{primary}</p>
-          {secondary && <p className="text-xs text-ink-muted">{secondary}</p>}
+          <p className="text-sm font-bold text-ink-primary leading-snug">{primary}</p>
+          {secondary && <p className="text-xs text-white/40">{secondary}</p>}
         </>
       )}
     </div>

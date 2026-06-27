@@ -268,7 +268,7 @@ export default function Dashboard() {
                 error={errs.pomodoro}
               />
               <StatCard
-                emoji="📔"
+                icon={BookOpen}
                 title="Günlük"
                 primary={journalHasContent ? '✍️ Yazıldı' : '📭 Henüz yazılmadı'}
                 secondary={journalHasContent ? format(today, 'd MMMM', { locale: tr }) : 'Bugün bir şeyler yaz'}

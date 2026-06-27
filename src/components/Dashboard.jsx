@@ -376,7 +376,7 @@ export default function Dashboard() {
           </div>
 
           {/* ── Section 2: Şimdi Ne Yapmalıyım? ────────────────────────── */}
-          <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 border-l-4 border-l-primary-500 shadow-sm p-5">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 border-l-4 border-l-primary-500 dark:border-l-primary-400 shadow-sm p-5">
             <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-3">
               Şimdi Ne Yapmalıyım?
             </p>

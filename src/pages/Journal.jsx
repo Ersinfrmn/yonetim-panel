@@ -465,10 +465,10 @@ export default function Journal() {
                   size={40}
                   className={`mb-1 transition-colors ${dragging ? 'text-primary-400' : 'text-white/20'}`}
                 />
-                <p className="text-sm font-semibold text-ink-secondary text-center">
+                <p className="text-sm font-semibold text-white/30 text-center">
                   {dragging ? 'Bırakın!' : 'Günlük görselinizi yükleyin'}
                 </p>
-                <p className="text-xs text-ink-muted text-center">
+                <p className="text-xs text-white/20 text-center">
                   Tablet ekran görüntüsü veya fotoğraf — JPG, PNG, WEBP
                 </p>
                 {images.length > 0 && (

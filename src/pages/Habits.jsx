@@ -1032,15 +1032,6 @@ export default function Habits() {
       .select().single()
     if (data) setLogs(l => [...l, data])
     toast.success('🔥 Zincir devam ediyor!')
-    confetti({ particleCount: 80, spread: 60, colors: ['#b91c1c', '#ffffff', '#7f1d1d'], origin: { y: 0.6 } })
-    awardXP(supabase, user.id, 'habit_complete')
-  }
-
-  async function handleJoker(habit) {
-    setLogs(l => [...l, { habit_id: habit.id, date: todayStr(), completed: true, id: 'joker_' + habit.id }])
-    localStorage.setItem(jokerMonthKey, '1')
-    setJokerUsed(true)
-    toast.success('🃏 Joker kullanıldı! Serin kalmaya devam et.')
   }
 
   async function unmarkToday(habit) {

@@ -783,7 +783,7 @@ function YearlyView({ habits, logs }) {
 
   return (
     <div className="space-y-4">
-      <h2 className="text-2xl font-semibold text-ink-primary">Yıllık Görünüm</h2>
+      <h2 className="text-2xl font-bold tracking-widest uppercase text-ink-primary">Yıllık Görünüm</h2>
 
       <select
         value={selectedHabitId}

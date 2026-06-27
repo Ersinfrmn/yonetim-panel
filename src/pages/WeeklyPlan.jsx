@@ -241,7 +241,7 @@ export default function WeeklyPlan() {
                     defaultValue={val}
                     onBlur={e => handleFocusBlur(i, e.target.value)}
                     placeholder="Bu haftanın ana odağı..."
-                    className={`flex-1 ${inputCls}`}
+                    className="flex-1 bg-white/10 border-b-2 border-white/10 text-ink-primary text-sm px-3 py-2 focus:outline-none focus:border-primary-500 placeholder:uppercase placeholder:tracking-wider placeholder:text-white/30 transition-colors"
                     style={{ borderRadius: 2 }}
                   />
                 </div>

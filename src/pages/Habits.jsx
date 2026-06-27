@@ -347,7 +347,7 @@ function YearHeatmap({ logs, habitId }) {
             <rect key={dateStr}
               x={x} y={y} width={CELL} height={CELL} rx={2}
               fill={completed ? doneFill : emptyFill}
-              stroke={isToday ? '#8b6dff' : 'none'}
+              stroke={isToday ? '#b91c1c' : 'none'}
               strokeWidth={isToday ? 1.5 : 0}>
               <title>
                 {format(d, 'd MMMM yyyy EEEE', { locale: tr })} — {completed ? '✓ Tamamlandı' : '○ Yapılmadı'}

@@ -346,7 +346,7 @@ export default function Journal() {
             value={selectedDate}
             max={fmt(new Date())}
             onChange={e => setSelectedDate(e.target.value)}
-            className="px-4 py-2 rounded-xl border border-border-subtle bg-white/5 text-ink-primary text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary-500"
+            className="px-4 py-2 border border-white/10 bg-white/5 text-ink-primary text-base font-bold text-center focus:outline-none focus:ring-1 focus:ring-primary-500"
           />
           <p className="text-xs text-ink-muted mt-1">{display(selectedDate)}</p>
         </div>

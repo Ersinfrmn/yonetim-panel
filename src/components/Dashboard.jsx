@@ -337,11 +337,11 @@ export default function Dashboard() {
   const quote = dailyQuote()
 
   return (
-    <div className="relative min-h-[calc(100vh-3rem)]">
-      {/* Particle canvas — desktop only, behind content */}
+    <>
       <ParticleCanvas />
+      <OrbitalGlow />
 
-      <div className="relative z-10">
+      <div>
         {/* ── Header ──────────────────────────────────────────────────────── */}
         <div className="mb-6">
           <h2 className="text-2xl font-semibold text-ink-primary">Bugünün Komuta Merkezi</h2>

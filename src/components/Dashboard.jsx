@@ -399,15 +399,15 @@ export default function Dashboard() {
             <div className="grid grid-cols-2 gap-3 pt-2">
               <button
                 onClick={() => openModal('morning').catch(console.error)}
-                style={{ height: 40, border: '1px solid rgba(255,255,255,0.1)', background: 'transparent', borderRadius: 2 }}
-                className="text-sm text-ink-secondary hover:text-white hover:border-white/20 transition-colors"
+                style={{ height: 40, border: '1px solid rgba(185,28,28,0.35)', background: 'rgba(185,28,28,0.15)', borderRadius: 2 }}
+                className="text-xs font-semibold uppercase tracking-wider text-white transition-colors"
               >
                 ☀ Sabah Brifingi
               </button>
               <button
                 onClick={() => openModal('evening').catch(console.error)}
-                style={{ height: 40, border: '1px solid rgba(255,255,255,0.1)', background: 'transparent', borderRadius: 2 }}
-                className="text-sm text-ink-secondary hover:text-white hover:border-white/20 transition-colors"
+                style={{ height: 40, border: '1px solid rgba(255,255,255,0.2)', background: 'transparent', borderRadius: 2 }}
+                className="text-xs font-semibold uppercase tracking-wider text-white/70 hover:text-white transition-colors"
               >
                 ◐ Günü Kapat
               </button>

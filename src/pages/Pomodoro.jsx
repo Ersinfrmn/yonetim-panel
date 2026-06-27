@@ -237,7 +237,7 @@ export default function Pomodoro() {
     const curTask   = linkedTaskRef.current
 
     if (curPhase === 'focus') {
-      chime('focus')
+      createSound(cfgRef.current.soundType, cfgRef.current.soundVolume)
 
       const nextPCount = curPCount + 1
       const isLong     = nextPCount >= 4

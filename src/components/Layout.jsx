@@ -424,9 +424,10 @@ function AddictionPanel({ user, open, onClose }) {
 // ─── Layout ───────────────────────────────────────────────────────────────────
 
 export default function Layout({ children }) {
-  const { signOut }             = useAuth()
-  const navigate                = useNavigate()
-  const [expanded, setExpanded] = useState(false)
+  const { signOut, user }        = useAuth()
+  const navigate                 = useNavigate()
+  const [expanded, setExpanded]  = useState(false)
+  const [showPanel, setShowPanel] = useState(false)
 
   async function handleSignOut() {
     await signOut()

@@ -1182,6 +1182,16 @@ export default function Habits() {
                   </button>
                 </div>
 
+                {/* ── Joker button ── */}
+                {isTargetDay && !doneToday && !jokerUsed && (
+                  <button
+                    onClick={() => handleJoker(habit)}
+                    style={{ marginTop: 8, fontSize: 11, color: '#888888', background: 'none', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 2, padding: '3px 8px', cursor: 'pointer' }}
+                  >
+                    🃏 Joker Kullan
+                  </button>
+                )}
+
                 {/* ── Progress bar (limited duration only) ── */}
                 {progress && (
                   <div className="mt-3">

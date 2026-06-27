@@ -783,7 +783,7 @@ function YearlyView({ habits, logs }) {
 
   return (
     <div className="space-y-4">
-      <h2 className="text-2xl font-bold tracking-widest uppercase text-ink-primary">Yıllık Görünüm</h2>
+      <h2 className="text-2xl font-bold tracking-widest uppercase text-primary-500">Yıllık Görünüm</h2>
 
       <select
         value={selectedHabitId}
@@ -895,7 +895,7 @@ function BreakArchive({ breakReasons, habits }) {
 
   return (
     <div className="space-y-5">
-      <h2 className="text-2xl font-bold tracking-widest uppercase text-ink-primary">Kırılma Arşivi</h2>
+      <h2 className="text-2xl font-bold tracking-widest uppercase text-primary-500">Kırılma Arşivi</h2>
 
       {/* Pattern Analysis */}
       <div className="flex gap-3 flex-wrap">
@@ -1088,7 +1088,7 @@ export default function Habits() {
         ].map(({ key, label }) => (
           <button key={key} onClick={() => setHabitsTab(key)}
             className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-colors ${
-              habitsTab === key ? 'bg-white/10 text-ink-primary' : 'text-ink-muted hover:text-ink-secondary'
+              habitsTab === key ? 'bg-primary-500/10 text-primary-500' : 'text-ink-muted hover:text-ink-secondary'
             }`}>
             {label}
           </button>
@@ -1097,7 +1097,7 @@ export default function Habits() {
 
       {habitsTab === 'habits' && (<>
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold tracking-widest uppercase text-ink-primary">Alışkanlık Takibi</h2>
+        <h2 className="text-2xl font-bold tracking-widest uppercase text-primary-500">Alışkanlık Takibi</h2>
         <button
           onClick={() => setCreateModal(true)}
           className="bg-primary-500 hover:bg-primary-600 text-white px-4 py-2.5 rounded-xl flex items-center gap-2 transition-colors text-sm font-medium"

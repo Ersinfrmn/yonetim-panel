@@ -671,7 +671,7 @@ export default function Pomodoro() {
           <div className="mb-2 relative">
             <button
               onClick={() => setShowTaskPicker(v => !v)}
-              className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl border border-border-subtle bg-white/5 text-sm hover:bg-white/10 transition-colors"
+              className="w-full flex items-center justify-between px-3 py-2.5 rounded-sm border border-white/10 bg-white/5 text-sm hover:bg-white/10 transition-colors"
             >
               <span className={linkedTask ? 'text-ink-primary' : 'text-ink-muted'}>
                 {linkedTask ? `📌 ${linkedTask.title}` : 'Görev seç (opsiyonel)'}

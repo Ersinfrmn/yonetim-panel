@@ -333,6 +333,8 @@ export default function Pomodoro() {
       focusDuration: draft.focus,
       shortBreak:    draft.short,
       longBreak:     draft.long,
+      soundType:     draft.soundType,
+      soundVolume:   draft.soundVolume,
     }))
     if (phase === 'idle') { setSecs(draft.focus * 60); setTotal(draft.focus * 60) }
     setShowCfg(false)

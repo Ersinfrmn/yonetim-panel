@@ -8,6 +8,7 @@ import { useAuth } from '../contexts/AuthContext'
 import { useTheme } from '../contexts/ThemeContext'
 
 const NAV = [
+  { to: '/dashboard', label: 'Dashboard',  icon: Home },
   { to: '/habits',   label: 'Alışkanlık', icon: Flame },
   { to: '/todos',    label: 'Görevler',   icon: CheckSquare },
   { to: '/journal',  label: 'Günlük',     icon: BookOpen },

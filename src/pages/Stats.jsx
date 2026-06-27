@@ -377,7 +377,7 @@ export default function Stats() {
 
       {/* ── Son 7 gün alışkanlık tamamlanma oranı (unchanged) ───────────────── */}
       <div className="bg-surface-card/80 backdrop-blur-md border border-border-subtle rounded-xl p-4 hover:border-border-glow transition-colors duration-200 mb-6">
-        <h3 className="text-sm font-semibold text-ink-secondary mb-4">Alışkanlık Tamamlanma Oranı — Son 7 Gün</h3>
+        <h3 className="text-[11px] font-semibold text-white/60 uppercase tracking-wider mb-4">Alışkanlık Tamamlanma Oranı — Son 7 Gün</h3>
         <ResponsiveContainer width="100%" height={180}>
           <BarChart data={data.last7} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
@@ -394,7 +394,7 @@ export default function Stats() {
 
       {/* ── 30 günlük trend (unchanged) ─────────────────────────────────────── */}
       <div className="bg-surface-card/80 backdrop-blur-md border border-border-subtle rounded-xl p-4 hover:border-border-glow transition-colors duration-200 mb-6">
-        <h3 className="text-sm font-semibold text-ink-secondary mb-4">Alışkanlık Oranı Trendi — Son 30 Gün</h3>
+        <h3 className="text-[11px] font-semibold text-white/60 uppercase tracking-wider mb-4">Alışkanlık Oranı Trendi — Son 30 Gün</h3>
         <ResponsiveContainer width="100%" height={180}>
           <LineChart data={data.last30} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
@@ -412,7 +412,7 @@ export default function Stats() {
       {/* ── NEW: Goal Progress ───────────────────────────────────────────────── */}
       {extras && (
         <div className="bg-surface-card/80 backdrop-blur-md border border-border-subtle rounded-xl p-4 hover:border-border-glow transition-colors duration-200 mb-6">
-          <h3 className="text-sm font-semibold text-ink-secondary mb-4">Hedef İlerlemesi</h3>
+          <h3 className="text-[11px] font-semibold text-white/60 uppercase tracking-wider mb-4">Hedef İlerlemesi</h3>
           {extras.goals.length === 0 ? (
             <p className="text-sm text-ink-muted text-center py-6">Henüz hedef eklenmedi</p>
           ) : (
@@ -452,7 +452,7 @@ export default function Stats() {
       {/* ── Per-habit mood bars ──────────────────────────────────────────────── */}
       {habitMoodCorr && (
         <div className="bg-surface-card/80 backdrop-blur-md border border-border-subtle rounded-xl p-4 hover:border-border-glow transition-colors duration-200 mb-6">
-          <h3 className="text-sm font-semibold text-ink-secondary mb-0.5">
+          <h3 className="text-[11px] font-semibold text-white/60 uppercase tracking-wider mb-0.5">
             Alışkanlık × Ruh Hali Korelasyonu
           </h3>
           <p className="text-xs text-ink-muted mb-4">Tamamlandığında vs tamamlanmadığında ortalama ruh hali</p>
@@ -495,7 +495,7 @@ export default function Stats() {
       {/* ── NEW: Habit × Mood Correlation (scatter) ─────────────────────────── */}
       {extras && (
         <div className="bg-surface-card/80 backdrop-blur-md border border-border-subtle rounded-xl p-4 hover:border-border-glow transition-colors duration-200 mb-6">
-          <h3 className="text-sm font-semibold text-ink-secondary mb-0.5">
+          <h3 className="text-[11px] font-semibold text-white/60 uppercase tracking-wider mb-0.5">
             Alışkanlık Sayısı × Ruh Hali
           </h3>
           <p className="text-xs text-ink-muted mb-4">Son 30 gün — yalnızca ruh hali girilen günler</p>

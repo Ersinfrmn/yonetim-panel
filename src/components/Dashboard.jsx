@@ -195,6 +195,11 @@ export default function Dashboard() {
     load()
   }, [user.id]) // eslint-disable-line react-hooks/exhaustive-deps
 
+  useEffect(() => {
+    supabase.from('user_xp').select('total_xp, level').eq('user_id', user.id).single()
+      .then(({ data }) => { if (data) setXpData(data) })
+  }, [user.id]) // eslint-disable-line react-hooks/exhaustive-deps
+
   // ── Derived ───────────────────────────────────────────────────────────────
   const todayHabits = d.habits.filter(h =>
     (h.target_days ?? [0, 1, 2, 3, 4, 5, 6]).includes(todayDow)

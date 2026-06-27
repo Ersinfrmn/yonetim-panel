@@ -220,10 +220,10 @@ export default function Goals() {
         <div className="flex gap-2">
           <button
             onClick={() => { setShowTemplates(t => !t); setShowForm(false) }}
-            className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium border transition-colors ${
+            className={`flex items-center gap-1.5 px-3 py-2 rounded-sm text-xs font-bold uppercase tracking-wider border transition-colors ${
               showTemplates
-                ? 'bg-amber-900/20 border-amber-700 text-amber-300'
-                : 'border-border-subtle text-ink-secondary hover:bg-white/5'
+                ? 'bg-primary-500/15 border-primary-500/40 text-white'
+                : 'border-white/20 text-white/70 hover:bg-white/5'
             }`}
           >
             <Sparkles size={14} />

@@ -392,8 +392,228 @@ export default function Dashboard() {
               </div>
 
             </div>
+
+            {/* ── Sabah / Akşam buttons ─────────────────────────────────────── */}
+            <div className="grid grid-cols-2 gap-3 pt-2">
+              <button
+                onClick={() => openModal('morning').catch(console.error)}
+                style={{ height: 40, border: '1px solid rgba(255,255,255,0.1)', background: 'transparent', borderRadius: 2 }}
+                className="text-sm text-ink-secondary hover:text-white hover:border-white/20 transition-colors"
+              >
+                ☀ Sabah Brifingi
+              </button>
+              <button
+                onClick={() => openModal('evening').catch(console.error)}
+                style={{ height: 40, border: '1px solid rgba(255,255,255,0.1)', background: 'transparent', borderRadius: 2 }}
+                className="text-sm text-ink-secondary hover:text-white hover:border-white/20 transition-colors"
+              >
+                ◐ Günü Kapat
+              </button>
+            </div>
+
           </div>
         )}
+
+        {/* ── Modal overlay ─────────────────────────────────────────────────── */}
+        {modal && (
+          <div
+            style={{ position: 'fixed', inset: 0, zIndex: 60, background: 'rgba(0,0,0,0.95)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}
+            onClick={e => e.target === e.currentTarget && closeModal()}
+          >
+            <div style={{ width: '100%', maxWidth: 560, background: '#111111', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 4, padding: 32, position: 'relative' }}>
+
+              {/* Close */}
+              <button onClick={closeModal} style={{ position: 'absolute', top: 14, right: 14, color: '#444444', lineHeight: 1 }} className="hover:text-white transition-colors">
+                <X size={18} />
+              </button>
+
+              {/* Step dots */}
+              <div style={{ display: 'flex', gap: 5, marginBottom: 24 }}>
+                {[1,2,3].map(s => (
+                  <div key={s} style={{ width: 5, height: 5, borderRadius: '50%', background: s === step ? '#b91c1c' : 'rgba(255,255,255,0.1)' }} />
+                ))}
+              </div>
+
+              {/* ── SABAH BRİFİNGİ ─────────────────────────────────────── */}
+              {modal === 'morning' && (
+                <>
+                  {step === 1 && (
+                    <div>
+                      <p className="text-[10px] font-medium text-ink-muted uppercase tracking-[0.15em] mb-4">Bugünün Alışkanlıkları</p>
+                      <div className="space-y-2 mb-6">
+                        {todayHabits.length === 0 ? (
+                          <p className="text-sm text-ink-muted">Bugün için alışkanlık hedefi yok.</p>
+                        ) : todayHabits.map(h => {
+                          const done = d.todayLogs.some(l => l.habit_id === h.id)
+                          return (
+                            <div key={h.id} className="flex items-center gap-3 py-0.5">
+                              <div style={{ width: 14, height: 14, borderRadius: 2, border: done ? 'none' : '1px solid rgba(255,255,255,0.15)', background: done ? '#b91c1c' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                                {done && <span style={{ fontSize: 8, color: '#fff' }}>✓</span>}
+                              </div>
+                              <span className={`text-sm ${done ? 'text-ink-muted line-through' : 'text-ink-primary'}`}>{h.name}</span>
+                            </div>
+                          )
+                        })}
+                      </div>
+                      <button onClick={() => setStep(2)} className="w-full h-10 bg-primary-500 hover:bg-primary-600 text-white text-sm font-medium transition-colors" style={{ borderRadius: 2 }}>
+                        Devam →
+                      </button>
+                    </div>
+                  )}
+
+                  {step === 2 && (
+                    <div>
+                      <p className="text-[10px] font-medium text-ink-muted uppercase tracking-[0.15em] mb-4">Bugünün 3 Kritik Görevi</p>
+                      <div className="space-y-2 mb-6">
+                        {morningTasks.map((task, i) => (
+                          <div key={i} className="flex items-center gap-3">
+                            <span className="text-xs font-bold text-ink-muted w-4 text-right shrink-0">{i + 1}.</span>
+                            <input
+                              type="text"
+                              value={task}
+                              onChange={e => { const n = [...morningTasks]; n[i] = e.target.value; setMorningTasks(n) }}
+                              placeholder="Görev..."
+                              className="flex-1 bg-white/5 border border-border-subtle text-ink-primary text-sm px-3 py-2 focus:outline-none focus:border-border-glow placeholder:text-ink-muted/40 transition-colors"
+                              style={{ borderRadius: 2 }}
+                            />
+                          </div>
+                        ))}
+                      </div>
+                      <button onClick={() => setStep(3)} className="w-full h-10 bg-primary-500 hover:bg-primary-600 text-white text-sm font-medium transition-colors" style={{ borderRadius: 2 }}>
+                        Devam →
+                      </button>
+                    </div>
+                  )}
+
+                  {step === 3 && (
+                    <div>
+                      <p className="text-[10px] font-medium text-ink-muted uppercase tracking-[0.15em] mb-4">Hazır. Odaklan.</p>
+                      <div className="space-y-2 mb-8">
+                        {morningTasks.filter(t => t.trim()).length === 0 ? (
+                          <p className="text-sm text-ink-muted">Görev belirlenmedi.</p>
+                        ) : morningTasks.filter(t => t.trim()).map((task, i) => (
+                          <div key={i} className="flex items-center gap-3">
+                            <div style={{ width: 14, height: 14, borderRadius: 2, border: '1px solid rgba(255,255,255,0.15)', flexShrink: 0 }} />
+                            <span className="text-sm text-ink-primary">{task}</span>
+                          </div>
+                        ))}
+                      </div>
+                      <button
+                        onClick={() => { closeModal(); navigate('/pomodoro') }}
+                        className="w-full h-12 bg-primary-500 hover:bg-primary-600 text-white font-semibold transition-colors mb-3"
+                        style={{ borderRadius: 2, fontSize: 15 }}
+                      >
+                        Pomodoro Başlat →
+                      </button>
+                      <button onClick={closeModal} className="w-full text-center text-xs text-ink-muted hover:text-white transition-colors py-1">
+                        Kapat
+                      </button>
+                    </div>
+                  )}
+                </>
+              )}
+
+              {/* ── GECE DEBRİEF ───────────────────────────────────────── */}
+              {modal === 'evening' && (
+                <>
+                  {step === 1 && (
+                    <div>
+                      <p className="text-[10px] font-medium text-ink-muted uppercase tracking-[0.15em] mb-4">Bugün Ne Tamamlandı?</p>
+                      <div className="space-y-4 mb-6" style={{ maxHeight: 320, overflowY: 'auto' }}>
+                        {todayHabits.length > 0 && (
+                          <div>
+                            <p className="text-[10px] text-ink-muted uppercase tracking-[0.12em] mb-2">Alışkanlıklar</p>
+                            {todayHabits.map(h => {
+                              const done = d.todayLogs.some(l => l.habit_id === h.id)
+                              return (
+                                <div key={h.id} className="flex items-center gap-3 py-0.5">
+                                  <div style={{ width: 14, height: 14, borderRadius: 2, border: done ? 'none' : '1px solid rgba(255,255,255,0.15)', background: done ? '#22C55E' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                                    {done && <span style={{ fontSize: 8, color: '#fff' }}>✓</span>}
+                                  </div>
+                                  <span className={`text-sm ${done ? 'text-ink-muted line-through' : 'text-ink-primary'}`}>{h.name}</span>
+                                </div>
+                              )
+                            })}
+                          </div>
+                        )}
+                        {d.todayTasks.length > 0 && (
+                          <div>
+                            <p className="text-[10px] text-ink-muted uppercase tracking-[0.12em] mb-2">Görevler</p>
+                            {d.todayTasks.map(t => (
+                              <div key={t.id} className="flex items-center gap-3 py-0.5">
+                                <div style={{ width: 14, height: 14, borderRadius: 2, border: t.completed ? 'none' : '1px solid rgba(255,255,255,0.15)', background: t.completed ? '#22C55E' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                                  {t.completed && <span style={{ fontSize: 8, color: '#fff' }}>✓</span>}
+                                </div>
+                                <span className={`text-sm ${t.completed ? 'text-ink-muted line-through' : 'text-ink-primary'}`}>{t.title}</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                        {todayHabits.length === 0 && d.todayTasks.length === 0 && (
+                          <p className="text-sm text-ink-muted">Bugün için kayıtlı alışkanlık veya görev yok.</p>
+                        )}
+                      </div>
+                      <button onClick={() => setStep(2)} className="w-full h-10 bg-primary-500 hover:bg-primary-600 text-white text-sm font-medium transition-colors" style={{ borderRadius: 2 }}>
+                        Devam →
+                      </button>
+                    </div>
+                  )}
+
+                  {step === 2 && (
+                    <div>
+                      <p className="text-[10px] font-medium text-ink-muted uppercase tracking-[0.15em] mb-4">Günlük Not</p>
+                      <textarea
+                        value={eveningNote}
+                        onChange={e => setEveningNote(e.target.value)}
+                        placeholder="Bugün ne öğrendim, ne hissettim?"
+                        rows={6}
+                        className="w-full bg-white/5 border border-border-subtle text-ink-primary text-sm px-3 py-2 focus:outline-none focus:border-border-glow resize-none placeholder:text-ink-muted/40 transition-colors mb-6"
+                        style={{ borderRadius: 2 }}
+                      />
+                      <button
+                        onClick={async () => { await saveJournalNote(); setStep(3) }}
+                        className="w-full h-10 bg-primary-500 hover:bg-primary-600 text-white text-sm font-medium transition-colors"
+                        style={{ borderRadius: 2 }}
+                      >
+                        Devam →
+                      </button>
+                    </div>
+                  )}
+
+                  {step === 3 && (
+                    <div>
+                      <p className="text-[10px] font-medium text-ink-muted uppercase tracking-[0.15em] mb-4">Yarın İçin 3 Öncelik</p>
+                      <div className="space-y-2 mb-6">
+                        {tomorrowPriorities.map((task, i) => (
+                          <div key={i} className="flex items-center gap-3">
+                            <span className="text-xs font-bold text-ink-muted w-4 text-right shrink-0">{i + 1}.</span>
+                            <input
+                              type="text"
+                              value={task}
+                              onChange={e => { const n = [...tomorrowPriorities]; n[i] = e.target.value; setTomorrowPriorities(n) }}
+                              placeholder="Yarın öncelik..."
+                              className="flex-1 bg-white/5 border border-border-subtle text-ink-primary text-sm px-3 py-2 focus:outline-none focus:border-border-glow placeholder:text-ink-muted/40 transition-colors"
+                              style={{ borderRadius: 2 }}
+                            />
+                          </div>
+                        ))}
+                      </div>
+                      <button
+                        onClick={async () => { await saveTomorrowPlan(); closeModal() }}
+                        className="w-full h-10 bg-primary-500 hover:bg-primary-600 text-white text-sm font-medium transition-colors"
+                        style={{ borderRadius: 2 }}
+                      >
+                        Tamamla
+                      </button>
+                    </div>
+                  )}
+                </>
+              )}
+
+            </div>
+          </div>
+        )}
+
     </div>
   )
 }

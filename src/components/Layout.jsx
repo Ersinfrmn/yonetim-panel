@@ -225,6 +225,18 @@ export default function Layout({ children }) {
             ))}
           </nav>
 
+          {/* Addiction tracker */}
+          <button
+            onClick={() => setAddictionOpen(v => !v)}
+            style={{
+              width: 64, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center',
+              flexShrink: 0, background: 'none', border: 'none', cursor: 'pointer',
+              color: addictionOpen ? '#b91c1c' : '#444444', transition: 'color 150ms',
+            }}
+          >
+            <ShieldOff size={20} strokeWidth={1.5} />
+          </button>
+
           {/* Logout */}
           <div style={{ height: 64, display: 'flex', alignItems: 'center', flexShrink: 0 }}>
             <button

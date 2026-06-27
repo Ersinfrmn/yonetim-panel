@@ -1,28 +1,17 @@
 import { useAuth } from '../contexts/AuthContext'
-import { useTheme } from '../contexts/ThemeContext'
-import { Sun, Moon, Zap } from 'lucide-react'
+import { Zap } from 'lucide-react'
 
 export default function Login() {
   const { signInWithGoogle } = useAuth()
-  const { dark, toggle } = useTheme()
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-900 dark:to-slate-800 flex items-center justify-center p-4">
-      <button
-        onClick={toggle}
-        className="fixed top-4 right-4 p-2 rounded-lg bg-white dark:bg-slate-700 shadow text-slate-500 dark:text-slate-300"
-      >
-        {dark ? <Sun size={18} /> : <Moon size={18} />}
-      </button>
-
-      <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-8 w-full max-w-sm text-center">
-        <div className="w-16 h-16 bg-primary-100 dark:bg-primary-900/30 rounded-2xl flex items-center justify-center mx-auto mb-4">
-          <Zap size={32} className="text-primary-600 dark:text-primary-400" />
+    <div className="min-h-screen bg-surface flex items-center justify-center p-4">
+      <div className="bg-surface-card/80 backdrop-blur-md border border-border-subtle rounded-xl p-8 w-full max-w-sm text-center">
+        <div className="w-16 h-16 bg-primary-500/10 border border-border-subtle rounded-xl flex items-center justify-center mx-auto mb-4">
+          <Zap size={28} className="text-primary-400" />
         </div>
-        <h1 className="text-2xl font-bold text-slate-800 dark:text-white mb-1">EF Komuta Merkezi</h1>
-        <p className="text-slate-500 dark:text-slate-400 text-sm mb-8">
-          Kişisel verimlilik çalışma alanınız
-        </p>
+        <h1 className="text-2xl font-semibold text-ink-primary mb-1">EF Komuta Merkezi</h1>
+        <p className="text-ink-secondary text-sm mb-8">Kişisel verimlilik çalışma alanınız</p>
 
         <div className="space-y-3 text-left mb-8">
           {[
@@ -33,7 +22,7 @@ export default function Login() {
             'Pomodoro zamanlayıcı',
             'İstatistik paneli',
           ].map(f => (
-            <div key={f} className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
+            <div key={f} className="flex items-center gap-2 text-sm text-ink-secondary">
               <div className="w-1.5 h-1.5 rounded-full bg-primary-500 shrink-0" />
               {f}
             </div>
@@ -42,7 +31,7 @@ export default function Login() {
 
         <button
           onClick={signInWithGoogle}
-          className="w-full flex items-center justify-center gap-3 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl px-4 py-3 text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-600 transition-colors shadow-sm"
+          className="w-full flex items-center justify-center gap-3 bg-white/5 border border-border-subtle rounded-xl px-4 py-3 text-sm font-medium text-ink-primary hover:bg-white/10 hover:border-border-glow transition-colors"
         >
           <svg width="18" height="18" viewBox="0 0 18 18">
             <path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z"/>

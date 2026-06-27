@@ -320,9 +320,9 @@ function YearHeatmap({ logs, habitId }) {
     }
   })
 
-  const emptyFill = '#1a1a2e'
+  const emptyFill = '#0d0d0d'
   const doneFill  = '#22c55e'
-  const textFill  = '#3D3D5C'
+  const textFill  = '#666666'
   const dayLabels = { 1: 'Pzt', 3: 'Çar', 5: 'Cum' }
 
   return (

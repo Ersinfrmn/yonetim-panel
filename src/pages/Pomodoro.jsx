@@ -10,7 +10,6 @@ import {
 } from 'recharts'
 import { format, subDays } from 'date-fns'
 import { tr } from 'date-fns/locale'
-import { awardXP } from '../utils/xp'
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 

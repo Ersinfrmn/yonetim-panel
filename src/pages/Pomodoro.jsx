@@ -266,6 +266,8 @@ export default function Pomodoro() {
           ))
         }
 
+        awardXP(supabase, user.id, 'pomodoro_complete')
+
         // Silently refresh report data if panel is open
         loadSessions(true)
       }

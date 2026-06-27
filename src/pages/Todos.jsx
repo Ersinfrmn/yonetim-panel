@@ -1006,7 +1006,7 @@ export default function Todos() {
                             onKeyDown={e => e.key === 'Enter' && saveEdit()}
                             className="w-full px-3 py-2 text-sm rounded-lg border border-border-subtle bg-white/5 text-ink-primary focus:outline-none focus:ring-2 focus:ring-primary-500"
                           />
-                          <FormFields f={editForm} set={setEF} compact />
+                          <FormFields f={editForm} set={setEF} compact goals={goals} />
                           <div className="flex gap-2">
                             <button onClick={() => setEditingId(null)}
                               className="flex-1 py-1.5 rounded-lg border border-border-subtle text-ink-secondary text-sm font-medium hover:bg-white/5 transition-colors">

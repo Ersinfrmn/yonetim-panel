@@ -115,7 +115,7 @@ export default function AddictionPanel({ isOpen, onClose }) {
       overflowY:   'auto',
       padding:     '20px 16px',
       boxSizing:   'border-box',
-      transform:   isOpen ? 'translateX(0)' : 'translateX(-280px)',
+      transform:   isOpen ? 'translateX(0)' : 'translateX(-100%)',
       transition:  'transform 250ms ease',
     }}>
 

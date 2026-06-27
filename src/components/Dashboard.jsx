@@ -298,8 +298,8 @@ export default function Dashboard() {
   return (
     <div style={{ background: 'transparent' }}>
       {/* ── Header ──────────────────────────────────────────────────────── */}
-        <div className="mb-6">
-          <h2 className="text-2xl font-semibold text-ink-primary">Bugünün Komuta Merkezi</h2>
+        <div className="mb-6 pl-3 border-l-2 border-primary-500">
+          <h2 className="text-2xl font-bold tracking-widest uppercase text-ink-primary">Bugünün Komuta Merkezi</h2>
           <p className="text-sm text-ink-secondary mt-0.5 capitalize">
             {format(today, 'd MMMM yyyy, EEEE', { locale: tr })}
           </p>

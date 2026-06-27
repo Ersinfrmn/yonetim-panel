@@ -449,11 +449,54 @@ export default function Stats() {
         </div>
       )}
 
-      {/* ── NEW: Habit × Mood Correlation ───────────────────────────────────── */}
-      {extras && (
+      {/* ── Per-habit mood bars ──────────────────────────────────────────────── */}
+      {habitMoodCorr && (
         <div className="bg-surface-card/80 backdrop-blur-md border border-border-subtle rounded-xl p-4 hover:border-border-glow transition-colors duration-200 mb-6">
           <h3 className="text-sm font-semibold text-ink-secondary mb-0.5">
             Alışkanlık × Ruh Hali Korelasyonu
+          </h3>
+          <p className="text-xs text-ink-muted mb-4">Tamamlandığında vs tamamlanmadığında ortalama ruh hali</p>
+          {!habitMoodCorr.hasEnough || habitMoodCorr.items.length === 0 ? (
+            <p className="text-sm text-ink-muted text-center py-8">
+              Yeterli veri yok — günlük yazmaya devam et.
+            </p>
+          ) : (
+            <div className="space-y-5">
+              {habitMoodCorr.items.map(h => (
+                <div key={h.id}>
+                  <p className="text-xs font-medium text-ink-secondary mb-2 truncate">{h.name}</p>
+                  <div className="space-y-1.5">
+                    {h.avgDone !== null && (
+                      <div className="flex items-center gap-2">
+                        <span style={{ fontSize: 10, color: '#444444', width: 96, flexShrink: 0 }}>Tamamlandı</span>
+                        <div className="flex-1 h-3.5 rounded-sm overflow-hidden" style={{ background: 'rgba(255,255,255,0.05)' }}>
+                          <div style={{ width: `${(h.avgDone / 5) * 100}%`, height: '100%', background: '#b91c1c', borderRadius: 2 }} />
+                        </div>
+                        <span className="text-xs font-semibold text-ink-secondary w-6 text-right tabular-nums">{h.avgDone.toFixed(1)}</span>
+                      </div>
+                    )}
+                    {h.avgNotDone !== null && (
+                      <div className="flex items-center gap-2">
+                        <span style={{ fontSize: 10, color: '#444444', width: 96, flexShrink: 0 }}>Tamamlanmadı</span>
+                        <div className="flex-1 h-3.5 rounded-sm overflow-hidden" style={{ background: 'rgba(255,255,255,0.05)' }}>
+                          <div style={{ width: `${(h.avgNotDone / 5) * 100}%`, height: '100%', background: '#333333', borderRadius: 2 }} />
+                        </div>
+                        <span className="text-xs font-semibold text-ink-secondary w-6 text-right tabular-nums">{h.avgNotDone.toFixed(1)}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── NEW: Habit × Mood Correlation (scatter) ─────────────────────────── */}
+      {extras && (
+        <div className="bg-surface-card/80 backdrop-blur-md border border-border-subtle rounded-xl p-4 hover:border-border-glow transition-colors duration-200 mb-6">
+          <h3 className="text-sm font-semibold text-ink-secondary mb-0.5">
+            Alışkanlık Sayısı × Ruh Hali
           </h3>
           <p className="text-xs text-ink-muted mb-4">Son 30 gün — yalnızca ruh hali girilen günler</p>
 

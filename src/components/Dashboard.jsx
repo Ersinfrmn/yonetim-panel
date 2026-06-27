@@ -74,7 +74,7 @@ function StatCard({ icon: Icon, title, primary, secondary, error }) {
 // ─── Momentum Ring ────────────────────────────────────────────────────────────
 
 function MomentumRing({ score, habitScore, taskScore, pomoScore }) {
-  const color = score >= 71 ? '#22C55E' : score >= 41 ? '#F59E0B' : '#EF4444'
+  const color = '#b91c1c'
   const dash  = Math.min(score / 100, 1) * RING_CIRC
 
   return (

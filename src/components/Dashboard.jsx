@@ -41,22 +41,29 @@ function ParticleCanvas() {
     if (window.innerWidth < 768) { canvas.style.display = 'none'; return }
 
     const ctx = canvas.getContext('2d')
+    const N   = 120
 
-    const resize = () => {
-      canvas.width  = canvas.offsetWidth
-      canvas.height = canvas.offsetHeight
+    function resize() {
+      canvas.width  = window.innerWidth
+      canvas.height = window.innerHeight
     }
     resize()
 
-    const N   = 60
-    const pts = Array.from({ length: N }, () => ({
-      x:     Math.random() * canvas.width,
-      y:     Math.random() * canvas.height,
-      r:     1 + Math.random() * 0.5,
-      vx:    (Math.random() - 0.5) * 0.25,
-      vy:    (Math.random() - 0.5) * 0.25,
-      alpha: 0.3 + Math.random() * 0.2,
-    }))
+    // 70% tiny white stars, 30% violet stars — each with independent twinkle
+    const pts = Array.from({ length: N }, (_, i) => {
+      const isWhite = i < N * 0.7
+      return {
+        x:         Math.random() * canvas.width,
+        y:         Math.random() * canvas.height,
+        r:         isWhite ? 0.4 + Math.random() * 0.6 : 0.9 + Math.random() * 1,
+        vx:        (Math.random() - 0.5) * 0.12,
+        vy:        (Math.random() - 0.5) * 0.12,
+        baseAlpha: isWhite ? 0.3 + Math.random() * 0.4 : 0.4 + Math.random() * 0.35,
+        isWhite,
+        phase:     Math.random() * Math.PI * 2,
+        period:    1800 + Math.random() * 2500,
+      }
+    })
 
     let raf, lastTs = 0, fps = 60, stopped = false
 
@@ -68,16 +75,21 @@ function ParticleCanvas() {
       if (lastTs > 0 && dt > 0) fps = fps * 0.95 + (1000 / dt) * 0.05
       lastTs = ts
 
-      if (fps < 30 && ts > 1000) { canvas.style.display = 'none'; stopped = true; return }
+      if (fps < 28 && ts > 2000) { canvas.style.display = 'none'; stopped = true; return }
 
       const W = canvas.width, H = canvas.height
       ctx.clearRect(0, 0, W, H)
+
       for (const p of pts) {
         p.x = (p.x + p.vx + W) % W
         p.y = (p.y + p.vy + H) % H
+        const t     = (ts % p.period) / p.period
+        const alpha = p.baseAlpha * (0.6 + 0.4 * Math.sin(p.phase + t * Math.PI * 2))
         ctx.beginPath()
         ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2)
-        ctx.fillStyle = `rgba(108,63,232,${p.alpha})`
+        ctx.fillStyle = p.isWhite
+          ? `rgba(255,255,255,${alpha})`
+          : `rgba(139,92,246,${alpha})`
         ctx.fill()
       }
 
@@ -92,8 +104,34 @@ function ParticleCanvas() {
   return (
     <canvas
       ref={canvasRef}
-      className="absolute inset-0 w-full h-full pointer-events-none"
+      className="fixed inset-0 w-screen h-screen pointer-events-none"
       style={{ zIndex: 0 }}
+    />
+  )
+}
+
+// ─── Orbital Glow Ring ────────────────────────────────────────────────────────
+
+function OrbitalGlow() {
+  return (
+    <div
+      className="fixed pointer-events-none hidden md:block"
+      style={{
+        width: 580,
+        height: 580,
+        top: '50%',
+        right: '10%',
+        borderRadius: '50%',
+        border: '1.5px solid rgba(139,92,246,0.45)',
+        boxShadow: [
+          '0 0 40px 6px rgba(139,92,246,0.18)',
+          '0 0 100px 24px rgba(108,63,232,0.08)',
+          'inset 0 0 50px rgba(108,63,232,0.06)',
+        ].join(', '),
+        animation: 'orbitalSpin 24s linear infinite',
+        opacity: 0.55,
+        zIndex: 0,
+      }}
     />
   )
 }

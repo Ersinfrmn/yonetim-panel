@@ -89,6 +89,7 @@ export default function Goals() {
   const [showForm, setShowForm] = useState(false)
   const [showTemplates, setShowTemplates] = useState(false)
   const [form, setForm] = useState(EMPTY_FORM)
+  const [linkedTodosMap, setLinkedTodosMap] = useState({})
   const progressTimers = useRef({})
   const celebratedRef = useRef({})
 

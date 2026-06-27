@@ -799,6 +799,7 @@ export default function Todos() {
     const { data } = await supabase.from('tasks')
       .update({ completed: nowDone }).eq('id', task.id).select().single()
     if (data) setTasks(ts => ts.map(x => x.id === task.id ? data : x))
+    if (nowDone) awardXP(supabase, user.id, 'task_complete')
 
     if (nowDone && task.recurrence && task.recurrence !== 'none') {
       const { data: rec } = await supabase.from('tasks').insert({

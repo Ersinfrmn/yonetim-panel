@@ -386,8 +386,8 @@ export default function Dashboard() {
                     </div>
                   ) : (
                     <div className="flex-1 flex flex-col justify-center">
-                      <p className="text-sm italic text-ink-secondary leading-relaxed">&ldquo;{quote}&rdquo;</p>
-                      <p className="text-xs text-ink-muted mt-4">— EF Komuta Merkezi</p>
+                      <p className="text-sm italic text-white/70 leading-relaxed">&ldquo;{quote}&rdquo;</p>
+                      <p className="text-[10px] text-white/30 uppercase tracking-wider mt-4">— EF Komuta Merkezi</p>
                     </div>
                   )}
                 </div>

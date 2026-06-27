@@ -326,8 +326,8 @@ export default function WeeklyPlan() {
                         onKeyDown={e => e.key === 'Enter' && addTask(key)}
                         onBlur={() => addTask(key)}
                         placeholder="+ Ekle"
-                        className="w-full bg-transparent text-[10px] text-ink-muted placeholder:text-ink-muted/40 focus:outline-none focus:text-white py-1 mt-2"
-                        style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}
+                        className="w-full bg-transparent text-[10px] text-ink-secondary placeholder:uppercase placeholder:tracking-wider placeholder:text-white/40 focus:outline-none focus:text-white py-1 mt-2"
+                        style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}
                       />
                     </div>
                   )

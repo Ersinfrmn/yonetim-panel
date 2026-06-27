@@ -337,7 +337,7 @@ export default function Journal() {
       {/* ── Date navigation ───────────────────────────────────────────────── */}
       <div className="flex items-center gap-3 mb-4">
         <button onClick={() => changeDay(-1)}
-          className="p-2 rounded-lg bg-white/5 border border-border-subtle text-ink-secondary hover:bg-white/10 hover:border-border-glow transition-colors">
+          className="p-2 text-ink-muted hover:text-white hover:bg-white/5 transition-colors" style={{ borderRadius: 2 }}>
           <ChevronLeft size={18} />
         </button>
         <div className="flex-1 text-center">

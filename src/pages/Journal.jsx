@@ -24,7 +24,6 @@ function getImageUrl(path) {
   return data.publicUrl
 }
 
-// Streak counts days that have at least one image or a mood selection
 function calcStreak(entries) {
   let streak = 0
   const d = new Date()
@@ -54,7 +53,7 @@ export default function Journal() {
   const [showSummary,    setShowSummary]    = useState(false)
   const [summaryPeriod,  setSummaryPeriod]  = useState(7)
   const [dragging,       setDragging]       = useState(false)
-  const [lightbox,       setLightbox]       = useState(null)    // { images: string[], index: number } | null
+  const [lightbox,       setLightbox]       = useState(null)
 
   const saveTimer    = useRef(null)
   const fileInputRef = useRef(null)
@@ -123,20 +122,19 @@ export default function Journal() {
     saveTimer.current = setTimeout(() => save(next, images, { notify: true }), 400)
   }
 
-  // ── Image upload (handles 1 or multiple files) ────────────────────────────
+  // ── Image upload ──────────────────────────────────────────────────────────
 
   async function uploadFiles(files) {
     const valid   = files.filter(f => f.type.startsWith('image/') && f.size <= 10 * 1024 * 1024)
     const invalid = files.length - valid.length
     if (invalid > 0) toast.error(`${invalid} dosya geçersiz (tür veya boyut)`)
 
-    const slots    = 5 - images.length
+    const slots = 5 - images.length
     if (slots <= 0) { toast.error('En fazla 5 görsel ekleyebilirsiniz'); return }
 
     const toUpload = valid.slice(0, slots)
     if (!toUpload.length) return
 
-    // Walk sequentially so each upload gets a fresh `current` without stale closures
     let current = [...images]
     for (const file of toUpload) {
       setUploading(true)
@@ -185,7 +183,6 @@ export default function Journal() {
 
   // ── Derived ───────────────────────────────────────────────────────────────
 
-  // An entry exists if it has images or a mood selection
   const entryDates = Object.keys(entries).filter(d => {
     const e = entries[d]
     return e?.images?.length > 0 || e?.mood
@@ -230,13 +227,13 @@ export default function Journal() {
 
       {/* ── Page header ───────────────────────────────────────────────────── */}
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Günlük</h2>
+        <h2 className="text-2xl font-semibold text-ink-primary">Günlük</h2>
         <button
           onClick={() => setShowSummary(s => !s)}
           className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
             showSummary
-              ? 'bg-primary-600 text-white'
-              : 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'
+              ? 'bg-primary-500 text-white'
+              : 'bg-white/5 border border-border-subtle text-ink-secondary hover:bg-white/10 hover:border-border-glow'
           }`}
         >
           <BarChart2 size={14} />
@@ -246,46 +243,46 @@ export default function Journal() {
 
       {/* ── Summary panel ─────────────────────────────────────────────────── */}
       {showSummary && (
-        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 p-4 mb-6">
+        <div className="bg-surface-card/80 backdrop-blur-md border border-border-subtle rounded-xl p-4 mb-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
-            <div className="bg-slate-50 dark:bg-slate-700 rounded-xl p-3 text-center">
-              <p className="text-2xl font-bold text-primary-600 dark:text-primary-400">{streak}</p>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Günlük seri</p>
+            <div className="bg-white/5 rounded-xl p-3 text-center">
+              <p className="text-2xl font-bold text-primary-400">{streak}</p>
+              <p className="text-xs text-ink-muted mt-0.5">Günlük seri</p>
             </div>
-            <div className="bg-slate-50 dark:bg-slate-700 rounded-xl p-3 text-center">
-              <p className="text-2xl font-bold text-slate-800 dark:text-white">{entryDates.length}</p>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Toplam giriş</p>
+            <div className="bg-white/5 rounded-xl p-3 text-center">
+              <p className="text-2xl font-bold text-ink-primary">{entryDates.length}</p>
+              <p className="text-xs text-ink-muted mt-0.5">Toplam giriş</p>
             </div>
-            <div className="bg-slate-50 dark:bg-slate-700 rounded-xl p-3 text-center">
-              <p className="text-2xl font-bold text-slate-800 dark:text-white">
+            <div className="bg-white/5 rounded-xl p-3 text-center">
+              <p className="text-2xl font-bold text-ink-primary">
                 {mostImagesDate ? (entries[mostImagesDate]?.images?.length || 0) : '—'}
               </p>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+              <p className="text-xs text-ink-muted mt-0.5">
                 En çok görsel
                 {mostImagesDate
                   ? ` — ${format(parseISO(mostImagesDate), 'd MMM', { locale: tr })}`
                   : ''}
               </p>
             </div>
-            <div className="bg-slate-50 dark:bg-slate-700 rounded-xl p-3 text-center">
+            <div className="bg-white/5 rounded-xl p-3 text-center">
               {happiestDate ? (
                 <>
                   <p className="text-2xl">{MOOD_EMOJIS[(entries[happiestDate]?.mood || 1) - 1]}</p>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                  <p className="text-xs text-ink-muted mt-0.5">
                     En mutlu — {format(parseISO(happiestDate), 'd MMM', { locale: tr })}
                   </p>
                 </>
               ) : (
                 <>
-                  <p className="text-2xl text-slate-300 dark:text-slate-600">—</p>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">En mutlu gün</p>
+                  <p className="text-2xl text-ink-muted">—</p>
+                  <p className="text-xs text-ink-muted mt-0.5">En mutlu gün</p>
                 </>
               )}
             </div>
           </div>
 
           <div className="flex items-center justify-between mb-3">
-            <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">
+            <p className="text-[11px] font-medium text-ink-secondary uppercase tracking-widest">
               Ruh hali trendi
             </p>
             <div className="flex gap-1">
@@ -293,8 +290,8 @@ export default function Journal() {
                 <button key={p} onClick={() => setSummaryPeriod(p)}
                   className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
                     summaryPeriod === p
-                      ? 'bg-primary-600 text-white'
-                      : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700'
+                      ? 'bg-primary-500 text-white'
+                      : 'text-ink-muted hover:bg-white/5'
                   }`}>
                   {p} gün
                 </button>
@@ -306,31 +303,31 @@ export default function Journal() {
             <ResponsiveContainer width="100%" height={110}>
               <LineChart data={chartData} margin={{ top: 5, right: 5, bottom: 0, left: -28 }}>
                 <XAxis dataKey="date"
-                  tick={{ fontSize: 10, fill: '#94a3b8' }} tickLine={false} axisLine={false}
+                  tick={{ fontSize: 10, fill: '#6B6B8A' }} tickLine={false} axisLine={false}
                   interval={summaryPeriod <= 7 ? 0 : Math.floor(summaryPeriod / 7)}
                 />
                 <YAxis domain={[1, 5]} ticks={[1, 2, 3, 4, 5]}
-                  tick={{ fontSize: 10, fill: '#94a3b8' }} tickLine={false} axisLine={false}
+                  tick={{ fontSize: 10, fill: '#6B6B8A' }} tickLine={false} axisLine={false}
                 />
                 <Tooltip
                   content={({ payload, label }) => {
                     if (!payload?.length || payload[0].value == null) return null
                     return (
-                      <div className="bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg px-2.5 py-1.5 text-xs shadow-lg">
-                        <span className="text-slate-400 mr-1">{label}</span>
+                      <div style={{ background: '#111128', border: '1px solid rgba(108,63,232,0.25)', borderRadius: 8, padding: '4px 8px' }}>
+                        <span className="text-ink-muted text-xs mr-1">{label}</span>
                         <span className="text-base">{MOOD_EMOJIS[payload[0].value - 1]}</span>
                       </div>
                     )
                   }}
                 />
-                <Line type="monotone" dataKey="mood" stroke="#6366f1" strokeWidth={2}
-                  dot={{ fill: '#6366f1', r: 3, strokeWidth: 0 }} activeDot={{ r: 4 }}
+                <Line type="monotone" dataKey="mood" stroke="#6C3FE8" strokeWidth={2}
+                  dot={{ fill: '#6C3FE8', r: 3, strokeWidth: 0 }} activeDot={{ r: 4 }}
                   connectNulls={false}
                 />
               </LineChart>
             </ResponsiveContainer>
           ) : (
-            <p className="text-xs text-slate-400 dark:text-slate-500 text-center py-6">
+            <p className="text-xs text-ink-muted text-center py-6">
               Henüz ruh hali kaydı yok — günlük eklerken emoji seçin
             </p>
           )}
@@ -340,7 +337,7 @@ export default function Journal() {
       {/* ── Date navigation ───────────────────────────────────────────────── */}
       <div className="flex items-center gap-3 mb-4">
         <button onClick={() => changeDay(-1)}
-          className="p-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-slate-50 transition-colors">
+          className="p-2 rounded-lg bg-white/5 border border-border-subtle text-ink-secondary hover:bg-white/10 hover:border-border-glow transition-colors">
           <ChevronLeft size={18} />
         </button>
         <div className="flex-1 text-center">
@@ -349,35 +346,35 @@ export default function Journal() {
             value={selectedDate}
             max={fmt(new Date())}
             onChange={e => setSelectedDate(e.target.value)}
-            className="px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-800 dark:text-white text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary-500"
+            className="px-4 py-2 rounded-xl border border-border-subtle bg-white/5 text-ink-primary text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary-500"
           />
-          <p className="text-xs text-slate-400 mt-1">{display(selectedDate)}</p>
+          <p className="text-xs text-ink-muted mt-1">{display(selectedDate)}</p>
         </div>
         <button onClick={() => changeDay(1)}
           disabled={selectedDate === fmt(new Date())}
-          className="p-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-slate-50 transition-colors disabled:opacity-40">
+          className="p-2 rounded-lg bg-white/5 border border-border-subtle text-ink-secondary hover:bg-white/10 transition-colors disabled:opacity-40">
           <ChevronRight size={18} />
         </button>
       </div>
 
       {/* ── Mood selector ─────────────────────────────────────────────────── */}
       <div className="flex items-center gap-3 mb-4">
-        <span className="text-xs text-slate-500 dark:text-slate-400 shrink-0">Bugün nasılsın?</span>
+        <span className="text-xs text-ink-muted shrink-0">Bugün nasılsın?</span>
         <div className="flex gap-1">
           {MOOD_EMOJIS.map((emoji, i) => (
             <button key={i} onClick={() => handleMoodSelect(i + 1)}
               title={['Kötü', 'Üzgün', 'Nötr', 'İyi', 'Harika'][i]}
               className={`text-xl w-9 h-9 rounded-lg transition-all ${
                 mood === i + 1
-                  ? 'bg-primary-100 dark:bg-primary-900/40 scale-110 ring-2 ring-primary-400'
-                  : 'hover:bg-slate-100 dark:hover:bg-slate-700 opacity-50 hover:opacity-100'
+                  ? 'bg-primary-500/20 scale-110 ring-2 ring-primary-400'
+                  : 'hover:bg-white/10 opacity-50 hover:opacity-100'
               }`}>
               {emoji}
             </button>
           ))}
           {mood && (
             <button onClick={() => handleMoodSelect(null)}
-              className="text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 px-1 ml-1">
+              className="text-xs text-ink-muted hover:text-ink-primary px-1 ml-1">
               ✕
             </button>
           )}
@@ -385,31 +382,29 @@ export default function Journal() {
       </div>
 
       {/* ── Image upload card ─────────────────────────────────────────────── */}
-      <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 overflow-hidden mb-6">
+      <div className="bg-surface-card/80 backdrop-blur-md border border-border-subtle rounded-xl overflow-hidden mb-6">
 
         {/* Existing image grid */}
         {images.length > 0 && (
-          <div className="p-4 border-b border-slate-100 dark:border-slate-700">
-            <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-3">
+          <div className="p-4 border-b border-border-subtle">
+            <p className="text-[11px] font-medium text-ink-secondary uppercase tracking-widest mb-3">
               Görseller ({images.length} / 5)
             </p>
             <div className="grid grid-cols-2 gap-3">
               {images.map((path, idx) => (
                 <div key={path}
-                  className="relative group aspect-video rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-700">
+                  className="relative group aspect-video rounded-xl overflow-hidden bg-white/5">
                   <img
                     src={getImageUrl(path)}
                     alt=""
                     className="w-full h-full object-cover cursor-pointer transition-opacity hover:opacity-90"
                     onClick={() => setLightbox({ images, index: idx })}
                   />
-                  {/* Delete button */}
                   <button
                     onClick={() => deleteImage(path)}
-                    className="absolute top-2 right-2 w-6 h-6 rounded-full bg-black/60 hover:bg-red-600 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all shadow">
+                    className="absolute top-2 right-2 w-6 h-6 rounded-full bg-black/60 hover:bg-red-600 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all">
                     <X size={12} />
                   </button>
-                  {/* Expand hint */}
                   <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
                     <span className="bg-black/50 rounded-md px-2 py-0.5 text-white text-[10px] font-medium">
                       Büyüt
@@ -421,7 +416,7 @@ export default function Journal() {
           </div>
         )}
 
-        {/* Upload zone — hidden when at capacity */}
+        {/* Upload zone */}
         {images.length < 5 ? (
           <div
             onDragOver={e => { e.preventDefault(); if (!uploading) setDragging(true) }}
@@ -432,27 +427,27 @@ export default function Journal() {
               if (!uploading) uploadFiles(Array.from(e.dataTransfer.files))
             }}
             onClick={() => { if (!uploading) fileInputRef.current?.click() }}
-            className={`m-4 border-2 border-dashed rounded-2xl py-12 px-6 flex flex-col items-center justify-center gap-2 select-none transition-colors ${
+            className={`m-4 border-2 border-dashed rounded-xl py-12 px-6 flex flex-col items-center justify-center gap-2 select-none transition-colors ${
               uploading
-                ? 'border-slate-200 dark:border-slate-600 cursor-default'
+                ? 'border-border-subtle cursor-default'
                 : dragging
-                  ? 'border-primary-400 bg-primary-50 dark:bg-primary-900/20 cursor-copy'
-                  : 'border-slate-200 dark:border-slate-600 cursor-pointer hover:border-primary-400 dark:hover:border-primary-500 hover:bg-slate-50 dark:hover:bg-slate-700/30'
+                  ? 'border-primary-400 bg-primary-500/10 cursor-copy'
+                  : 'border-border-subtle cursor-pointer hover:border-border-glow hover:bg-primary-500/5'
             }`}
           >
             {uploading ? (
               <>
-                <Loader2 size={38} className="animate-spin text-primary-500 mb-1" />
-                <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Yükleniyor...</p>
+                <Loader2 size={38} className="animate-spin text-primary-400 mb-1" />
+                <p className="text-sm font-medium text-ink-muted">Yükleniyor...</p>
                 {uploadProgress > 0 && (
                   <div className="w-44 mt-2">
-                    <div className="h-1.5 bg-slate-200 dark:bg-slate-600 rounded-full overflow-hidden">
+                    <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
                       <div
                         className="h-full bg-primary-500 rounded-full transition-all duration-300"
                         style={{ width: `${uploadProgress}%` }}
                       />
                     </div>
-                    <p className="text-[10px] text-center text-slate-400 mt-1">%{uploadProgress}</p>
+                    <p className="text-[10px] text-center text-ink-muted mt-1">%{uploadProgress}</p>
                   </div>
                 )}
               </>
@@ -460,16 +455,16 @@ export default function Journal() {
               <>
                 <ImagePlus
                   size={40}
-                  className={`mb-1 transition-colors ${dragging ? 'text-primary-400' : 'text-slate-300 dark:text-slate-600'}`}
+                  className={`mb-1 transition-colors ${dragging ? 'text-primary-400' : 'text-ink-muted'}`}
                 />
-                <p className="text-sm font-semibold text-slate-600 dark:text-slate-300 text-center">
+                <p className="text-sm font-semibold text-ink-secondary text-center">
                   {dragging ? 'Bırakın!' : 'Günlük görselinizi yükleyin'}
                 </p>
-                <p className="text-xs text-slate-400 text-center">
+                <p className="text-xs text-ink-muted text-center">
                   Tablet ekran görüntüsü veya fotoğraf — JPG, PNG, WEBP
                 </p>
                 {images.length > 0 && (
-                  <p className="text-xs text-primary-500 dark:text-primary-400 mt-1">
+                  <p className="text-xs text-primary-400 mt-1">
                     {5 - images.length} görsel daha ekleyebilirsiniz
                   </p>
                 )}
@@ -477,7 +472,7 @@ export default function Journal() {
             )}
           </div>
         ) : (
-          <p className="text-xs text-slate-400 text-center py-5">
+          <p className="text-xs text-ink-muted text-center py-5">
             Maksimum görsel sayısına ulaşıldı (5 / 5)
           </p>
         )}
@@ -500,7 +495,7 @@ export default function Journal() {
       {/* ── Past entries list ─────────────────────────────────────────────── */}
       {entryDates.length > 0 && (
         <div>
-          <h3 className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-3">
+          <h3 className="text-[11px] font-medium text-ink-secondary uppercase tracking-widest mb-3">
             Geçmiş Kayıtlar
           </h3>
           <div className="space-y-2">
@@ -517,21 +512,21 @@ export default function Journal() {
                     onClick={() => setSelectedDate(d)}
                     className={`w-full text-left px-3 py-3 rounded-xl border transition-colors flex items-center gap-3 ${
                       d === selectedDate
-                        ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
-                        : 'border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700'
+                        ? 'border-primary-500 bg-primary-500/10'
+                        : 'border-border-subtle bg-surface-card/80 hover:border-border-glow hover:bg-white/5'
                     }`}
                   >
                     {/* Thumbnail */}
-                    <div className="w-12 h-12 rounded-lg overflow-hidden shrink-0 bg-slate-100 dark:bg-slate-700 flex items-center justify-center">
+                    <div className="w-12 h-12 rounded-lg overflow-hidden shrink-0 bg-white/5 flex items-center justify-center">
                       {firstImg
                         ? <img src={getImageUrl(firstImg)} alt="" className="w-full h-full object-cover" />
-                        : <ImagePlus size={16} className="text-slate-300 dark:text-slate-600" />
+                        : <ImagePlus size={16} className="text-ink-muted" />
                       }
                     </div>
                     {/* Info */}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between mb-0.5">
-                        <p className="text-sm font-medium text-slate-700 dark:text-slate-200 truncate">
+                        <p className="text-sm font-medium text-ink-primary truncate">
                           {display(d)}
                         </p>
                         {entry?.mood && (
@@ -540,7 +535,7 @@ export default function Journal() {
                           </span>
                         )}
                       </div>
-                      <p className="text-xs text-slate-400">
+                      <p className="text-xs text-ink-muted">
                         {imgCount > 0 ? `${imgCount} görsel` : 'Görsel yok'}
                       </p>
                     </div>
@@ -558,14 +553,12 @@ export default function Journal() {
           style={{ background: 'rgba(0,0,0,0.92)' }}
           onClick={e => e.target === e.currentTarget && setLightbox(null)}
         >
-          {/* Counter */}
           {lightbox.images.length > 1 && (
             <div className="absolute top-4 left-4 bg-black/50 rounded-full px-3 py-1 text-white text-xs font-medium pointer-events-none">
               {lightbox.index + 1} / {lightbox.images.length}
             </div>
           )}
 
-          {/* Close */}
           <button
             onClick={() => setLightbox(null)}
             className="absolute top-4 right-4 z-10 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
@@ -573,7 +566,6 @@ export default function Journal() {
             <X size={22} />
           </button>
 
-          {/* Prev */}
           {lightbox.images.length > 1 && (
             <button
               onClick={e => {
@@ -589,15 +581,13 @@ export default function Journal() {
             </button>
           )}
 
-          {/* Main image */}
           <img
             src={getImageUrl(lightbox.images[lightbox.index])}
             alt=""
-            className="max-w-[90vw] max-h-[90vh] object-contain rounded-lg shadow-2xl"
+            className="max-w-[90vw] max-h-[90vh] object-contain rounded-lg"
             onClick={e => e.stopPropagation()}
           />
 
-          {/* Next */}
           {lightbox.images.length > 1 && (
             <button
               onClick={e => {
@@ -613,7 +603,6 @@ export default function Journal() {
             </button>
           )}
 
-          {/* Dot indicators */}
           {lightbox.images.length > 1 && (
             <div className="absolute bottom-5 left-1/2 -translate-x-1/2 flex items-center gap-2">
               {lightbox.images.map((_, i) => (

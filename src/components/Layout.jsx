@@ -285,7 +285,6 @@ export default function Layout({ children }) {
         </button>
       </nav>
 
-      <AddictionPanel isOpen={addictionOpen} onClose={() => setAddictionOpen(false)} />
     </div>
   )
 }

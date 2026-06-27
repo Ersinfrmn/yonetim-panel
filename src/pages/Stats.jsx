@@ -189,6 +189,51 @@ export default function Stats() {
     loadExtras()
   }, [user.id])
 
+  // ── Per-habit mood correlation ────────────────────────────────────────────
+
+  useEffect(() => {
+    async function loadHabitMood() {
+      const [
+        { data: habits },
+        { data: logs },
+        { data: journals },
+      ] = await Promise.all([
+        supabase.from('habits').select('id, name').eq('user_id', user.id),
+        supabase.from('habit_logs').select('habit_id, date').eq('user_id', user.id).eq('completed', true),
+        supabase.from('journal_entries').select('date, mood').eq('user_id', user.id).not('mood', 'is', null),
+      ])
+
+      const moodByDate = {}
+      ;(journals || []).forEach(j => { moodByDate[j.date] = j.mood })
+
+      const moodDates = Object.keys(moodByDate)
+      if (moodDates.length < 5) {
+        setHabitMoodCorr({ hasEnough: false, items: [] })
+        return
+      }
+
+      const logsByHabit = {}
+      ;(logs || []).forEach(l => {
+        if (!logsByHabit[l.habit_id]) logsByHabit[l.habit_id] = new Set()
+        logsByHabit[l.habit_id].add(l.date)
+      })
+
+      const items = (habits || []).map(habit => {
+        const doneDates    = logsByHabit[habit.id] || new Set()
+        const doneMoods    = moodDates.filter(d =>  doneDates.has(d)).map(d => moodByDate[d])
+        const notDoneMoods = moodDates.filter(d => !doneDates.has(d)).map(d => moodByDate[d])
+        const avgDone    = doneMoods.length    ? doneMoods.reduce((a, b) => a + b, 0)    / doneMoods.length    : null
+        const avgNotDone = notDoneMoods.length ? notDoneMoods.reduce((a, b) => a + b, 0) / notDoneMoods.length : null
+        return { id: habit.id, name: habit.name, avgDone, avgNotDone, doneCount: doneMoods.length }
+      }).filter(h => h.doneCount > 0)
+        .sort((a, b) => b.doneCount - a.doneCount)
+        .slice(0, 5)
+
+      setHabitMoodCorr({ hasEnough: true, items })
+    }
+    loadHabitMood()
+  }, [user.id])
+
   // ── CSV export ────────────────────────────────────────────────────────────
 
   async function downloadCSV() {

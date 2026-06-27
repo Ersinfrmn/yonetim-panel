@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
@@ -20,15 +20,82 @@ const QUOTES = [
   'Sistem kur, motivasyona güvenme.',
 ]
 
-// ─── Helpers ─────────────────────────────────────────────────────────────────
+const fmt       = d => format(d, 'yyyy-MM-dd')
+const RING_R    = 48
+const RING_CIRC = 2 * Math.PI * RING_R
 
-const fmt = d => format(d, 'yyyy-MM-dd')
-
-// Deterministic quote per day — seed is sum of all charCodes in the date string
 function dailyQuote() {
   const s   = fmt(new Date())
   const sum = [...s].reduce((a, c) => a + c.charCodeAt(0), 0)
   return QUOTES[sum % QUOTES.length]
+}
+
+// ─── Particle Canvas ──────────────────────────────────────────────────────────
+
+function ParticleCanvas() {
+  const canvasRef = useRef(null)
+
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+    if (window.innerWidth < 768) { canvas.style.display = 'none'; return }
+
+    const ctx = canvas.getContext('2d')
+
+    const resize = () => {
+      canvas.width  = canvas.offsetWidth
+      canvas.height = canvas.offsetHeight
+    }
+    resize()
+
+    const N   = 60
+    const pts = Array.from({ length: N }, () => ({
+      x:     Math.random() * canvas.width,
+      y:     Math.random() * canvas.height,
+      r:     1 + Math.random() * 0.5,
+      vx:    (Math.random() - 0.5) * 0.25,
+      vy:    (Math.random() - 0.5) * 0.25,
+      alpha: 0.3 + Math.random() * 0.2,
+    }))
+
+    let raf, lastTs = 0, fps = 60, stopped = false
+
+    function draw(ts) {
+      if (stopped) return
+      if (document.visibilityState === 'hidden') { raf = requestAnimationFrame(draw); return }
+
+      const dt = ts - lastTs
+      if (lastTs > 0 && dt > 0) fps = fps * 0.95 + (1000 / dt) * 0.05
+      lastTs = ts
+
+      if (fps < 30 && ts > 1000) { canvas.style.display = 'none'; stopped = true; return }
+
+      const W = canvas.width, H = canvas.height
+      ctx.clearRect(0, 0, W, H)
+      for (const p of pts) {
+        p.x = (p.x + p.vx + W) % W
+        p.y = (p.y + p.vy + H) % H
+        ctx.beginPath()
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2)
+        ctx.fillStyle = `rgba(108,63,232,${p.alpha})`
+        ctx.fill()
+      }
+
+      raf = requestAnimationFrame(draw)
+    }
+
+    raf = requestAnimationFrame(draw)
+    window.addEventListener('resize', resize)
+    return () => { stopped = true; cancelAnimationFrame(raf); window.removeEventListener('resize', resize) }
+  }, [])
+
+  return (
+    <canvas
+      ref={canvasRef}
+      className="absolute inset-0 w-full h-full pointer-events-none"
+      style={{ zIndex: 0 }}
+    />
+  )
 }
 
 // ─── Loading Skeleton ─────────────────────────────────────────────────────────
@@ -38,13 +105,13 @@ function Skeleton() {
     <div className="space-y-4">
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {[...Array(4)].map((_, i) => (
-          <div key={i} className="h-24 animate-pulse bg-slate-200 dark:bg-slate-700 rounded-2xl" />
+          <div key={i} className="h-24 animate-pulse bg-surface-card/60 rounded-xl border border-border-subtle" />
         ))}
       </div>
-      <div className="h-28 animate-pulse bg-slate-200 dark:bg-slate-700 rounded-2xl" />
+      <div className="h-28 animate-pulse bg-surface-card/60 rounded-xl border border-border-subtle" />
       <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-        <div className="md:col-span-3 h-56 animate-pulse bg-slate-200 dark:bg-slate-700 rounded-2xl" />
-        <div className="md:col-span-2 h-56 animate-pulse bg-slate-200 dark:bg-slate-700 rounded-2xl" />
+        <div className="md:col-span-3 h-56 animate-pulse bg-surface-card/60 rounded-xl border border-border-subtle" />
+        <div className="md:col-span-2 h-56 animate-pulse bg-surface-card/60 rounded-xl border border-border-subtle" />
       </div>
     </div>
   )
@@ -54,80 +121,65 @@ function Skeleton() {
 
 function StatCard({ emoji, title, primary, secondary, error }) {
   return (
-    <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 p-4 flex flex-col gap-1.5 shadow-sm">
+    <div className="bg-surface-card/80 backdrop-blur-md border border-border-subtle rounded-xl p-5 flex flex-col gap-1.5 hover:border-border-glow transition-colors duration-200">
       <div className="flex items-center gap-2">
-        <span className="text-xl leading-none">{emoji}</span>
-        <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide truncate">
-          {title}
-        </p>
+        <span className="text-lg leading-none">{emoji}</span>
+        <p className="text-[11px] font-medium text-ink-secondary uppercase tracking-widest truncate">{title}</p>
       </div>
       {error ? (
-        <p className="text-xs text-red-400">Veri yüklenemedi</p>
+        <p className="text-xs text-status-error">Veri yüklenemedi</p>
       ) : (
         <>
-          <p className="text-sm font-bold text-slate-800 dark:text-white leading-snug">{primary}</p>
-          {secondary && (
-            <p className="text-xs text-slate-400 dark:text-slate-500">{secondary}</p>
-          )}
+          <p className="text-sm font-semibold text-ink-primary leading-snug">{primary}</p>
+          {secondary && <p className="text-xs text-ink-muted">{secondary}</p>}
         </>
       )}
     </div>
   )
 }
 
-// ─── Momentum Ring (SVG) ──────────────────────────────────────────────────────
-
-const RING_R    = 48
-const RING_CIRC = 2 * Math.PI * RING_R
+// ─── Momentum Ring ────────────────────────────────────────────────────────────
 
 function MomentumRing({ score, habitScore, taskScore, pomoScore }) {
-  const color = score >= 71 ? '#22c55e' : score >= 41 ? '#f59e0b' : '#ef4444'
+  const color = score >= 71 ? '#22C55E' : score >= 41 ? '#F59E0B' : '#EF4444'
   const dash  = Math.min(score / 100, 1) * RING_CIRC
 
   return (
-    <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 p-5 shadow-sm h-full">
-      <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-4">
+    <div className="bg-surface-card/80 backdrop-blur-md border border-border-subtle rounded-xl p-5 hover:border-border-glow transition-colors duration-200 h-full">
+      <p className="text-[11px] font-medium text-ink-secondary uppercase tracking-widest mb-4">
         Haftalık Momentum
       </p>
       <div className="flex flex-col items-center">
-        <svg viewBox="0 0 120 120" className="w-32 h-32 -mt-1">
-          {/* Background track */}
-          <circle cx="60" cy="60" r={RING_R} fill="none"
-            strokeWidth="10"
-            className="stroke-slate-200 dark:stroke-slate-600" />
-          {/* Progress arc */}
+        <svg viewBox="0 0 120 120" className="w-32 h-32">
+          <circle cx="60" cy="60" r={RING_R} fill="none" strokeWidth="10" className="stroke-white/5" />
           <circle cx="60" cy="60" r={RING_R} fill="none"
             stroke={color} strokeWidth="10"
             strokeDasharray={`${dash} ${RING_CIRC}`}
             strokeLinecap="round"
             transform="rotate(-90 60 60)"
+            style={{ transition: 'stroke-dasharray 0.6s ease' }}
           />
-          {/* Score number */}
           <text x="60" y="56" textAnchor="middle" dominantBaseline="middle"
-            fontSize="26" fontWeight="700"
-            className="fill-slate-800 dark:fill-white">
+            fontSize="26" fontWeight="700" fill="#F0F0FF">
             {score}
           </text>
-          {/* /100 label */}
           <text x="60" y="74" textAnchor="middle" dominantBaseline="middle"
-            fontSize="10" fill="#94a3b8">
+            fontSize="10" fill="#3D3D5C">
             / 100
           </text>
         </svg>
 
-        {/* Sub-scores */}
-        <div className="w-full grid grid-cols-3 gap-2 mt-4 pt-4 border-t border-slate-100 dark:border-slate-700">
+        <div className="w-full grid grid-cols-3 gap-2 mt-4 pt-4 border-t border-border-subtle">
           {[
             { label: 'Alışkanlık', val: habitScore, max: 40 },
-            { label: 'Görev',     val: taskScore,  max: 30 },
-            { label: 'Pomodoro',  val: pomoScore,  max: 30 },
+            { label: 'Görev',      val: taskScore,  max: 30 },
+            { label: 'Pomodoro',   val: pomoScore,  max: 30 },
           ].map(({ label, val, max }) => (
             <div key={label} className="text-center">
-              <p className="text-sm font-bold text-slate-700 dark:text-slate-200">
-                {val}
-                <span className="text-xs font-normal text-slate-400">/{max}</span>
+              <p className="text-sm font-bold text-ink-primary">
+                {val}<span className="text-xs font-normal text-ink-muted">/{max}</span>
               </p>
-              <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">{label}</p>
+              <p className="text-[10px] text-ink-muted mt-0.5">{label}</p>
             </div>
           ))}
         </div>
@@ -144,8 +196,8 @@ export default function Dashboard() {
 
   const today    = new Date()
   const todayStr = fmt(today)
-  const todayDow = today.getDay()           // 0=Sun … 6=Sat
-  const sevenAgo = fmt(subDays(today, 6))   // 7-day window: sevenAgo…today
+  const todayDow = today.getDay()
+  const sevenAgo = fmt(subDays(today, 6))
 
   const [loading, setLoading] = useState(true)
   const [d, setD] = useState({
@@ -158,30 +210,16 @@ export default function Dashboard() {
 
   useEffect(() => {
     async function load() {
-      // All fetches run in parallel; each section degrades independently
       const [r0, r1, r2, r3, r4] = await Promise.allSettled([
-        // [0] habits
         supabase.from('habits').select('*').eq('user_id', user.id),
-        // [1] habit_logs for last 7 days (includes today — slice in JS)
         supabase.from('habit_logs').select('habit_id,date,completed')
-          .eq('user_id', user.id)
-          .gte('date', sevenAgo)
-          .lte('date', todayStr),
-        // [2] tasks with due_date in last 7 days
+          .eq('user_id', user.id).gte('date', sevenAgo).lte('date', todayStr),
         supabase.from('tasks').select('id,title,completed,due_date,priority')
-          .eq('user_id', user.id)
-          .gte('due_date', sevenAgo)
-          .lte('due_date', todayStr),
-        // [3] completed pomodoro sessions from last 7 days
+          .eq('user_id', user.id).gte('due_date', sevenAgo).lte('due_date', todayStr),
         supabase.from('pomodoro_sessions').select('id,was_completed,completed,started_at,completed_at,duration_minutes')
-          .eq('user_id', user.id)
-          .or('was_completed.eq.true,completed.eq.true')
-          .gte('started_at', sevenAgo),
-        // [4] today's journal entry
+          .eq('user_id', user.id).or('was_completed.eq.true,completed.eq.true').gte('started_at', sevenAgo),
         supabase.from('journal_entries').select('id,date,content,images')
-          .eq('user_id', user.id)
-          .eq('date', todayStr)
-          .limit(1),
+          .eq('user_id', user.id).eq('date', todayStr).limit(1),
       ])
 
       const habits   = r0.status === 'fulfilled' ? (r0.value.data || []) : []
@@ -190,22 +228,21 @@ export default function Dashboard() {
       const allPomos = r3.status === 'fulfilled' ? (r3.value.data || []) : []
       const journal  = r4.status === 'fulfilled' ? (r4.value.data?.[0] || null) : null
 
-      // Slice into today vs. full 7-day window
-      const todayLogs  = allLogs.filter(l => l.date === todayStr)
-      const weekLogs   = allLogs
-
-      const todayTasks = allTasks.filter(t => t.due_date === todayStr)
-      const weekTasks  = allTasks
-
-      // Pomodoros: determine "today" by the session's completion or start timestamp
-      const pomodotodayDate = (p) => {
+      const todayPomos = allPomos.filter(p => {
         const ts = p.completed_at || p.started_at
-        return ts ? fmt(parseISO(ts)) : null
-      }
-      const todayPomos = allPomos.filter(p => pomodotodayDate(p) === todayStr)
-      const weekPomos  = allPomos
+        return ts ? fmt(parseISO(ts)) === todayStr : false
+      })
 
-      setD({ habits, todayLogs, weekLogs, todayTasks, weekTasks, todayPomos, weekPomos, journal })
+      setD({
+        habits,
+        todayLogs:  allLogs.filter(l => l.date === todayStr),
+        weekLogs:   allLogs,
+        todayTasks: allTasks.filter(t => t.due_date === todayStr),
+        weekTasks:  allTasks,
+        todayPomos,
+        weekPomos:  allPomos,
+        journal,
+      })
       setErrs({
         habits:   r0.status === 'rejected' || r1.status === 'rejected',
         tasks:    r2.status === 'rejected',
@@ -217,234 +254,156 @@ export default function Dashboard() {
     load()
   }, [user.id]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // ── Derived: habits ───────────────────────────────────────────────────────
+  // ── Derived ───────────────────────────────────────────────────────────────
   const todayHabits = d.habits.filter(h =>
     (h.target_days ?? [0, 1, 2, 3, 4, 5, 6]).includes(todayDow)
   )
-  const completedTodayHabits = todayHabits.filter(h =>
-    d.todayLogs.some(l => l.habit_id === h.id)
-  )
-  const incompleteHabits = todayHabits.filter(h =>
-    !d.todayLogs.some(l => l.habit_id === h.id)
-  )
+  const completedTodayHabits = todayHabits.filter(h => d.todayLogs.some(l => l.habit_id === h.id))
+  const incompleteHabits     = todayHabits.filter(h => !d.todayLogs.some(l => l.habit_id === h.id))
 
-  // ── Derived: tasks ────────────────────────────────────────────────────────
   const completedTodayTasks = d.todayTasks.filter(t => t.completed)
   const pendingTodayTasks   = d.todayTasks.filter(t => !t.completed)
   const highPriorityTask    = pendingTodayTasks.find(t => t.priority === 'high')
 
-  // ── Derived: pomodoro ─────────────────────────────────────────────────────
   const todayPomoCount = d.todayPomos.length
-  const todayPomoMins  = d.todayPomos.reduce((sum, p) => sum + (p.duration_minutes ?? 25), 0)
+  const todayPomoMins  = d.todayPomos.reduce((s, p) => s + (p.duration_minutes ?? 25), 0)
+  const journalHasContent = d.journal && (d.journal.images?.length > 0 || d.journal.content?.trim())
 
-  // ── Derived: journal ──────────────────────────────────────────────────────
-  const journalHasContent = d.journal &&
-    (d.journal.images?.length > 0 || d.journal.content?.trim())
-
-  // ── Derived: momentum score ───────────────────────────────────────────────
-  // Habit component — count expected vs. completed across the last 7 days
+  // Momentum
   let habitExpected = 0, habitDone = 0
   for (let i = 0; i < 7; i++) {
-    const day     = subDays(today, i)
-    const dow     = day.getDay()
-    const ds      = fmt(day)
-    const dayHabs = d.habits.filter(h => (h.target_days ?? [0, 1, 2, 3, 4, 5, 6]).includes(dow))
-    habitExpected += dayHabs.length
-    habitDone     += d.weekLogs.filter(l =>
-      l.date === ds && dayHabs.some(h => h.id === l.habit_id)
-    ).length
+    const day  = subDays(today, i)
+    const dow  = day.getDay()
+    const ds   = fmt(day)
+    const dh   = d.habits.filter(h => (h.target_days ?? [0, 1, 2, 3, 4, 5, 6]).includes(dow))
+    habitExpected += dh.length
+    habitDone     += d.weekLogs.filter(l => l.date === ds && dh.some(h => h.id === l.habit_id)).length
   }
-  const habitScore = habitExpected > 0
-    ? Math.round((habitDone / habitExpected) * 40)
-    : 0
-
-  const taskTotal  = d.weekTasks.length
-  const taskDone   = d.weekTasks.filter(t => t.completed).length
-  const taskScore  = taskTotal > 0 ? Math.round((taskDone / taskTotal) * 30) : 0
-
-  const pomoScore    = Math.round(Math.min(d.weekPomos.length / 28, 1) * 30)
+  const habitScore    = habitExpected > 0 ? Math.round((habitDone / habitExpected) * 40) : 0
+  const taskScore     = d.weekTasks.length > 0 ? Math.round((d.weekTasks.filter(t => t.completed).length / d.weekTasks.length) * 30) : 0
+  const pomoScore     = Math.round(Math.min(d.weekPomos.length / 28, 1) * 30)
   const momentumScore = habitScore + taskScore + pomoScore
 
-  // ── Derived: action ───────────────────────────────────────────────────────
+  // Action
   let action
   if (highPriorityTask) {
-    action = {
-      emoji: '🚨',
-      text:  highPriorityTask.title,
-      sub:   'Yüksek öncelikli görev — bugün bitirilmeli',
-      href:  '/todos',
-      btn:   'Görevlere git',
-    }
+    action = { emoji: '🚨', text: highPriorityTask.title, sub: 'Yüksek öncelikli görev — bugün bitirilmeli', href: '/todos', btn: 'Görevlere git' }
   } else if (incompleteHabits.length > 0) {
-    action = {
-      emoji: '🔥',
-      text:  incompleteHabits[0].name,
-      sub:   `${incompleteHabits.length} alışkanlık tamamlanmayı bekliyor`,
-      href:  '/habits',
-      btn:   'Alışkanlıklara git',
-    }
+    action = { emoji: '🔥', text: incompleteHabits[0].name, sub: `${incompleteHabits.length} alışkanlık tamamlanmayı bekliyor`, href: '/habits', btn: 'Alışkanlıklara git' }
   } else if (todayPomoCount < 4) {
-    action = {
-      emoji: '🍅',
-      text:  `Pomodoro zamanı — henüz ${todayPomoCount} pomodoro tamamladın`,
-      sub:   `Günlük hedefe ulaşmak için ${4 - todayPomoCount} pomodoro daha`,
-      href:  '/pomodoro',
-      btn:   "Pomodoro'ya git",
-    }
+    action = { emoji: '🍅', text: `Pomodoro zamanı — henüz ${todayPomoCount} pomodoro tamamladın`, sub: `${4 - todayPomoCount} oturum daha önerilir`, href: '/pomodoro', btn: "Pomodoro'ya git" }
   } else {
-    action = {
-      emoji: '🎉',
-      text:  'Harika! Bugünkü hedeflerini tamamladın',
-      sub:   null,
-      href:  null,
-      btn:   null,
-    }
+    action = { emoji: '🎉', text: 'Harika! Bugünkü hedeflerini tamamladın', sub: null, href: null, btn: null }
   }
 
-  // ── Quote ─────────────────────────────────────────────────────────────────
   const quote = dailyQuote()
 
   return (
-    <div>
-      {/* ── Header ────────────────────────────────────────────────────────── */}
-      <div className="mb-6">
-        <h2 className="text-2xl font-bold text-slate-800 dark:text-white">
-          Bugünün Komuta Merkezi
-        </h2>
-        <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5 capitalize">
-          {format(today, 'd MMMM yyyy, EEEE', { locale: tr })}
-        </p>
-      </div>
+    <div className="relative min-h-[calc(100vh-3rem)]">
+      {/* Particle canvas — desktop only, behind content */}
+      <ParticleCanvas />
 
-      {loading ? <Skeleton /> : (
-        <div className="space-y-4">
+      <div className="relative z-10">
+        {/* ── Header ──────────────────────────────────────────────────────── */}
+        <div className="mb-6">
+          <h2 className="text-2xl font-semibold text-ink-primary">Bugünün Komuta Merkezi</h2>
+          <p className="text-sm text-ink-secondary mt-0.5 capitalize">
+            {format(today, 'd MMMM yyyy, EEEE', { locale: tr })}
+          </p>
+        </div>
 
-          {/* ── Section 1: Günün Özeti ──────────────────────────────────── */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-            <StatCard
-              emoji="🔥"
-              title="Alışkanlıklar"
-              primary={
-                todayHabits.length === 0
-                  ? 'Bugün hedef gün yok'
-                  : `${completedTodayHabits.length} / ${todayHabits.length} tamamlandı`
-              }
-              secondary={
-                todayHabits.length > 0
-                  ? (incompleteHabits.length > 0
-                      ? `${incompleteHabits.length} alışkanlık bekliyor`
-                      : 'Tümü tamam! 🎯')
-                  : undefined
-              }
-              error={errs.habits}
-            />
-            <StatCard
-              emoji="✅"
-              title="Görevler"
-              primary={`${completedTodayTasks.length} görev tamamlandı bugün`}
-              secondary={
-                pendingTodayTasks.length > 0
-                  ? `${pendingTodayTasks.length} görev bekliyor`
-                  : d.todayTasks.length === 0
-                    ? 'Bugün görev yok'
-                    : 'Tümü tamamlandı! ✅'
-              }
-              error={errs.tasks}
-            />
-            <StatCard
-              emoji="🍅"
-              title="Pomodoro"
-              primary={`${todayPomoCount} pomodoro — ${todayPomoMins} dk odak`}
-              secondary={
-                todayPomoCount >= 4
-                  ? 'Günlük hedefe ulaşıldı 🎯'
-                  : `${4 - todayPomoCount} oturum daha önerilir`
-              }
-              error={errs.pomodoro}
-            />
-            <StatCard
-              emoji="📔"
-              title="Günlük"
-              primary={journalHasContent ? '✍️ Yazıldı' : '📭 Henüz yazılmadı'}
-              secondary={
-                journalHasContent
-                  ? format(today, 'd MMMM', { locale: tr })
-                  : 'Bugün bir şeyler yaz'
-              }
-              error={errs.journal}
-            />
-          </div>
+        {loading ? <Skeleton /> : (
+          <div className="space-y-4">
 
-          {/* ── Section 2: Şimdi Ne Yapmalıyım? ────────────────────────── */}
-          <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 border-l-4 border-l-primary-500 dark:border-l-primary-400 shadow-sm p-5">
-            <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-3">
-              Şimdi Ne Yapmalıyım?
-            </p>
-            <div className="flex items-start gap-3">
-              <span className="text-2xl leading-none mt-0.5 shrink-0">{action.emoji}</span>
-              <div className="flex-1 min-w-0">
-                <p className="text-base font-semibold text-slate-800 dark:text-white leading-snug">
-                  {action.text}
-                </p>
-                {action.sub && (
-                  <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">{action.sub}</p>
-                )}
-              </div>
-              {action.href && (
-                <button
-                  onClick={() => navigate(action.href)}
-                  className="shrink-0 px-3 py-1.5 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-xs font-medium transition-colors whitespace-nowrap">
-                  {action.btn} →
-                </button>
-              )}
-            </div>
-          </div>
-
-          {/* ── Sections 3 + 4: Momentum & Motivasyon ──────────────────── */}
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-
-            {/* Haftalık Momentum */}
-            <div className="md:col-span-3">
-              <MomentumRing
-                score={momentumScore}
-                habitScore={habitScore}
-                taskScore={taskScore}
-                pomoScore={pomoScore}
+            {/* ── Section 1: Günün Özeti ─────────────────────────────────── */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+              <StatCard
+                emoji="🔥"
+                title="Alışkanlıklar"
+                primary={todayHabits.length === 0 ? 'Bugün hedef gün yok' : `${completedTodayHabits.length} / ${todayHabits.length} tamamlandı`}
+                secondary={todayHabits.length > 0 ? (incompleteHabits.length > 0 ? `${incompleteHabits.length} bekliyor` : 'Tümü tamam 🎯') : undefined}
+                error={errs.habits}
+              />
+              <StatCard
+                emoji="✅"
+                title="Görevler"
+                primary={`${completedTodayTasks.length} tamamlandı bugün`}
+                secondary={pendingTodayTasks.length > 0 ? `${pendingTodayTasks.length} görev bekliyor` : d.todayTasks.length === 0 ? 'Bugün görev yok' : 'Tümü bitti ✅'}
+                error={errs.tasks}
+              />
+              <StatCard
+                emoji="🍅"
+                title="Pomodoro"
+                primary={`${todayPomoCount} oturum — ${todayPomoMins} dk`}
+                secondary={todayPomoCount >= 4 ? 'Günlük hedefe ulaşıldı 🎯' : `${4 - todayPomoCount} oturum daha önerilir`}
+                error={errs.pomodoro}
+              />
+              <StatCard
+                emoji="📔"
+                title="Günlük"
+                primary={journalHasContent ? '✍️ Yazıldı' : '📭 Henüz yazılmadı'}
+                secondary={journalHasContent ? format(today, 'd MMMM', { locale: tr }) : 'Bugün bir şeyler yaz'}
+                error={errs.journal}
               />
             </div>
 
-            {/* Motivasyon */}
-            <div className="md:col-span-2">
-              <div className="h-full bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-5 flex flex-col">
-                <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-4">
-                  Motivasyon
-                </p>
-                {journalHasContent ? (
-                  <div className="flex-1 flex flex-col justify-center items-center text-center gap-2">
-                    <span className="text-5xl">📸</span>
-                    <p className="text-sm font-medium text-slate-700 dark:text-slate-200 mt-1">
-                      Bugün günlük yazıldı
-                    </p>
-                    <p className="text-xs text-slate-400">
-                      {format(today, 'd MMMM yyyy', { locale: tr })}
-                    </p>
-                  </div>
-                ) : (
-                  <div className="flex-1 flex flex-col justify-center">
-                    <p className="text-base italic text-slate-600 dark:text-slate-300 leading-relaxed">
-                      &ldquo;{quote}&rdquo;
-                    </p>
-                    <p className="text-xs text-slate-400 dark:text-slate-500 mt-4">
-                      — EF Komuta Merkezi
-                    </p>
-                  </div>
+            {/* ── Section 2: Şimdi Ne Yapmalıyım? ────────────────────────── */}
+            <div className="bg-surface-card/80 backdrop-blur-md border border-border-subtle border-l-[3px] border-l-primary-500 rounded-xl p-5 hover:border-border-glow transition-colors duration-200">
+              <p className="text-[11px] font-medium text-ink-secondary uppercase tracking-widest mb-3">
+                Şimdi Ne Yapmalıyım?
+              </p>
+              <div className="flex items-start gap-3">
+                <span className="text-2xl leading-none mt-0.5 shrink-0">{action.emoji}</span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-ink-primary leading-snug">{action.text}</p>
+                  {action.sub && <p className="text-xs text-ink-muted mt-0.5">{action.sub}</p>}
+                </div>
+                {action.href && (
+                  <button
+                    onClick={() => navigate(action.href)}
+                    className="shrink-0 px-3 py-1.5 rounded-lg bg-primary-500 hover:bg-primary-600 text-white text-xs font-medium transition-colors whitespace-nowrap">
+                    {action.btn} →
+                  </button>
                 )}
               </div>
             </div>
 
+            {/* ── Sections 3 + 4: Momentum & Motivasyon ──────────────────── */}
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+
+              <div className="md:col-span-3">
+                <MomentumRing
+                  score={momentumScore}
+                  habitScore={habitScore}
+                  taskScore={taskScore}
+                  pomoScore={pomoScore}
+                />
+              </div>
+
+              <div className="md:col-span-2">
+                <div className="h-full bg-surface-card/80 backdrop-blur-md border border-border-subtle rounded-xl p-5 flex flex-col hover:border-border-glow transition-colors duration-200">
+                  <p className="text-[11px] font-medium text-ink-secondary uppercase tracking-widest mb-4">
+                    Motivasyon
+                  </p>
+                  {journalHasContent ? (
+                    <div className="flex-1 flex flex-col justify-center items-center text-center gap-2">
+                      <span className="text-4xl">📸</span>
+                      <p className="text-sm font-medium text-ink-primary mt-1">Bugün günlük yazıldı</p>
+                      <p className="text-xs text-ink-muted">{format(today, 'd MMMM yyyy', { locale: tr })}</p>
+                    </div>
+                  ) : (
+                    <div className="flex-1 flex flex-col justify-center">
+                      <p className="text-sm italic text-ink-secondary leading-relaxed">&ldquo;{quote}&rdquo;</p>
+                      <p className="text-xs text-ink-muted mt-4">— EF Komuta Merkezi</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   )
 }

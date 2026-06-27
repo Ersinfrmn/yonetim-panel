@@ -435,12 +435,12 @@ export default function Journal() {
               if (!uploading) uploadFiles(Array.from(e.dataTransfer.files))
             }}
             onClick={() => { if (!uploading) fileInputRef.current?.click() }}
-            className={`m-4 border-2 border-dashed rounded-xl py-12 px-6 flex flex-col items-center justify-center gap-2 select-none transition-colors ${
+            className={`m-4 border-2 border-dashed rounded-sm py-12 px-6 flex flex-col items-center justify-center gap-2 select-none transition-colors ${
               uploading
-                ? 'border-border-subtle cursor-default'
+                ? 'border-white/10 cursor-default'
                 : dragging
-                  ? 'border-primary-400 bg-primary-500/10 cursor-copy'
-                  : 'border-border-subtle cursor-pointer hover:border-border-glow hover:bg-primary-500/5'
+                  ? 'border-primary-500 bg-primary-500/10 cursor-copy'
+                  : 'border-white/10 cursor-pointer hover:border-primary-500 hover:bg-primary-500/5'
             }`}
           >
             {uploading ? (

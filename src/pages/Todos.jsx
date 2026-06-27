@@ -911,7 +911,7 @@ export default function Todos() {
                 onChange={e => setF('title', e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && addTask()}
                 placeholder="Görev başlığı..."
-                className="flex-1 px-4 py-2.5 rounded-xl border border-border-subtle bg-white/5 text-ink-primary placeholder-ink-muted focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="flex-1 px-3 py-2 text-sm border-b border-white/10 bg-white/5 text-ink-primary placeholder:text-white/30 focus:outline-none focus:border-primary-500"
               />
               <button onClick={addTask}
                 className="bg-primary-500 hover:bg-primary-600 text-white px-4 py-2 rounded-xl flex items-center gap-2 text-sm transition-colors shrink-0">

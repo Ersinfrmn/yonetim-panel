@@ -320,8 +320,8 @@ export default function Journal() {
                     )
                   }}
                 />
-                <Line type="monotone" dataKey="mood" stroke="#6C3FE8" strokeWidth={2}
-                  dot={{ fill: '#6C3FE8', r: 3, strokeWidth: 0 }} activeDot={{ r: 4 }}
+                <Line type="monotone" dataKey="mood" stroke="#b91c1c" strokeWidth={2}
+                  dot={{ fill: '#b91c1c', r: 3, strokeWidth: 0 }} activeDot={{ r: 4 }}
                   connectNulls={false}
                 />
               </LineChart>

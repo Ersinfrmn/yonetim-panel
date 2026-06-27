@@ -141,8 +141,6 @@ export default function Dashboard() {
   })
   const [errs, setErrs] = useState({})
 
-  const [xpData, setXpData] = useState(null)
-
   const [modal,              setModal]              = useState(null)
   const [step,               setStep]               = useState(1)
   const [morningTasks,       setMorningTasks]       = useState(['', '', ''])

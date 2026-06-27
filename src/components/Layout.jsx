@@ -519,7 +519,7 @@ export default function Layout({ children }) {
 
         {/* ── Click-outside overlay for addiction panel ────────────────── */}
         {showPanel && (
-          <div style={{ position: 'fixed', inset: 0, zIndex: 44 }} onClick={() => setShowPanel(false)} />
+          <div style={{ position: 'fixed', inset: 0, zIndex: 55 }} onClick={() => setShowPanel(false)} />
         )}
 
         {/* ── Addiction panel ──────────────────────────────────────────── */}

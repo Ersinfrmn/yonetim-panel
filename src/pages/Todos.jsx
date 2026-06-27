@@ -1,3 +1,7 @@
+// SQL — run once in Supabase:
+// ALTER TABLE todos ADD COLUMN IF NOT EXISTS goal_id uuid references goals(id);
+// (Table is named 'tasks' in this app — use: ALTER TABLE tasks ADD COLUMN IF NOT EXISTS goal_id uuid references goals(id);)
+
 import { useEffect, useRef, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'

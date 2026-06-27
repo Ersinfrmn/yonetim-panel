@@ -381,8 +381,8 @@ export default function Stats() {
         <ResponsiveContainer width="100%" height={180}>
           <BarChart data={data.last7} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="rgba(108,63,232,0.08)" />
-            <XAxis dataKey="day" tick={{ fontSize: 12, fill: '#6B6B8A' }} />
-            <YAxis domain={[0, 100]} tick={{ fontSize: 12, fill: '#6B6B8A' }} unit="%" />
+            <XAxis dataKey="day" tick={{ fontSize: 12, fill: '#888888' }} />
+            <YAxis domain={[0, 100]} tick={{ fontSize: 12, fill: '#888888' }} unit="%" />
             <Tooltip
               formatter={v => [`${v}%`, 'Tamamlanma']}
               contentStyle={{ background: '#111128', border: 'none', borderRadius: 8, color: '#f8fafc' }}
@@ -398,8 +398,8 @@ export default function Stats() {
         <ResponsiveContainer width="100%" height={180}>
           <LineChart data={data.last30} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="rgba(108,63,232,0.08)" />
-            <XAxis dataKey="day" tick={{ fontSize: 11, fill: '#6B6B8A' }} />
-            <YAxis domain={[0, 100]} tick={{ fontSize: 12, fill: '#6B6B8A' }} unit="%" />
+            <XAxis dataKey="day" tick={{ fontSize: 11, fill: '#888888' }} />
+            <YAxis domain={[0, 100]} tick={{ fontSize: 12, fill: '#888888' }} unit="%" />
             <Tooltip
               formatter={v => [`${v}%`, 'Oran']}
               contentStyle={{ background: '#111128', border: 'none', borderRadius: 8, color: '#f8fafc' }}
@@ -514,8 +514,8 @@ export default function Stats() {
                 <XAxis
                   dataKey="x"
                   type="number"
-                  label={{ value: 'Tamamlanan alışkanlık', position: 'insideBottom', offset: -2, fontSize: 10, fill: '#6B6B8A' }}
-                  tick={{ fontSize: 11, fill: '#6B6B8A' }}
+                  label={{ value: 'Tamamlanan alışkanlık', position: 'insideBottom', offset: -2, fontSize: 10, fill: '#888888' }}
+                  tick={{ fontSize: 11, fill: '#888888' }}
                   allowDecimals={false}
                   domain={['auto', 'auto']}
                 />

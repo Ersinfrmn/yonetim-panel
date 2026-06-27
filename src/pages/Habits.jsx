@@ -9,6 +9,8 @@ import {
 } from 'lucide-react'
 import { useTheme } from '../contexts/ThemeContext'
 import toast from 'react-hot-toast'
+import confetti from 'canvas-confetti'
+import { awardXP } from '../utils/xp'
 
 const CHAIN_DAYS = 14
 const MIN_BREAK_CHARS = 100

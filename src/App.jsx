@@ -15,7 +15,7 @@ import Stats from './pages/Stats'
 function PrivateRoute({ children }) {
   const { user, loading } = useAuth()
   if (loading) return (
-    <div className="min-h-screen bg-surface flex items-center justify-center">
+    <div className="min-h-screen flex items-center justify-center">
       <div className="w-8 h-8 border-2 border-primary-500 border-t-transparent rounded-full animate-spin" />
     </div>
   )

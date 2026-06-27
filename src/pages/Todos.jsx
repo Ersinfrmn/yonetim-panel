@@ -13,7 +13,6 @@ import {
   RotateCcw, Tag, ChevronLeft, ChevronRight,
 } from 'lucide-react'
 import toast from 'react-hot-toast'
-import { awardXP } from '../utils/xp'
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 

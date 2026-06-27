@@ -13,7 +13,9 @@
       "Bash(git push *)",
       "Bash(npx vite *)",
       "Skill(update-config)",
-      "Skill(update-config:*)"
+      "Skill(update-config:*)",
+      "Bash(node -e ' *)",
+      "Bash(git commit *)"
     ]
   },
   "hooks": {

@@ -369,10 +369,11 @@ export default function Journal() {
               onClick={() => handleMoodSelect(i + 1)}
               title={['Kötü', 'Üzgün', 'Nötr', 'İyi', 'Harika'][i]}
               style={{
-                width: 32, height: 32, borderRadius: 4, fontSize: 18,
-                border: mood === i + 1 ? '1px solid #b91c1c' : '1px solid rgba(255,255,255,0.06)',
-                background: mood === i + 1 ? 'rgba(185,28,28,0.1)' : 'transparent',
-                transition: 'border-color 150ms, background 150ms',
+                width: 44, height: 44, borderRadius: 4, fontSize: 24,
+                border: mood === i + 1 ? '2px solid #b91c1c' : '1px solid rgba(255,255,255,0.06)',
+                background: mood === i + 1 ? 'rgba(185,28,28,0.12)' : 'transparent',
+                opacity: mood === i + 1 ? 1 : 0.3,
+                transition: 'border-color 150ms, background 150ms, opacity 150ms',
                 cursor: 'pointer',
               }}
             >

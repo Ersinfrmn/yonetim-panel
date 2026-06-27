@@ -378,10 +378,10 @@ export default function Goals() {
           <button
             key={f.key}
             onClick={() => setFilter(f.key)}
-            className={`flex-1 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+            className={`flex-1 py-1.5 rounded-sm text-[11px] font-bold uppercase tracking-wider transition-colors ${
               filter === f.key
-                ? 'bg-white/10 text-ink-primary'
-                : 'text-ink-muted hover:text-ink-secondary'
+                ? 'bg-primary-500 text-white'
+                : 'text-white/40 hover:text-white/70'
             }`}
           >
             {f.label}

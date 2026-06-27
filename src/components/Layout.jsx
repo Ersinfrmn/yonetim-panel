@@ -167,8 +167,8 @@ function NavItem({ to, icon: Icon, label = '', expanded = false, mobile = false 
 export default function Layout({ children }) {
   const { signOut }             = useAuth()
   const navigate                = useNavigate()
-  const [expanded, setExpanded]         = useState(false)
-  const [addictionOpen, setAddictionOpen] = useState(false)
+  const location                = useLocation()
+  const [expanded, setExpanded] = useState(false)
 
   async function handleSignOut() {
     await signOut()

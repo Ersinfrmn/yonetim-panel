@@ -739,7 +739,7 @@ export default function Pomodoro() {
           className="w-full flex items-center justify-between px-4 py-3.5 text-sm font-semibold text-ink-primary hover:bg-white/5 transition-colors"
         >
           <span>📊 Bu Haftanın Odak Özeti</span>
-          {showReport ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+          {showReport ? <ChevronUp size={16} className="text-primary-400" /> : <ChevronDown size={16} className="text-primary-400" />}
         </button>
 
         {showReport && (

@@ -361,7 +361,7 @@ export default function Stats() {
               <Trophy size={22} className="text-primary-400" />
             </div>
             <div>
-              <p className="text-[11px] font-medium text-ink-secondary uppercase tracking-widest">En Verimli Günüm</p>
+              <p className="text-[11px] font-bold text-primary-400 uppercase tracking-widest">En Verimli Günüm</p>
               {extras.bestDay ? (<>
                 <p className="font-bold text-ink-primary text-sm mt-0.5">
                   {format(parseISO(extras.bestDay.date), 'd MMMM yyyy, EEEE', { locale: tr })}

@@ -210,7 +210,7 @@ function ChainBoxes({ logs, habitId, targetDays, onToggleToday }) {
     doneFill:    '#cbd5e1', doneStroke:   '#64748b', doneX:   '#1e293b', doneConn:   '#cbd5e1',
     emptyFill:   '#f8fafc', emptyStroke:  '#e2e8f0',
     skipFill:    '#f1f3f6', skipStroke:   '#e5e8ee', skipDash: '#c8d0da',
-    todayStroke: '#6C3FE8', todayLabel:   '#6C3FE8',
+    todayStroke: '#b91c1c', todayLabel:   '#b91c1c',
   }
 
   return (

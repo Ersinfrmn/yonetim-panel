@@ -143,6 +143,9 @@ export default function Layout({ children }) {
         </div>
       </main>
 
+      {/* ── Orbital glow ring — fixed, visible on all pages ──────────────── */}
+      <OrbitalGlow />
+
       {/* ── Mobile bottom nav — icons only, 56px ──────────────────────────── */}
       <nav
         className="md:hidden fixed bottom-0 left-0 right-0 z-40 h-14 flex items-center"

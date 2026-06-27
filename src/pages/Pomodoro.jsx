@@ -770,9 +770,9 @@ export default function Pomodoro() {
                 <ResponsiveContainer width="100%" height={90}>
                   <BarChart data={chartData} margin={{ top: 0, right: 0, left: -28, bottom: 0 }}>
                     <XAxis dataKey="day"
-                      tick={{ fontSize: 11, fill: '#6B6B8A' }} axisLine={false} tickLine={false} />
+                      tick={{ fontSize: 11, fill: '#888888' }} axisLine={false} tickLine={false} />
                     <YAxis
-                      tick={{ fontSize: 11, fill: '#6B6B8A' }} axisLine={false} tickLine={false}
+                      tick={{ fontSize: 11, fill: '#888888' }} axisLine={false} tickLine={false}
                       allowDecimals={false} />
                     <Tooltip
                       contentStyle={{ background: '#111128', border: 'none', borderRadius: 8, fontSize: 12 }}

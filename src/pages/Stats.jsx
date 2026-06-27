@@ -538,7 +538,7 @@ export default function Stats() {
                   labelFormatter={v => `${v} alışkanlık`}
                 />
                 {/* Scatter points */}
-                <Scatter dataKey="y" fill="#818cf8" opacity={0.75} name="y" />
+                <Scatter dataKey="y" fill="#b91c1c" opacity={0.75} name="y" />
                 {/* Trend line */}
                 <Line
                   type="linear"

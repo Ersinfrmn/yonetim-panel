@@ -98,71 +98,73 @@ export default function Layout({ children }) {
   }
 
   return (
-    <div className="relative z-10 flex h-screen overflow-hidden">
+    <>
+      {/* Orbital ring lives outside the flex container so it never affects flow */}
+      <OrbitalGlow />
 
-      {/* ── Desktop sidebar — icon-only 64px strip ────────────────────────── */}
-      <aside
-        className="relative hidden md:flex flex-col items-center shrink-0 w-16"
-        style={{
-          background:    'rgba(8, 8, 20, 0.92)',
-          backdropFilter:'blur(20px)',
-          borderRight:   '1px solid rgba(139,92,246,0.1)',
-        }}
-      >
-        {/* Subtle top gradient overlay */}
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{ background: 'linear-gradient(180deg, rgba(108,63,232,0.07) 0%, transparent 40%)' }}
-        />
+      <div className="relative z-10 flex h-screen overflow-hidden">
 
-        {/* Monogram */}
-        <div className="relative h-16 flex items-center justify-center shrink-0">
-          <span className="text-primary-500 font-semibold text-lg leading-none select-none">EF</span>
-        </div>
+        {/* ── Desktop sidebar — icon-only 64px strip ──────────────────────── */}
+        <aside
+          className="relative hidden md:flex flex-col items-center shrink-0 w-16"
+          style={{
+            background:    'rgba(8, 8, 20, 0.92)',
+            backdropFilter:'blur(20px)',
+            borderRight:   '1px solid rgba(139,92,246,0.1)',
+          }}
+        >
+          {/* Subtle top gradient overlay */}
+          <div
+            className="absolute inset-0 pointer-events-none"
+            style={{ background: 'linear-gradient(180deg, rgba(108,63,232,0.07) 0%, transparent 40%)' }}
+          />
 
-        {/* Nav */}
-        <nav className="relative flex-1 flex flex-col items-center gap-1 pt-1">
-          {NAV.map(item => <NavItem key={item.to} {...item} />)}
-        </nav>
+          {/* Monogram */}
+          <div className="relative h-16 flex items-center justify-center shrink-0">
+            <span className="text-primary-500 font-semibold text-lg leading-none select-none">EF</span>
+          </div>
 
-        {/* Logout */}
-        <div className="relative h-16 flex items-center justify-center shrink-0">
+          {/* Nav */}
+          <nav className="relative flex-1 flex flex-col items-center gap-1 pt-1">
+            {NAV.map(item => <NavItem key={item.to} {...item} />)}
+          </nav>
+
+          {/* Logout */}
+          <div className="relative h-16 flex items-center justify-center shrink-0">
+            <button
+              onClick={handleSignOut}
+              className="w-10 h-10 flex items-center justify-center rounded-lg text-ink-muted hover:text-status-error hover:bg-white/5 transition-colors duration-150"
+            >
+              <LogOut size={20} strokeWidth={1.5} />
+            </button>
+          </div>
+        </aside>
+
+        {/* ── Main content ────────────────────────────────────────────────── */}
+        <main className="flex-1 overflow-y-auto pb-14 md:pb-0" style={{ position: 'relative', zIndex: 1 }}>
+          <div className="max-w-4xl mx-auto p-4 md:p-6">
+            {children}
+          </div>
+        </main>
+
+        {/* ── Mobile bottom nav — icons only, 56px ────────────────────────── */}
+        <nav
+          className="md:hidden fixed bottom-0 left-0 right-0 z-40 h-14 flex items-center"
+          style={{
+            background:    'rgba(8, 8, 20, 0.95)',
+            backdropFilter:'blur(20px)',
+            borderTop:     '1px solid rgba(139,92,246,0.1)',
+          }}
+        >
+          {NAV.map(item => <NavItem key={item.to} {...item} mobile />)}
           <button
             onClick={handleSignOut}
-            className="w-10 h-10 flex items-center justify-center rounded-lg text-ink-muted hover:text-status-error hover:bg-white/5 transition-colors duration-150"
+            className="flex-1 flex items-center justify-center text-ink-muted hover:text-status-error transition-colors duration-150"
           >
             <LogOut size={20} strokeWidth={1.5} />
           </button>
-        </div>
-      </aside>
-
-      {/* ── Main content ──────────────────────────────────────────────────── */}
-      <main className="flex-1 overflow-y-auto pb-14 md:pb-0" style={{ position: 'relative', zIndex: 1 }}>
-        <div className="max-w-4xl mx-auto p-4 md:p-6">
-          {children}
-        </div>
-      </main>
-
-      {/* ── Orbital glow ring — fixed, visible on all pages ──────────────── */}
-      <OrbitalGlow />
-
-      {/* ── Mobile bottom nav — icons only, 56px ──────────────────────────── */}
-      <nav
-        className="md:hidden fixed bottom-0 left-0 right-0 z-40 h-14 flex items-center"
-        style={{
-          background:    'rgba(8, 8, 20, 0.95)',
-          backdropFilter:'blur(20px)',
-          borderTop:     '1px solid rgba(139,92,246,0.1)',
-        }}
-      >
-        {NAV.map(item => <NavItem key={item.to} {...item} mobile />)}
-        <button
-          onClick={handleSignOut}
-          className="flex-1 flex items-center justify-center text-ink-muted hover:text-status-error transition-colors duration-150"
-        >
-          <LogOut size={20} strokeWidth={1.5} />
-        </button>
-      </nav>
-    </div>
+        </nav>
+      </div>
+    </>
   )
 }

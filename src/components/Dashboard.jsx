@@ -141,6 +141,12 @@ export default function Dashboard() {
   })
   const [errs, setErrs] = useState({})
 
+  const [modal,              setModal]              = useState(null)
+  const [step,               setStep]               = useState(1)
+  const [morningTasks,       setMorningTasks]       = useState(['', '', ''])
+  const [eveningNote,        setEveningNote]        = useState('')
+  const [tomorrowPriorities, setTomorrowPriorities] = useState(['', '', ''])
+
   useEffect(() => {
     async function load() {
       const [r0, r1, r2, r3, r4] = await Promise.allSettled([

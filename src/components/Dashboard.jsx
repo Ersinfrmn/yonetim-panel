@@ -278,11 +278,11 @@ export default function Dashboard() {
 
             {/* ── Section 2: Şimdi Ne Yapmalıyım? ────────────────────────── */}
             <div className="bg-surface-card/80 backdrop-blur-md border border-border-subtle border-l-[3px] border-l-primary-500 rounded-xl p-5 hover:border-border-glow transition-colors duration-200">
-              <p className="text-[11px] font-medium text-ink-secondary uppercase tracking-widest mb-3">
+              <p className="text-[10px] font-medium text-ink-muted uppercase tracking-[0.15em] mb-3">
                 Şimdi Ne Yapmalıyım?
               </p>
               <div className="flex items-start gap-3">
-                <span className="text-2xl leading-none mt-0.5 shrink-0">{action.emoji}</span>
+                <Zap size={16} style={{ color: '#b91c1c', flexShrink: 0, marginTop: 2 }} />
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-semibold text-ink-primary leading-snug">{action.text}</p>
                   {action.sub && <p className="text-xs text-ink-muted mt-0.5">{action.sub}</p>}

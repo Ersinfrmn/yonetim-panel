@@ -33,7 +33,7 @@ const pColor = p => p >= 100 ? '#22c55e' : p >= 67 ? '#6366f1' : p >= 34 ? '#eab
 function MoodTick({ x, y, payload }) {
   return (
     <g transform={`translate(${x},${y})`}>
-      <text x={-4} y={0} dy={5} textAnchor="end" fill="#94a3b8" fontSize={13}>
+      <text x={-4} y={0} dy={5} textAnchor="end" fill="#6B6B8A" fontSize={13}>
         {MOOD[payload.value]}
       </text>
     </g>
@@ -268,13 +268,13 @@ export default function Stats() {
 
   // ── Early return ──────────────────────────────────────────────────────────
 
-  if (!data) return <div className="text-center py-20 text-slate-400">İstatistikler yükleniyor...</div>
+  if (!data) return <div className="text-center py-20 text-ink-muted">İstatistikler yükleniyor...</div>
 
   const statCards = [
-    { icon: CheckSquare, label: 'Bu hafta tamamlanan',  value: data.tasksThisWeek,       sub: `${data.tasksThisMonth} bu ay`,   color: 'text-blue-500',   bg: 'bg-blue-50 dark:bg-blue-900/20' },
-    { icon: BookOpen,    label: 'Günlük serisi',         value: `${data.journalStreak}g`,  sub: 'ardışık gün',                   color: 'text-purple-500', bg: 'bg-purple-50 dark:bg-purple-900/20' },
-    { icon: Timer,       label: 'Bugünkü pomodoro',      value: data.pomoToday,            sub: `${data.pomoWeek} bu hafta`,     color: 'text-red-500',    bg: 'bg-red-50 dark:bg-red-900/20' },
-    { icon: Flame,       label: 'Aktif alışkanlık',      value: data.habitCount,           sub: 'takip edilen alışkanlık',       color: 'text-orange-500', bg: 'bg-orange-50 dark:bg-orange-900/20' },
+    { icon: CheckSquare, label: 'Bu hafta tamamlanan',  value: data.tasksThisWeek,       sub: `${data.tasksThisMonth} bu ay`,   color: 'text-primary-400', bg: 'bg-primary-500/10' },
+    { icon: BookOpen,    label: 'Günlük serisi',         value: `${data.journalStreak}g`,  sub: 'ardışık gün',                   color: 'text-primary-400', bg: 'bg-primary-500/10' },
+    { icon: Timer,       label: 'Bugünkü pomodoro',      value: data.pomoToday,            sub: `${data.pomoWeek} bu hafta`,     color: 'text-status-error',    bg: 'bg-status-error/10' },
+    { icon: Flame,       label: 'Aktif alışkanlık',      value: data.habitCount,           sub: 'takip edilen alışkanlık',       color: 'text-status-warning', bg: 'bg-status-warning/10' },
   ]
 
   // ── Render ────────────────────────────────────────────────────────────────
@@ -283,10 +283,10 @@ export default function Stats() {
     <div>
       {/* Header + CSV button */}
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold text-slate-800 dark:text-white">İstatistikler</h2>
+        <h2 className="text-2xl font-semibold text-ink-primary">İstatistikler</h2>
         <button
           onClick={downloadCSV}
-          className="flex items-center gap-2 px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-medium hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+          className="flex items-center gap-2 px-3 py-2 rounded-xl border border-border-subtle bg-white/5 text-ink-secondary text-xs font-medium hover:text-ink-primary hover:bg-white/10 transition-colors"
         >
           <Download size={14} />
           CSV İndir
@@ -296,33 +296,33 @@ export default function Stats() {
       {/* ── Özet kartlar (unchanged) ────────────────────────────────────────── */}
       <div className="grid grid-cols-2 gap-3 mb-6">
         {statCards.map(({ icon: Icon, label, value, sub, color, bg }) => (
-          <div key={label} className="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-100 dark:border-slate-700">
+          <div key={label} className="bg-surface-card/80 backdrop-blur-md border border-border-subtle rounded-xl p-4 hover:border-border-glow transition-colors duration-200">
             <div className={`w-9 h-9 rounded-xl ${bg} flex items-center justify-center mb-3`}>
               <Icon size={18} className={color} />
             </div>
-            <p className="text-2xl font-bold text-slate-800 dark:text-white">{value}</p>
-            <p className="text-xs font-medium text-slate-600 dark:text-slate-300 mt-0.5">{label}</p>
-            <p className="text-xs text-slate-400 mt-0.5">{sub}</p>
+            <p className="text-2xl font-bold text-ink-primary">{value}</p>
+            <p className="text-xs font-medium text-ink-secondary mt-0.5">{label}</p>
+            <p className="text-xs text-ink-muted mt-0.5">{sub}</p>
           </div>
         ))}
       </div>
 
       {/* ── En Verimli Günüm badge ───────────────────────────────────────────── */}
       {extras && (
-        <div className="mb-6 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 p-4">
+        <div className="mb-6 bg-surface-card/80 backdrop-blur-md border border-border-subtle rounded-xl p-4 hover:border-border-glow transition-colors duration-200">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-amber-50 dark:bg-amber-900/30 flex items-center justify-center shrink-0">
+            <div className="w-12 h-12 rounded-xl bg-status-warning/10 flex items-center justify-center shrink-0">
               <Trophy size={22} className="text-amber-500" />
             </div>
             <div>
-              <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">En Verimli Günüm</p>
+              <p className="text-[11px] font-medium text-ink-secondary uppercase tracking-widest">En Verimli Günüm</p>
               {extras.bestDay ? (<>
-                <p className="font-bold text-slate-800 dark:text-white text-sm mt-0.5">
+                <p className="font-bold text-ink-primary text-sm mt-0.5">
                   {format(parseISO(extras.bestDay.date), 'd MMMM yyyy, EEEE', { locale: tr })}
                 </p>
-                <p className="text-xs text-slate-400 mt-0.5">{extras.bestDay.count} pomodoro tamamlandı</p>
+                <p className="text-xs text-ink-muted mt-0.5">{extras.bestDay.count} pomodoro tamamlandı</p>
               </>) : (
-                <p className="text-sm text-slate-400 mt-0.5">Henüz tamamlanan pomodoro yok</p>
+                <p className="text-sm text-ink-muted mt-0.5">Henüz tamamlanan pomodoro yok</p>
               )}
             </div>
           </div>
@@ -330,45 +330,45 @@ export default function Stats() {
       )}
 
       {/* ── Son 7 gün alışkanlık tamamlanma oranı (unchanged) ───────────────── */}
-      <div className="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-100 dark:border-slate-700 mb-6">
-        <h3 className="text-sm font-semibold text-slate-600 dark:text-slate-300 mb-4">Alışkanlık Tamamlanma Oranı — Son 7 Gün</h3>
+      <div className="bg-surface-card/80 backdrop-blur-md border border-border-subtle rounded-xl p-4 hover:border-border-glow transition-colors duration-200 mb-6">
+        <h3 className="text-sm font-semibold text-ink-secondary mb-4">Alışkanlık Tamamlanma Oranı — Son 7 Gün</h3>
         <ResponsiveContainer width="100%" height={180}>
           <BarChart data={data.last7} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-            <XAxis dataKey="day" tick={{ fontSize: 12, fill: '#94a3b8' }} />
-            <YAxis domain={[0, 100]} tick={{ fontSize: 12, fill: '#94a3b8' }} unit="%" />
+            <CartesianGrid strokeDasharray="3 3" stroke="rgba(108,63,232,0.08)" />
+            <XAxis dataKey="day" tick={{ fontSize: 12, fill: '#6B6B8A' }} />
+            <YAxis domain={[0, 100]} tick={{ fontSize: 12, fill: '#6B6B8A' }} unit="%" />
             <Tooltip
               formatter={v => [`${v}%`, 'Tamamlanma']}
-              contentStyle={{ background: '#1e293b', border: 'none', borderRadius: 8, color: '#f8fafc' }}
+              contentStyle={{ background: '#111128', border: 'none', borderRadius: 8, color: '#f8fafc' }}
             />
-            <Bar dataKey="rate" fill="#0ea5e9" radius={[4, 4, 0, 0]} />
+            <Bar dataKey="rate" fill="#6C3FE8" radius={[4, 4, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </div>
 
       {/* ── 30 günlük trend (unchanged) ─────────────────────────────────────── */}
-      <div className="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-100 dark:border-slate-700 mb-6">
-        <h3 className="text-sm font-semibold text-slate-600 dark:text-slate-300 mb-4">Alışkanlık Oranı Trendi — Son 30 Gün</h3>
+      <div className="bg-surface-card/80 backdrop-blur-md border border-border-subtle rounded-xl p-4 hover:border-border-glow transition-colors duration-200 mb-6">
+        <h3 className="text-sm font-semibold text-ink-secondary mb-4">Alışkanlık Oranı Trendi — Son 30 Gün</h3>
         <ResponsiveContainer width="100%" height={180}>
           <LineChart data={data.last30} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-            <XAxis dataKey="day" tick={{ fontSize: 11, fill: '#94a3b8' }} />
-            <YAxis domain={[0, 100]} tick={{ fontSize: 12, fill: '#94a3b8' }} unit="%" />
+            <CartesianGrid strokeDasharray="3 3" stroke="rgba(108,63,232,0.08)" />
+            <XAxis dataKey="day" tick={{ fontSize: 11, fill: '#6B6B8A' }} />
+            <YAxis domain={[0, 100]} tick={{ fontSize: 12, fill: '#6B6B8A' }} unit="%" />
             <Tooltip
               formatter={v => [`${v}%`, 'Oran']}
-              contentStyle={{ background: '#1e293b', border: 'none', borderRadius: 8, color: '#f8fafc' }}
+              contentStyle={{ background: '#111128', border: 'none', borderRadius: 8, color: '#f8fafc' }}
             />
-            <Line type="monotone" dataKey="rate" stroke="#0ea5e9" strokeWidth={2} dot={{ r: 3, fill: '#0ea5e9' }} />
+            <Line type="monotone" dataKey="rate" stroke="#6C3FE8" strokeWidth={2} dot={{ r: 3, fill: '#6C3FE8' }} />
           </LineChart>
         </ResponsiveContainer>
       </div>
 
       {/* ── NEW: Goal Progress ───────────────────────────────────────────────── */}
       {extras && (
-        <div className="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-100 dark:border-slate-700 mb-6">
-          <h3 className="text-sm font-semibold text-slate-600 dark:text-slate-300 mb-4">Hedef İlerlemesi</h3>
+        <div className="bg-surface-card/80 backdrop-blur-md border border-border-subtle rounded-xl p-4 hover:border-border-glow transition-colors duration-200 mb-6">
+          <h3 className="text-sm font-semibold text-ink-secondary mb-4">Hedef İlerlemesi</h3>
           {extras.goals.length === 0 ? (
-            <p className="text-sm text-slate-400 text-center py-6">Henüz hedef eklenmedi</p>
+            <p className="text-sm text-ink-muted text-center py-6">Henüz hedef eklenmedi</p>
           ) : (
             <div className="space-y-4">
               {extras.goals.map(goal => {
@@ -377,21 +377,21 @@ export default function Stats() {
                 return (
                   <div key={goal.id}>
                     <div className="flex items-center justify-between mb-1">
-                      <span className="text-sm font-medium text-slate-700 dark:text-slate-200 truncate max-w-[75%]">
+                      <span className="text-sm font-medium text-ink-primary truncate max-w-[75%]">
                         {goal.title}
                       </span>
                       <span className="text-xs font-semibold tabular-nums" style={{ color }}>
                         {pct}%
                       </span>
                     </div>
-                    <div className="h-2 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+                    <div className="h-2 bg-white/5 rounded-full overflow-hidden">
                       <div
                         className="h-full rounded-full transition-all duration-500"
                         style={{ width: `${pct}%`, backgroundColor: color }}
                       />
                     </div>
                     {goal.target_date && (
-                      <p className="text-[11px] text-slate-400 mt-1">
+                      <p className="text-[11px] text-ink-muted mt-1">
                         Hedef: {format(parseISO(goal.target_date), 'd MMM yyyy', { locale: tr })}
                       </p>
                     )}
@@ -405,14 +405,14 @@ export default function Stats() {
 
       {/* ── NEW: Habit × Mood Correlation ───────────────────────────────────── */}
       {extras && (
-        <div className="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-100 dark:border-slate-700 mb-6">
-          <h3 className="text-sm font-semibold text-slate-600 dark:text-slate-300 mb-0.5">
+        <div className="bg-surface-card/80 backdrop-blur-md border border-border-subtle rounded-xl p-4 hover:border-border-glow transition-colors duration-200 mb-6">
+          <h3 className="text-sm font-semibold text-ink-secondary mb-0.5">
             Alışkanlık × Ruh Hali Korelasyonu
           </h3>
-          <p className="text-xs text-slate-400 mb-4">Son 30 gün — yalnızca ruh hali girilen günler</p>
+          <p className="text-xs text-ink-muted mb-4">Son 30 gün — yalnızca ruh hali girilen günler</p>
 
           {!extras.hasEnoughCorr ? (
-            <p className="text-sm text-slate-400 text-center py-8">
+            <p className="text-sm text-ink-muted text-center py-8">
               Yeterli veri yok — daha fazla günlük girişi yapın
             </p>
           ) : (
@@ -421,12 +421,12 @@ export default function Stats() {
                 data={extras.correlationData}
                 margin={{ top: 4, right: 8, left: -4, bottom: 0 }}
               >
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(148,163,184,0.15)" />
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(108,63,232,0.08)" />
                 <XAxis
                   dataKey="x"
                   type="number"
-                  label={{ value: 'Tamamlanan alışkanlık', position: 'insideBottom', offset: -2, fontSize: 10, fill: '#94a3b8' }}
-                  tick={{ fontSize: 11, fill: '#94a3b8' }}
+                  label={{ value: 'Tamamlanan alışkanlık', position: 'insideBottom', offset: -2, fontSize: 10, fill: '#6B6B8A' }}
+                  tick={{ fontSize: 11, fill: '#6B6B8A' }}
                   allowDecimals={false}
                   domain={['auto', 'auto']}
                 />
@@ -439,8 +439,8 @@ export default function Stats() {
                   width={32}
                 />
                 <Tooltip
-                  contentStyle={{ background: '#1e293b', border: 'none', borderRadius: 8, fontSize: 12 }}
-                  labelStyle={{ color: '#94a3b8' }}
+                  contentStyle={{ background: '#111128', border: 'none', borderRadius: 8, fontSize: 12 }}
+                  labelStyle={{ color: '#6B6B8A' }}
                   formatter={(value, name) => [
                     name === 'y'     ? MOOD[value] || value :
                     name === 'trend' ? `${value.toFixed(1)} (trend)` : value,
@@ -468,7 +468,7 @@ export default function Stats() {
           {/* Mood legend */}
           <div className="flex gap-3 mt-3 flex-wrap justify-center">
             {[1, 2, 3, 4, 5].map(m => (
-              <span key={m} className="text-xs text-slate-400 flex items-center gap-1">
+              <span key={m} className="text-xs text-ink-muted flex items-center gap-1">
                 <span>{MOOD[m]}</span>
                 <span>{m}</span>
               </span>

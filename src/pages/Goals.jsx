@@ -11,7 +11,7 @@ import toast from 'react-hot-toast'
 const CATEGORIES = [
   { value: 'career',    label: 'Kariyer',  emoji: '💼', bg: 'bg-blue-900/30',    text: 'text-blue-300' },
   { value: 'health',    label: 'Sağlık',   emoji: '💪', bg: 'bg-green-900/30',  text: 'text-green-300' },
-  { value: 'education', label: 'Eğitim',   emoji: '📚', bg: 'bg-purple-900/30', text: 'text-purple-300' },
+  { value: 'education', label: 'Eğitim',   emoji: '📚', bg: 'bg-rose-900/30', text: 'text-rose-300' },
   { value: 'finance',   label: 'Finans',   emoji: '💰', bg: 'bg-yellow-900/30', text: 'text-yellow-300' },
   { value: 'personal',  label: 'Kişisel',  emoji: '🌱', bg: 'bg-teal-900/30',    text: 'text-teal-300' },
 ]

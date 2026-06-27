@@ -354,7 +354,7 @@ export default function Dashboard() {
                 {action.href && (
                   <button
                     onClick={() => navigate(action.href)}
-                    className="shrink-0 px-3 py-1.5 rounded-lg bg-primary-500 hover:bg-primary-600 text-white text-xs font-medium transition-colors whitespace-nowrap">
+                    className="shrink-0 px-4 py-2 rounded-sm bg-primary-500 hover:bg-primary-600 text-white text-xs font-bold uppercase tracking-wider transition-colors whitespace-nowrap">
                     {action.btn} →
                   </button>
                 )}

@@ -65,7 +65,7 @@ export default function Layout({ children }) {
   }
 
   return (
-    <div className="flex h-screen overflow-hidden" style={{ background: '#0a0a0a' }}>
+    <div className="flex h-screen overflow-hidden" style={{ background: 'transparent' }}>
 
       {/* ── Desktop sidebar ──────────────────────────────────────────────── */}
       <aside

@@ -87,7 +87,7 @@ function getNextDate(task) {
 
 const emptyForm = () => ({
   title: '', due_date: '', priority: 'medium',
-  importance: 'normal', recurrence: 'none', tags: [],
+  importance: 'normal', recurrence: 'none', tags: [], goal_id: null,
 })
 
 // ─── Calendar helpers ─────────────────────────────────────────────────────────

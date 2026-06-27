@@ -427,7 +427,7 @@ export default function Pomodoro() {
         })}
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center select-none">
-        <span className="text-[10px] uppercase tracking-[0.2em] text-ink-muted mb-1 font-medium">
+        <span className="text-[10px] uppercase tracking-[0.2em] text-primary-400 mb-1 font-bold">
           {phaseLabel}
         </span>
         {phase === 'cdown'

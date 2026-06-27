@@ -14,22 +14,21 @@
 }
 
 html {
-  background: #05050f;
+  background: #0a0a0a;
 }
 
 body {
   font-family: 'Geist', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
-  color: #F0F0FF;
+  color: #ffffff;
 }
 
 body, #root {
-  background: #05050f;
+  background-color: #0a0a0a;
   background-image:
-    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(108,63,232,0.35) 0%, transparent 60%),
-    radial-gradient(ellipse 60% 40% at 80% 80%,  rgba(76,29,149,0.2)  0%, transparent 50%),
-    radial-gradient(ellipse 40% 30% at 20% 60%,  rgba(139,92,246,0.1) 0%, transparent 40%);
-  background-attachment: fixed;
+    linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
   min-height: 100vh;
 }
 
@@ -40,41 +39,54 @@ body, #root {
 /* Scrollbar */
 ::-webkit-scrollbar       { width: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(108,63,232,0.4); border-radius: 2px; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
 
 /* Selection */
-::selection { background: rgba(108,63,232,0.35); color: #F0F0FF; }
+::selection { background: rgba(185,28,28,0.35); color: #ffffff; }
 
 /* ── Page enter transition ───────────────────────────────────────────────── */
 @keyframes pageEnter {
-  from { opacity: 0; transform: scale(0.97); }
+  from { opacity: 0; transform: scale(0.99); }
   to   { opacity: 1; transform: scale(1); }
 }
 .page-enter {
-  animation: pageEnter 200ms ease-out both;
+  animation: pageEnter 150ms ease-out both;
 }
 
-/* ── Orbital ring spin ───────────────────────────────────────────────────── */
-@keyframes orbitalSpin {
-  from { transform: translateY(-50%) rotate(0deg); }
-  to   { transform: translateY(-50%) rotate(360deg); }
+/* ── Cards — sharp, solid, no blur ──────────────────────────────────────── */
+[class*="bg-surface-card"] {
+  background: #111111 !important;
+  backdrop-filter: none !important;
+  border-radius: 4px !important;
+  box-shadow: none !important;
+  transition: border-color 150ms ease !important;
 }
 
-/* ── Glassmorphism card depth ────────────────────────────────────────────── */
-/* Targets all cards that have both bg-surface-card and backdrop-blur        */
-[class*="bg-surface-card"][class*="backdrop-blur"] {
-  background: rgba(11, 11, 26, 0.72) !important;
-  backdrop-filter: blur(20px) saturate(160%) !important;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.04);
-  transition: all 200ms ease;
-}
-[class*="bg-surface-card"][class*="backdrop-blur"]:hover {
-  box-shadow: 0 8px 32px rgba(0,0,0,0.45), 0 0 24px rgba(108,63,232,0.12), inset 0 1px 0 rgba(255,255,255,0.04);
+/* ── Buttons — sharp corners ─────────────────────────────────────────────── */
+button:not([class*="rounded-full"]) {
+  border-radius: 2px !important;
 }
 
-/* ── Page title glow ─────────────────────────────────────────────────────── */
+/* ── Inputs & selects — sharp corners ───────────────────────────────────── */
+input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+select,
+textarea {
+  border-radius: 2px !important;
+}
+
+/* ── Page title — no glow ───────────────────────────────────────────────── */
 main h2 {
-  text-shadow: 0 0 40px rgba(139,92,246,0.3);
+  text-shadow: none;
+}
+
+/* ── Range input ─────────────────────────────────────────────────────────── */
+input[type='range'] {
+  accent-color: #b91c1c;
+}
+
+/* ── Date/number inputs ──────────────────────────────────────────────────── */
+input[type='date']::-webkit-calendar-picker-indicator {
+  filter: invert(0.5);
 }
 
 /* ── Heatmap cells ───────────────────────────────────────────────────────── */
@@ -83,14 +95,4 @@ main h2 {
 }
 .heatmap-cell:hover {
   opacity: 0.8;
-}
-
-/* Range input */
-input[type='range'] {
-  accent-color: #6C3FE8;
-}
-
-/* Date/number inputs — dark fill */
-input[type='date']::-webkit-calendar-picker-indicator {
-  filter: invert(0.5);
 }

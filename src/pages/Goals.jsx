@@ -5,7 +5,6 @@ import { format, parseISO, differenceInDays } from 'date-fns'
 import { tr } from 'date-fns/locale'
 import { Plus, Trash2, Target, Sparkles, X } from 'lucide-react'
 import toast from 'react-hot-toast'
-import confetti from 'canvas-confetti'
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 

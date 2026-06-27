@@ -72,6 +72,7 @@ const GROUPS = [
       { to: '/habits',   icon: Repeat,      label: 'Alışkanlıklar' },
       { to: '/pomodoro', icon: Timer,       label: 'Pomodoro'      },
       { to: '/journal',  icon: BookOpen,    label: 'Günlük'        },
+      { to: '/books',    icon: Library,     label: 'Kitaplar'      },
     ],
   },
   {

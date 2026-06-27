@@ -313,7 +313,6 @@ export default function Dashboard() {
   return (
     <>
       <ParticleCanvas />
-      <OrbitalGlow />
 
       <div>
         {/* ── Header ──────────────────────────────────────────────────────── */}

@@ -9,11 +9,11 @@ import toast from 'react-hot-toast'
 // ─── Constants ───────────────────────────────────────────────────────────────
 
 const CATEGORIES = [
-  { value: 'career',    label: 'Kariyer',  emoji: '💼', bg: 'bg-blue-100 dark:bg-blue-900/30',    text: 'text-blue-700 dark:text-blue-300' },
-  { value: 'health',    label: 'Sağlık',   emoji: '💪', bg: 'bg-green-100 dark:bg-green-900/30',  text: 'text-green-700 dark:text-green-300' },
-  { value: 'education', label: 'Eğitim',   emoji: '📚', bg: 'bg-purple-100 dark:bg-purple-900/30', text: 'text-purple-700 dark:text-purple-300' },
-  { value: 'finance',   label: 'Finans',   emoji: '💰', bg: 'bg-yellow-100 dark:bg-yellow-900/30', text: 'text-yellow-700 dark:text-yellow-300' },
-  { value: 'personal',  label: 'Kişisel',  emoji: '🌱', bg: 'bg-teal-100 dark:bg-teal-900/30',    text: 'text-teal-700 dark:text-teal-300' },
+  { value: 'career',    label: 'Kariyer',  emoji: '💼', bg: 'bg-blue-900/30',    text: 'text-blue-300' },
+  { value: 'health',    label: 'Sağlık',   emoji: '💪', bg: 'bg-green-900/30',  text: 'text-green-300' },
+  { value: 'education', label: 'Eğitim',   emoji: '📚', bg: 'bg-purple-900/30', text: 'text-purple-300' },
+  { value: 'finance',   label: 'Finans',   emoji: '💰', bg: 'bg-yellow-900/30', text: 'text-yellow-300' },
+  { value: 'personal',  label: 'Kişisel',  emoji: '🌱', bg: 'bg-teal-900/30',    text: 'text-teal-300' },
 ]
 
 const TEMPLATES = [
@@ -48,10 +48,10 @@ const TEMPLATES = [
 ]
 
 const STATUS_CONFIG = {
-  active:       { label: 'Aktif',      bg: 'bg-blue-100 dark:bg-blue-900/30',   text: 'text-blue-700 dark:text-blue-300' },
-  'in-progress':{ label: 'Aktif',      bg: 'bg-blue-100 dark:bg-blue-900/30',   text: 'text-blue-700 dark:text-blue-300' },
-  completed:    { label: 'Tamamlandı', bg: 'bg-green-100 dark:bg-green-900/30', text: 'text-green-700 dark:text-green-300' },
-  paused:       { label: 'Beklemede',  bg: 'bg-slate-100 dark:bg-slate-700',    text: 'text-slate-600 dark:text-slate-400' },
+  active:       { label: 'Aktif',      bg: 'bg-blue-900/30',   text: 'text-blue-300' },
+  'in-progress':{ label: 'Aktif',      bg: 'bg-blue-900/30',   text: 'text-blue-300' },
+  completed:    { label: 'Tamamlandı', bg: 'bg-green-900/30', text: 'text-green-300' },
+  paused:       { label: 'Beklemede',  bg: 'bg-white/5',    text: 'text-ink-secondary' },
 }
 
 const MILESTONES = {
@@ -76,7 +76,7 @@ function getDaysInfo(target_date) {
   if (days < 0) return { label: `${Math.abs(days)} gün geçti`, color: 'text-red-500' }
   if (days === 0) return { label: 'Bugün son gün!', color: 'text-amber-500' }
   if (days <= 7)  return { label: `${days} gün kaldı`, color: 'text-amber-500' }
-  return { label: `${days} gün kaldı`, color: 'text-slate-400' }
+  return { label: `${days} gün kaldı`, color: 'text-ink-muted' }
 }
 
 // ─── Component ───────────────────────────────────────────────────────────────
@@ -205,14 +205,14 @@ export default function Goals() {
     <div>
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Hedefler</h2>
+        <h2 className="text-2xl font-bold text-ink-primary">Hedefler</h2>
         <div className="flex gap-2">
           <button
             onClick={() => { setShowTemplates(t => !t); setShowForm(false) }}
             className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium border transition-colors ${
               showTemplates
-                ? 'bg-amber-50 dark:bg-amber-900/20 border-amber-300 dark:border-amber-700 text-amber-700 dark:text-amber-300'
-                : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'
+                ? 'bg-amber-900/20 border-amber-700 text-amber-300'
+                : 'border-border-subtle text-ink-secondary hover:bg-white/5'
             }`}
           >
             <Sparkles size={14} />
@@ -220,7 +220,7 @@ export default function Goals() {
           </button>
           <button
             onClick={() => { setShowForm(f => !f); setShowTemplates(false) }}
-            className="flex items-center gap-1.5 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-xl text-sm font-medium transition-colors"
+            className="flex items-center gap-1.5 px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-xl text-sm font-medium transition-colors"
           >
             {showForm ? <X size={14} /> : <Plus size={14} />}
             {showForm ? 'İptal' : 'Hedef Ekle'}
@@ -230,8 +230,8 @@ export default function Goals() {
 
       {/* ── Template gallery ──────────────────────────────────────────────── */}
       {showTemplates && (
-        <div className="mb-6 bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 p-4">
-          <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-3">
+        <div className="mb-6 bg-surface-card/80 backdrop-blur-md border border-border-subtle rounded-xl p-4">
+          <p className="text-[11px] font-medium text-ink-secondary uppercase tracking-widest mb-3">
             Hazır Şablonlar
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -239,18 +239,18 @@ export default function Goals() {
               <button
                 key={tmpl.key}
                 onClick={() => applyTemplate(tmpl)}
-                className="text-left p-3 rounded-xl border border-slate-200 dark:border-slate-600 hover:border-primary-400 dark:hover:border-primary-500 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-all group"
+                className="text-left p-3 rounded-xl border border-border-subtle hover:border-border-glow hover:bg-primary-500/10 transition-all group"
               >
                 <div className="flex items-center gap-2 mb-1">
                   <span className="text-xl">{tmpl.emoji}</span>
-                  <span className="text-sm font-medium text-slate-800 dark:text-white group-hover:text-primary-700 dark:group-hover:text-primary-300 transition-colors">
+                  <span className="text-sm font-medium text-ink-primary group-hover:text-primary-300 transition-colors">
                     {tmpl.title}
                   </span>
                   <span className={`ml-auto text-xs px-1.5 py-0.5 rounded-full ${getCat(tmpl.category).bg} ${getCat(tmpl.category).text}`}>
                     {getCat(tmpl.category).label}
                   </span>
                 </div>
-                <p className="text-xs text-slate-400 line-clamp-2 pl-8">{tmpl.description}</p>
+                <p className="text-xs text-ink-muted line-clamp-2 pl-8">{tmpl.description}</p>
               </button>
             ))}
           </div>
@@ -259,7 +259,7 @@ export default function Goals() {
 
       {/* ── Create form ───────────────────────────────────────────────────── */}
       {showForm && (
-        <div className="mb-6 bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 p-5 space-y-4">
+        <div className="mb-6 bg-surface-card/80 backdrop-blur-md border border-border-subtle rounded-xl p-5 space-y-4">
           {/* SMART chips */}
           <div className="flex gap-1.5 flex-wrap">
             {[
@@ -271,7 +271,7 @@ export default function Goals() {
             ].map(([letter, word]) => (
               <span
                 key={letter}
-                className="text-[10px] px-2 py-0.5 rounded-full bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 font-semibold"
+                className="text-[10px] px-2 py-0.5 rounded-full bg-primary-900/30 text-primary-400 font-semibold"
               >
                 {letter} — {word}
               </span>
@@ -280,7 +280,7 @@ export default function Goals() {
 
           {/* Title */}
           <div>
-            <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">
+            <label className="block text-xs font-medium text-ink-secondary mb-1">
               Başlık
               <span className="ml-1 text-primary-400 font-normal">Specific</span>
             </label>
@@ -289,13 +289,13 @@ export default function Goals() {
               onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
               onKeyDown={e => e.key === 'Enter' && addGoal()}
               placeholder="Ne tam olarak başarmak istiyorsun? Açık ve net yaz."
-              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm"
+              className="w-full px-4 py-2.5 rounded-xl border border-border-subtle bg-white/5 text-ink-primary placeholder-ink-muted focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm"
             />
           </div>
 
           {/* Description */}
           <div>
-            <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">
+            <label className="block text-xs font-medium text-ink-secondary mb-1">
               Açıklama
               <span className="ml-1 text-primary-400 font-normal">Measurable · Achievable · Relevant</span>
             </label>
@@ -304,18 +304,18 @@ export default function Goals() {
               onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
               placeholder="Başarıyı nasıl ölçeceksin? Bu hedef gerçekçi mi? Neden önemli?"
               rows={2}
-              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none text-sm"
+              className="w-full px-4 py-2.5 rounded-xl border border-border-subtle bg-white/5 text-ink-primary placeholder-ink-muted focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none text-sm"
             />
           </div>
 
           {/* Category + Date */}
           <div className="flex gap-3 flex-wrap">
             <div className="flex-1 min-w-[140px]">
-              <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Kategori</label>
+              <label className="block text-xs font-medium text-ink-secondary mb-1">Kategori</label>
               <select
                 value={form.category}
                 onChange={e => setForm(f => ({ ...f, category: e.target.value }))}
-                className="w-full px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="w-full px-3 py-2.5 rounded-xl border border-border-subtle bg-white/5 text-ink-primary text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
               >
                 {CATEGORIES.map(c => (
                   <option key={c.value} value={c.value}>{c.emoji} {c.label}</option>
@@ -323,7 +323,7 @@ export default function Goals() {
               </select>
             </div>
             <div className="flex-1 min-w-[140px]">
-              <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">
+              <label className="block text-xs font-medium text-ink-secondary mb-1">
                 Hedef tarihi
                 <span className="ml-1 text-primary-400 font-normal">Time-bound</span>
               </label>
@@ -332,7 +332,7 @@ export default function Goals() {
                 value={form.target_date}
                 min={today}
                 onChange={e => setForm(f => ({ ...f, target_date: e.target.value }))}
-                className="w-full px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="w-full px-3 py-2.5 rounded-xl border border-border-subtle bg-white/5 text-ink-primary text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
               />
             </div>
           </div>
@@ -342,13 +342,13 @@ export default function Goals() {
             <button
               onClick={addGoal}
               disabled={!form.title.trim()}
-              className="flex-1 bg-primary-600 hover:bg-primary-700 disabled:opacity-40 disabled:cursor-not-allowed text-white py-2.5 rounded-xl text-sm font-medium transition-colors"
+              className="flex-1 bg-primary-500 hover:bg-primary-600 disabled:opacity-40 disabled:cursor-not-allowed text-white py-2.5 rounded-xl text-sm font-medium transition-colors"
             >
               Hedef Ekle
             </button>
             <button
               onClick={() => { setForm(EMPTY_FORM); setShowForm(false) }}
-              className="px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-sm hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+              className="px-4 py-2.5 rounded-xl border border-border-subtle text-ink-secondary text-sm hover:bg-white/5 transition-colors"
             >
               İptal
             </button>
@@ -357,7 +357,7 @@ export default function Goals() {
       )}
 
       {/* ── Filter tabs ───────────────────────────────────────────────────── */}
-      <div className="flex gap-1 mb-5 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl">
+      <div className="flex gap-1 mb-5 p-1 bg-surface-card rounded-xl border border-border-subtle">
         {[
           { key: 'all',       label: 'Tümü' },
           { key: 'active',    label: 'Aktif' },
@@ -369,8 +369,8 @@ export default function Goals() {
             onClick={() => setFilter(f.key)}
             className={`flex-1 py-1.5 rounded-lg text-xs font-medium transition-colors ${
               filter === f.key
-                ? 'bg-white dark:bg-slate-700 text-slate-800 dark:text-white shadow-sm'
-                : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+                ? 'bg-white/10 text-ink-primary'
+                : 'text-ink-muted hover:text-ink-secondary'
             }`}
           >
             {f.label}
@@ -383,15 +383,15 @@ export default function Goals() {
 
       {/* ── Empty state ───────────────────────────────────────────────────── */}
       {filtered.length === 0 && (
-        <div className="text-center py-16 text-slate-400">
-          <Target size={40} className="mx-auto mb-3 opacity-30" />
+        <div className="text-center py-16 text-ink-muted">
+          <Target size={40} className="mx-auto mb-3 opacity-20 text-ink-muted" />
           <p className="text-sm">
             {filter === 'all' ? 'Henüz hedef yok.' : 'Bu filtrede hedef yok.'}
           </p>
           {filter === 'all' && (
             <button
               onClick={() => setShowForm(true)}
-              className="mt-3 text-sm text-primary-600 dark:text-primary-400 hover:underline"
+              className="mt-3 text-sm text-primary-400 hover:underline"
             >
               İlk hedefini ekle →
             </button>
@@ -411,14 +411,14 @@ export default function Goals() {
           return (
             <div
               key={goal.id}
-              className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 p-4"
+              className="bg-surface-card/80 backdrop-blur-md border border-border-subtle rounded-xl hover:border-border-glow transition-colors duration-200 p-4"
             >
               {/* Card header */}
               <div className="flex items-start gap-3 mb-4">
                 <span className="text-2xl mt-0.5 shrink-0">{cat.emoji}</span>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap mb-0.5">
-                    <p className="font-semibold text-slate-800 dark:text-white leading-tight">{goal.title}</p>
+                    <p className="font-semibold text-ink-primary leading-tight">{goal.title}</p>
                     <span className={`shrink-0 text-xs px-2 py-0.5 rounded-full font-medium ${statusCfg.bg} ${statusCfg.text}`}>
                       {statusCfg.label}
                     </span>
@@ -427,14 +427,14 @@ export default function Goals() {
                     </span>
                   </div>
                   {goal.description && (
-                    <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 mt-0.5">{goal.description}</p>
+                    <p className="text-xs text-ink-secondary line-clamp-2 mt-0.5">{goal.description}</p>
                   )}
                 </div>
                 <div className="flex items-center gap-1 shrink-0">
                   <select
                     value={goal.status}
                     onChange={e => updateStatus(goal, e.target.value)}
-                    className="text-xs px-2 py-1 rounded-lg border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-slate-700 dark:text-slate-300 focus:outline-none"
+                    className="text-xs px-2 py-1 rounded-lg border border-border-subtle bg-surface-card text-ink-secondary focus:outline-none"
                   >
                     <option value="in-progress">Aktif</option>
                     <option value="paused">Beklemede</option>
@@ -442,7 +442,7 @@ export default function Goals() {
                   </select>
                   <button
                     onClick={() => deleteGoal(goal.id)}
-                    className="p-1.5 text-slate-300 dark:text-slate-600 hover:text-red-500 transition-colors"
+                    className="p-1.5 text-ink-muted hover:text-red-500 transition-colors"
                   >
                     <Trash2 size={15} />
                   </button>
@@ -452,16 +452,16 @@ export default function Goals() {
               {/* Progress */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs text-slate-500 dark:text-slate-400">İlerleme</span>
+                  <span className="text-xs text-ink-secondary">İlerleme</span>
                   <span className={`text-xs font-bold tabular-nums ${
-                    progress === 100 ? 'text-green-500' : 'text-primary-600 dark:text-primary-400'
+                    progress === 100 ? 'text-green-500' : 'text-primary-400'
                   }`}>
                     {progress}%
                   </span>
                 </div>
 
                 {/* Progress bar with milestone ticks */}
-                <div className="relative h-2 bg-slate-100 dark:bg-slate-700 rounded-full overflow-visible">
+                <div className="relative h-2 bg-white/5 rounded-full overflow-visible">
                   <div
                     className={`absolute inset-y-0 left-0 rounded-full transition-all duration-300 ${
                       progress === 100 ? 'bg-green-500' : 'bg-primary-500'
@@ -473,8 +473,8 @@ export default function Goals() {
                       key={tick}
                       className={`absolute top-0 bottom-0 w-px rounded-full ${
                         progress >= tick
-                          ? 'bg-white/70 dark:bg-white/50'
-                          : 'bg-slate-300 dark:bg-slate-600'
+                          ? 'bg-white/70'
+                          : 'bg-white/10'
                       }`}
                       style={{ left: `${tick}%` }}
                     />
@@ -501,7 +501,7 @@ export default function Goals() {
                       .map(m => (
                         <span
                           key={m}
-                          className="text-xs px-1.5 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300"
+                          className="text-xs px-1.5 py-0.5 rounded-full bg-status-warning/10 text-status-warning"
                         >
                           {MILESTONES[m]?.icon} {m}%
                         </span>
@@ -512,8 +512,8 @@ export default function Goals() {
 
               {/* Footer: date + countdown */}
               {(goal.target_date || daysInfo) && (
-                <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-700 flex items-center justify-between">
-                  <span className="text-xs text-slate-400">
+                <div className="mt-3 pt-3 border-t border-border-subtle flex items-center justify-between">
+                  <span className="text-xs text-ink-muted">
                     {goal.target_date
                       ? format(parseISO(goal.target_date), 'd MMMM yyyy', { locale: tr })
                       : ''}

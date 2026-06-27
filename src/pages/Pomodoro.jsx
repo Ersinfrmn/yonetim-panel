@@ -775,9 +775,9 @@ export default function Pomodoro() {
                       tick={{ fontSize: 11, fill: '#888888' }} axisLine={false} tickLine={false}
                       allowDecimals={false} />
                     <Tooltip
-                      contentStyle={{ background: '#111128', border: 'none', borderRadius: 8, fontSize: 12 }}
-                      itemStyle={{ color: '#F0F0FF' }}
-                      labelStyle={{ color: '#6B6B8A' }}
+                      contentStyle={{ background: '#111111', border: 'none', borderRadius: 4, fontSize: 12 }}
+                      itemStyle={{ color: '#ffffff' }}
+                      labelStyle={{ color: '#888888' }}
                       formatter={v => [v, 'Pomodoro']}
                     />
                     <Bar dataKey="count" radius={[4, 4, 0, 0]}>

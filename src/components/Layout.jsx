@@ -284,6 +284,8 @@ export default function Layout({ children }) {
           <LogOut size={20} strokeWidth={1.5} />
         </button>
       </nav>
+
+      <AddictionPanel isOpen={addictionOpen} onClose={() => setAddictionOpen(false)} />
     </div>
   )
 }

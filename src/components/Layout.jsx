@@ -37,13 +37,23 @@ function NavItem({ to, icon: Icon, mobile = false }) {
       {({ isActive }) => (
         <div className={`relative w-10 h-10 flex items-center justify-center rounded-lg transition-all duration-150 ${
           isActive
-            ? 'text-primary-400 bg-primary-500/10'
+            ? 'bg-primary-500/15'
             : 'text-ink-muted hover:text-ink-secondary hover:bg-white/5'
         }`}>
           {isActive && (
-            <span className="absolute -left-[18px] top-2 bottom-2 w-[3px] bg-primary-500 rounded-r-full" />
+            <span
+              className="absolute -left-[18px] top-2 bottom-2 w-[3px] rounded-r-full"
+              style={{ background: '#7c3aed' }}
+            />
           )}
-          <Icon size={20} strokeWidth={1.5} />
+          <Icon
+            size={20}
+            strokeWidth={1.5}
+            style={isActive
+              ? { color: '#a78bfa', filter: 'drop-shadow(0 0 6px rgba(139,92,246,0.85))' }
+              : undefined
+            }
+          />
         </div>
       )}
     </NavLink>

@@ -509,7 +509,7 @@ function HabitCreateModal({ onClose, onCreate }) {
               <input autoFocus value={name} onChange={e => setName(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && name.trim() && setStep(2)}
                 placeholder="Örn: Her gün 30 dk koşmak"
-                className="w-full px-4 py-3 rounded-xl border border-border-subtle bg-white/5 text-ink-primary placeholder-ink-muted focus:outline-none focus:ring-2 focus:ring-primary-500" />
+                className="w-full px-4 py-3 border-b border-white/10 bg-white/5 text-ink-primary placeholder:text-white/30 focus:outline-none focus:border-primary-500" />
               <div className="flex gap-3 mt-5">
                 <button onClick={onClose} className={btnSec}>İptal</button>
                 <button onClick={() => setStep(2)} disabled={!name.trim()} className={btnPri(name.trim())}>İleri →</button>

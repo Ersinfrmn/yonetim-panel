@@ -45,7 +45,7 @@ body, #root {
 /* Selection */
 ::selection { background: rgba(108,63,232,0.35); color: #F0F0FF; }
 
-/* Page enter transition */
+/* ── Page enter transition ───────────────────────────────────────────────── */
 @keyframes pageEnter {
   from { opacity: 0; transform: scale(0.97); }
   to   { opacity: 1; transform: scale(1); }
@@ -54,7 +54,30 @@ body, #root {
   animation: pageEnter 200ms ease-out both;
 }
 
-/* Heatmap cells */
+/* ── Orbital ring spin ───────────────────────────────────────────────────── */
+@keyframes orbitalSpin {
+  from { transform: translateY(-50%) rotate(0deg); }
+  to   { transform: translateY(-50%) rotate(360deg); }
+}
+
+/* ── Glassmorphism card depth ────────────────────────────────────────────── */
+/* Targets all cards that have both bg-surface-card and backdrop-blur        */
+[class*="bg-surface-card"][class*="backdrop-blur"] {
+  background: rgba(11, 11, 26, 0.72) !important;
+  backdrop-filter: blur(20px) saturate(160%) !important;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.04);
+  transition: all 200ms ease;
+}
+[class*="bg-surface-card"][class*="backdrop-blur"]:hover {
+  box-shadow: 0 8px 32px rgba(0,0,0,0.45), 0 0 24px rgba(108,63,232,0.12), inset 0 1px 0 rgba(255,255,255,0.04);
+}
+
+/* ── Page title glow ─────────────────────────────────────────────────────── */
+main h2 {
+  text-shadow: 0 0 40px rgba(139,92,246,0.3);
+}
+
+/* ── Heatmap cells ───────────────────────────────────────────────────────── */
 .heatmap-cell {
   transition: opacity 0.15s;
 }

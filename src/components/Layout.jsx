@@ -482,6 +482,19 @@ export default function Layout({ children }) {
             ))}
           </nav>
 
+          {/* Addiction tracker toggle */}
+          <div style={{ height: 40, display: 'flex', alignItems: 'center', flexShrink: 0 }}>
+            <button
+              onClick={() => setShowPanel(v => !v)}
+              style={{ width: 64, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, background: 'none', border: 'none', cursor: 'pointer', color: showPanel ? '#b91c1c' : '#444444', transition: 'color 150ms' }}
+            >
+              <ShieldOff size={20} strokeWidth={1.5} />
+            </button>
+            <span style={{ opacity: expanded ? 1 : 0, transition: 'opacity 200ms ease', fontSize: 12, color: '#888888', whiteSpace: 'nowrap', userSelect: 'none' }}>
+              Bağımlılık
+            </span>
+          </div>
+
           {/* Logout */}
           <div style={{ height: 64, display: 'flex', alignItems: 'center', flexShrink: 0 }}>
             <button

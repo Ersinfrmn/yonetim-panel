@@ -308,17 +308,13 @@ export default function Dashboard() {
           <p className="text-sm text-ink-secondary mt-0.5 capitalize">
             {format(today, 'd MMMM yyyy, EEEE', { locale: tr })}
           </p>
-          <div style={{ marginTop: 12 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-              <span style={{ fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase', color: '#444444' }}>
-                SEVİYE {xpData?.level ?? 1}
-              </span>
-              <span style={{ fontSize: 10, color: '#444444' }}>
-                {xpData ? xpData.total_xp % 100 : 0} / 100 XP
-              </span>
+          <div style={{ marginBottom: '16px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+              <span style={{ fontSize: '9px', letterSpacing: '0.15em', textTransform: 'uppercase', color: '#444444' }}>SEVİYE 1</span>
+              <span style={{ fontSize: '9px', color: '#444444' }}>0 / 100 XP</span>
             </div>
-            <div style={{ height: 2, background: 'rgba(255,255,255,0.06)', borderRadius: 1 }}>
-              <div style={{ height: '100%', borderRadius: 1, background: '#b91c1c', width: `${xpData ? xpData.total_xp % 100 : 0}%`, transition: 'width 600ms ease' }} />
+            <div style={{ height: '2px', background: 'rgba(255,255,255,0.06)', borderRadius: '1px' }}>
+              <div style={{ height: '100%', width: '0%', background: '#b91c1c', borderRadius: '1px' }} />
             </div>
           </div>
         </div>

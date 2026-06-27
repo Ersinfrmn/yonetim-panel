@@ -201,10 +201,10 @@ function ChainBoxes({ logs, habitId, targetDays, onToggleToday }) {
 
   const C = dark ? {
     activeFill:  '#f59e0b', activeStroke: '#78350f', activeX: '#fef3c7', activeConn: '#f59e0b',
-    doneFill:    '#1a1a3a', doneStroke:   '#0D0D1A', doneX:   '#3D3D5C', doneConn:   '#1a1a3a',
-    emptyFill:   '#0D0D1A', emptyStroke:  'rgba(108,63,232,0.2)',
-    skipFill:    '#080810', skipStroke:   'rgba(108,63,232,0.1)', skipDash: 'rgba(108,63,232,0.15)',
-    todayStroke: '#8b6dff', todayLabel:   '#8b6dff',
+    doneFill:    '#1a1a1a', doneStroke:   '#0d0d0d', doneX:   '#666666', doneConn:   '#1a1a1a',
+    emptyFill:   '#0d0d0d', emptyStroke:  'rgba(255,255,255,0.1)',
+    skipFill:    '#080808', skipStroke:   'rgba(255,255,255,0.06)', skipDash: 'rgba(255,255,255,0.1)',
+    todayStroke: '#b91c1c', todayLabel:   '#b91c1c',
   } : {
     activeFill:  '#fbbf24', activeStroke: '#92400e', activeX: '#ffffff', activeConn: '#fbbf24',
     doneFill:    '#cbd5e1', doneStroke:   '#64748b', doneX:   '#1e293b', doneConn:   '#cbd5e1',

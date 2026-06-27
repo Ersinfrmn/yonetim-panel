@@ -359,7 +359,7 @@ export default function Pomodoro() {
   const progress   = total > 0 ? (total - secs) / total : 0
   const dashOffset = CIRC * (1 - progress)
   const isBreakish = phase === 'break' || (phase === 'cdown' && cTarget === 'focus')
-  const ringColor  = isBreakish ? '#10b981' : '#6C3FE8'
+  const ringColor  = isBreakish ? '#10b981' : '#b91c1c'
 
   const phaseLabel =
     phase === 'idle'                               ? 'HAZIR' :

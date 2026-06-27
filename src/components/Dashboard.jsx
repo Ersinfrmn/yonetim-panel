@@ -237,6 +237,62 @@ export default function Dashboard() {
 
   const quote = dailyQuote()
 
+  // ── Modal helpers ─────────────────────────────────────────────────────────
+
+  const DOW_KEY = ['sun','mon','tue','wed','thu','fri','sat']
+
+  async function openModal(type) {
+    setStep(1)
+    setModal(type)
+    if (type === 'morning') {
+      const ws = fmt(startOfWeek(new Date(), { weekStartsOn: 1 }))
+      const { data } = await supabase
+        .from('weekly_plans').select('day_tasks')
+        .eq('user_id', user.id).eq('week_start', ws).maybeSingle()
+      const dk    = DOW_KEY[new Date().getDay()]
+      const items = (data?.day_tasks?.[dk] || []).slice(0, 3)
+      setMorningTasks(
+        [0, 1, 2].map(i => (typeof items[i] === 'string' ? items[i] : items[i]?.text) || '')
+      )
+    } else {
+      setEveningNote('')
+      setTomorrowPriorities(['', '', ''])
+    }
+  }
+
+  function closeModal() { setModal(null); setStep(1) }
+
+  async function saveJournalNote() {
+    if (!eveningNote.trim()) return
+    const { data: ex } = await supabase
+      .from('journal_entries').select('id,content')
+      .eq('user_id', user.id).eq('date', todayStr).maybeSingle()
+    if (ex) {
+      await supabase.from('journal_entries')
+        .update({ content: ex.content ? `${ex.content}\n\n---\n${eveningNote}` : eveningNote })
+        .eq('id', ex.id)
+    } else {
+      await supabase.from('journal_entries')
+        .insert({ user_id: user.id, date: todayStr, content: eveningNote, images: [] })
+    }
+  }
+
+  async function saveTomorrowPlan() {
+    const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate() + 1)
+    const ws  = fmt(startOfWeek(tomorrow, { weekStartsOn: 1 }))
+    const dk  = DOW_KEY[tomorrow.getDay()]
+    const { data: ex } = await supabase
+      .from('weekly_plans').select('*').eq('user_id', user.id).eq('week_start', ws).maybeSingle()
+    const EMPTY    = { mon:[], tue:[], wed:[], thu:[], fri:[], sat:[], sun:[] }
+    const newTasks = tomorrowPriorities.filter(t => t.trim()).map(text => ({ text, done: false }))
+    const patch    = { ...(ex?.day_tasks || EMPTY), [dk]: newTasks }
+    if (ex) {
+      await supabase.from('weekly_plans').update({ day_tasks: patch }).eq('id', ex.id)
+    } else {
+      await supabase.from('weekly_plans').insert({ user_id: user.id, week_start: ws, day_tasks: patch })
+    }
+  }
+
   return (
     <div style={{ background: 'transparent' }}>
       {/* ── Header ──────────────────────────────────────────────────────── */}

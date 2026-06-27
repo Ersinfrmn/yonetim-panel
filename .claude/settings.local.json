@@ -19,7 +19,8 @@
       "Bash(git checkout *)",
       "Bash(cat vercel.json)",
       "Bash(ls .vercel)",
-      "Bash(npx vercel *)"
+      "Bash(npx vercel *)",
+      "Bash(git check-ignore *)"
     ]
   },
   "hooks": {

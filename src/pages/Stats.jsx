@@ -404,7 +404,7 @@ export default function Stats() {
               formatter={v => [`${v}%`, 'Oran']}
               contentStyle={{ background: '#111111', border: 'none', borderRadius: 4, color: '#ffffff' }}
             />
-            <Line type="monotone" dataKey="rate" stroke="#6C3FE8" strokeWidth={2} dot={{ r: 3, fill: '#6C3FE8' }} />
+            <Line type="monotone" dataKey="rate" stroke="#b91c1c" strokeWidth={2} dot={{ r: 3, fill: '#b91c1c' }} />
           </LineChart>
         </ResponsiveContainer>
       </div>

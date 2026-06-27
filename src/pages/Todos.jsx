@@ -874,10 +874,10 @@ export default function Todos() {
           { key: 'calendar', label: '📅 Takvim'   },
         ].map(({ key, label }) => (
           <button key={key} onClick={() => setMainTab(key)}
-            className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-colors ${
+            className={`flex-1 py-2 px-4 rounded-sm text-xs font-bold uppercase tracking-wider transition-colors ${
               mainTab === key
-                ? 'bg-white/10 text-ink-primary'
-                : 'text-ink-muted hover:text-ink-secondary'
+                ? 'bg-primary-500 text-white'
+                : 'text-white/40 hover:text-white/70'
             }`}>
             {label}
           </button>

@@ -975,9 +975,9 @@ export default function Todos() {
           {/* List view */}
           {viewMode === 'list' && (
             filtered.length === 0 ? (
-              <div className="text-center py-12 text-ink-muted">
-                <CheckSquare size={36} className="mx-auto mb-2 opacity-30" />
-                <p>Burada görev yok!</p>
+              <div className="text-center py-20">
+                <CheckSquare size={56} strokeWidth={1.5} className="mx-auto mb-4 text-white/10" />
+                <p className="text-xs uppercase tracking-widest text-white/30">Burada görev yok</p>
               </div>
             ) : (
               <div className="space-y-2">

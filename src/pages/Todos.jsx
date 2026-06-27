@@ -826,6 +826,7 @@ export default function Todos() {
       importance: task.importance || 'normal',
       recurrence: task.recurrence || 'none',
       tags: task.tags || [],
+      goal_id: task.goal_id || null,
     })
   }
 

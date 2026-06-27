@@ -94,9 +94,19 @@ export default function Goals() {
   const celebratedRef = useRef({})
 
   useEffect(() => {
-    supabase.from('goals').select('*').eq('user_id', user.id)
-      .order('created_at', { ascending: false })
-      .then(({ data }) => { setGoals(data || []); setLoading(false) })
+    Promise.all([
+      supabase.from('goals').select('*').eq('user_id', user.id).order('created_at', { ascending: false }),
+      supabase.from('tasks').select('id, title, completed, goal_id').eq('user_id', user.id).not('goal_id', 'is', null),
+    ]).then(([{ data: g }, { data: t }]) => {
+      setGoals(g || [])
+      const map = {}
+      ;(t || []).forEach(task => {
+        if (!map[task.goal_id]) map[task.goal_id] = []
+        map[task.goal_id].push(task)
+      })
+      setLinkedTodosMap(map)
+      setLoading(false)
+    })
   }, [])
 
   // ── CRUD ──────────────────────────────────────────────────────────────────

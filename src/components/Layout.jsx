@@ -197,9 +197,8 @@ export default function Layout({ children }) {
             zIndex:         50,
             width:          expanded ? 220 : 64,
             overflow:       'hidden',
-            background:     expanded ? 'rgba(5,5,5,0.88)' : 'transparent',
-            backdropFilter: expanded ? 'blur(12px)' : 'none',
-            transition:     'width 250ms ease, background 250ms ease, backdrop-filter 250ms ease',
+            background:     expanded ? 'rgba(5,5,5,0.3)' : 'transparent',
+            transition:     'width 250ms ease, background 250ms ease',
           }}
         >
           {/* Monogram */}

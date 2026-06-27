@@ -1133,6 +1133,12 @@ export default function Habits() {
         </div>
       )}
 
+      </>)}
+
+      {habitsTab === 'archive' && (
+        <BreakArchive breakReasons={breakReasons} habits={habits} />
+      )}
+
       {createModal && <HabitCreateModal onClose={() => setCreateModal(false)} onCreate={handleCreate} />}
       {editModal   && <HabitEditModal habit={editModal} onClose={() => setEditModal(null)} onSave={handleEdit} />}
       {breakModal  && <ChainBreakModal habit={breakModal.habit} onSubmit={handleBreakReasonSubmit} onClose={() => setBreakModal(null)} />}

@@ -104,9 +104,12 @@ export default function Pomodoro() {
       if (s && typeof s.focusDuration === 'number' &&
               typeof s.shortBreak    === 'number' &&
               typeof s.longBreak     === 'number')
-        return { focus: s.focusDuration, short: s.shortBreak, long: s.longBreak }
+        return {
+          focus: s.focusDuration, short: s.shortBreak, long: s.longBreak,
+          soundType: s.soundType || 'alarm', soundVolume: s.soundVolume ?? 0.8,
+        }
     } catch {}
-    return { focus: 25, short: 5, long: 15 }
+    return { focus: 25, short: 5, long: 15, soundType: 'alarm', soundVolume: 0.8 }
   }
   const [cfg, setCfg]         = useState(initCfg)
   const [draft, setDraft]     = useState(initCfg)

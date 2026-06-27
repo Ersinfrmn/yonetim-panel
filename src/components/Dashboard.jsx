@@ -93,11 +93,11 @@ function MomentumRing({ score, habitScore, taskScore, pomoScore }) {
             style={{ transition: 'stroke-dasharray 0.6s ease' }}
           />
           <text x="60" y="56" textAnchor="middle" dominantBaseline="middle"
-            fontSize="26" fontWeight="700" fill="#F0F0FF">
+            fontSize="30" fontWeight="700" fill="#ffffff">
             {score}
           </text>
           <text x="60" y="74" textAnchor="middle" dominantBaseline="middle"
-            fontSize="10" fill="#3D3D5C">
+            fontSize="10" fill="rgba(255,255,255,0.3)">
             / 100
           </text>
         </svg>

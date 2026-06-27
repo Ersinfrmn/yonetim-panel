@@ -1,3 +1,8 @@
+@import '@fontsource/geist/400.css';
+@import '@fontsource/geist/500.css';
+@import '@fontsource/geist/600.css';
+@import '@fontsource/geist/700.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -8,9 +13,14 @@
   padding: 0;
 }
 
+html, body {
+  background: #080810;
+}
+
 body {
-  font-family: system-ui, -apple-system, sans-serif;
+  font-family: 'Geist', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
+  color: #F0F0FF;
 }
 
 #root {
@@ -18,19 +28,21 @@ body {
   min-height: 100vh;
 }
 
-/* Custom scrollbar */
-::-webkit-scrollbar {
-  width: 6px;
+/* Scrollbar */
+::-webkit-scrollbar       { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(108,63,232,0.4); border-radius: 2px; }
+
+/* Selection */
+::selection { background: rgba(108,63,232,0.35); color: #F0F0FF; }
+
+/* Page enter transition */
+@keyframes pageEnter {
+  from { opacity: 0; transform: scale(0.97); }
+  to   { opacity: 1; transform: scale(1); }
 }
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 3px;
-}
-.dark ::-webkit-scrollbar-thumb {
-  background: #475569;
+.page-enter {
+  animation: pageEnter 200ms ease-out both;
 }
 
 /* Heatmap cells */
@@ -39,4 +51,14 @@ body {
 }
 .heatmap-cell:hover {
   opacity: 0.8;
+}
+
+/* Range input */
+input[type='range'] {
+  accent-color: #6C3FE8;
+}
+
+/* Date/number inputs — dark fill */
+input[type='date']::-webkit-calendar-picker-indicator {
+  filter: invert(0.5);
 }

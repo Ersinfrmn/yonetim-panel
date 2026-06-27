@@ -17,7 +17,7 @@ import {
 const fmt     = d => format(d, 'yyyy-MM-dd')
 const display = d => format(typeof d === 'string' ? parseISO(d) : d, 'd MMMM yyyy', { locale: tr })
 
-const MOOD_EMOJIS = ['😞', '😕', '😐', '🙂', '😊']
+const MOOD_EMOJIS = ['😞', '😕', '😐', '🙂', '😄']
 
 function getImageUrl(path) {
   const { data } = supabase.storage.from('journal-images').getPublicUrl(path)

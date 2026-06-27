@@ -33,7 +33,7 @@ const pColor = p => p >= 100 ? '#22c55e' : p >= 67 ? '#6366f1' : p >= 34 ? '#eab
 function MoodTick({ x, y, payload }) {
   return (
     <g transform={`translate(${x},${y})`}>
-      <text x={-4} y={0} dy={5} textAnchor="end" fill="#6B6B8A" fontSize={13}>
+      <text x={-4} y={0} dy={5} textAnchor="end" fill="#888888" fontSize={13}>
         {MOOD[payload.value]}
       </text>
     </g>

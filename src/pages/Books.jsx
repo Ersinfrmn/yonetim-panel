@@ -280,12 +280,12 @@ export default function Books() {
           </button>
         </div>
       ) : loading ? null : books.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '80px 20px', color: '#444444' }}>
-          <Library size={48} style={{ color: '#1a1a1a', marginBottom: 16, display: 'block', margin: '0 auto 16px' }} />
-          <p style={{ fontSize: 14, marginBottom: 20 }}>Henüz kitap eklenmedi.</p>
+        <div style={{ textAlign: 'center', padding: '80px 20px' }}>
+          <Library size={64} strokeWidth={1.5} style={{ color: 'rgba(255,255,255,0.1)', display: 'block', margin: '0 auto 16px' }} />
+          <p style={{ fontSize: 11, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)', marginBottom: 20 }}>Henüz kitap eklenmedi</p>
           <button
             onClick={() => setShowModal(true)}
-            style={{ background: '#b91c1c', border: 'none', borderRadius: 2, color: '#fff', padding: '8px 20px', fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', cursor: 'pointer', fontFamily: 'inherit' }}
+            style={{ background: '#b91c1c', border: 'none', borderRadius: 2, color: '#fff', padding: '8px 20px', fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', cursor: 'pointer', fontFamily: 'inherit' }}
           >
             İlk Kitabı Ekle
           </button>

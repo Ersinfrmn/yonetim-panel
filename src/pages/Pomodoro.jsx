@@ -518,7 +518,7 @@ export default function Pomodoro() {
 
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-semibold text-ink-primary">Pomodoro</h2>
+        <h2 className="text-2xl font-bold tracking-widest uppercase text-ink-primary">Pomodoro</h2>
         <div className="flex gap-1">
           <button
             onClick={() => { setDraft({ ...cfg }); setShowCfg(s => !s) }}

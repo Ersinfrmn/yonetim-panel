@@ -1087,8 +1087,8 @@ export default function Habits() {
           { key: 'yearly',  label: 'Yıllık Görünüm' },
         ].map(({ key, label }) => (
           <button key={key} onClick={() => setHabitsTab(key)}
-            className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-colors ${
-              habitsTab === key ? 'bg-primary-500/10 text-primary-500' : 'text-ink-muted hover:text-ink-secondary'
+            className={`flex-1 py-2 px-4 rounded-sm text-xs font-bold uppercase tracking-wider transition-colors ${
+              habitsTab === key ? 'bg-primary-500 text-white' : 'text-white/40 hover:text-white/70'
             }`}>
             {label}
           </button>

@@ -517,6 +517,14 @@ export default function Layout({ children }) {
           </div>
         </aside>
 
+        {/* ── Click-outside overlay for addiction panel ────────────────── */}
+        {showPanel && (
+          <div style={{ position: 'fixed', inset: 0, zIndex: 44 }} onClick={() => setShowPanel(false)} />
+        )}
+
+        {/* ── Addiction panel ──────────────────────────────────────────── */}
+        {user && <AddictionPanel user={user} open={showPanel} onClose={() => setShowPanel(false)} />}
+
         {/* ── Main content — padded left to clear the fixed sidebar ─────── */}
         <main
           className="flex-1 overflow-y-auto pb-14 md:pb-0"

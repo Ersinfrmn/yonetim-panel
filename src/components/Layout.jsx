@@ -122,7 +122,7 @@ function NavItem({ to, icon: Icon, label = '', expanded = false, mobile = false 
     return (
       <NavLink to={to} className={({ isActive }) =>
         `flex-1 flex items-center justify-center transition-colors duration-150 ${
-          isActive ? 'text-white' : 'text-ink-muted hover:text-ink-secondary'
+          isActive ? 'text-primary-500' : 'text-ink-muted hover:text-ink-secondary'
         }`
       }>
         <Icon size={20} strokeWidth={1.5} />

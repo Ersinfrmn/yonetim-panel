@@ -504,7 +504,7 @@ function HabitCreateModal({ onClose, onCreate }) {
 
           {step === 1 && (
             <>
-              <p className="text-xs text-ink-muted uppercase tracking-widest mb-1">Adım 1 / 4</p>
+              <p className="text-xs text-primary-400 uppercase tracking-widest mb-1">Adım 1 / 4</p>
               <h3 className="text-base font-semibold text-ink-primary mb-4">Alışkanlık Adı</h3>
               <input autoFocus value={name} onChange={e => setName(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && name.trim() && setStep(2)}
@@ -519,7 +519,7 @@ function HabitCreateModal({ onClose, onCreate }) {
 
           {step === 2 && (
             <>
-              <p className="text-xs text-ink-muted uppercase tracking-widest mb-1">Adım 2 / 4</p>
+              <p className="text-xs text-primary-400 uppercase tracking-widest mb-1">Adım 2 / 4</p>
               <h3 className="text-base font-semibold text-ink-primary mb-4">Süre Belirle</h3>
               <div className="grid grid-cols-2 gap-2">
                 {DURATION_OPTIONS.map(opt => (
@@ -540,7 +540,7 @@ function HabitCreateModal({ onClose, onCreate }) {
 
           {step === 3 && (
             <>
-              <p className="text-xs text-ink-muted uppercase tracking-widest mb-1">Adım 3 / 4</p>
+              <p className="text-xs text-primary-400 uppercase tracking-widest mb-1">Adım 3 / 4</p>
               <h3 className="text-base font-semibold text-ink-primary mb-4">Şablon Seç</h3>
               <div className="grid grid-cols-2 gap-2">
                 {TEMPLATES.map(t => (
@@ -563,7 +563,7 @@ function HabitCreateModal({ onClose, onCreate }) {
 
           {step === 4 && (
             <>
-              <p className="text-xs text-ink-muted uppercase tracking-widest mb-1">Adım 4 / 4</p>
+              <p className="text-xs text-primary-400 uppercase tracking-widest mb-1">Adım 4 / 4</p>
               <h3 className="text-base font-semibold text-ink-primary mb-4">Günleri Seç</h3>
               <DayPicker value={targetDays} onChange={setTargetDays} />
               <p className="text-xs text-ink-muted mt-2 text-center">{targetDays.length} / 7 gün seçili</p>

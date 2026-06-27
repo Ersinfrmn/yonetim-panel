@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
 
 export default function AddictionPanel({ isOpen, onClose }) {
+  console.log('[AddictionPanel] isOpen:', isOpen)
   const { user } = useAuth()
   const [quitDate, setQuitDate] = useState(null)
   const [inputDate, setInputDate] = useState('')

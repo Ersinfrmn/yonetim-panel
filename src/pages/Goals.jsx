@@ -231,7 +231,7 @@ export default function Goals() {
           </button>
           <button
             onClick={() => { setShowForm(f => !f); setShowTemplates(false) }}
-            className="flex items-center gap-1.5 px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-xl text-sm font-medium transition-colors"
+            className="flex items-center gap-1.5 px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-sm text-xs font-bold uppercase tracking-wider transition-colors"
           >
             {showForm ? <X size={14} /> : <Plus size={14} />}
             {showForm ? 'İptal' : 'Hedef Ekle'}

@@ -177,7 +177,7 @@ function fmtShortDate(str) {
   return `${d.getDate()} ${ADDICT_MONTHS[d.getMonth()]}`
 }
 
-function AddictionPanel({ user, open, onClose }) {
+function AddictionPanel({ user, open, onClose, expanded }) {
   const [quitDate,     setQuitDate]     = useState(null)
   const [loadingDate,  setLoadingDate]  = useState(true)
   const [setupDate,    setSetupDate]    = useState('')

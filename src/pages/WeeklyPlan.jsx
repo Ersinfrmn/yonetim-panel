@@ -191,7 +191,7 @@ export default function WeeklyPlan() {
 
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-semibold text-ink-primary">Haftalık Plan</h2>
+        <h2 className="text-2xl font-bold tracking-widest uppercase text-ink-primary">Haftalık Plan</h2>
 
         <div className="flex items-center gap-1">
           <button

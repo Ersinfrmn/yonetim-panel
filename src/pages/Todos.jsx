@@ -734,14 +734,16 @@ export default function Todos() {
 
   // ── load ──
   async function load() {
-    const [{ data: t }, { data: st }] = await Promise.all([
+    const [{ data: t }, { data: st }, { data: g }] = await Promise.all([
       supabase.from('tasks').select('*').eq('user_id', user.id).order('created_at', { ascending: false }),
       supabase.from('subtasks').select('*').eq('user_id', user.id),
+      supabase.from('goals').select('id, title, status').eq('user_id', user.id).in('status', ['active', 'in-progress']),
     ])
     setTasks(t || [])
     const stMap = {}
     ;(st || []).forEach(s => { if (!stMap[s.task_id]) stMap[s.task_id] = []; stMap[s.task_id].push(s) })
     setSubtasksMap(stMap)
+    setGoals(g || [])
     setLoading(false)
   }
   useEffect(() => { load() }, [])

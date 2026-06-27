@@ -710,6 +710,110 @@ function ChainBreakModal({ habit, onSubmit, onClose }) {
   )
 }
 
+// ─── BreakArchive — cross-habit break analysis + history ─────────────────────
+
+const TR_MONTHS_FULL = ['OCAK','ŞUBAT','MART','NİSAN','MAYIS','HAZİRAN','TEMMUZ','AĞUSTOS','EYLÜL','EKİM','KASIM','ARALIK']
+const DAY_NAMES_FULL = ['Pazar','Pazartesi','Salı','Çarşamba','Perşembe','Cuma','Cumartesi']
+
+function BreakArchive({ breakReasons, habits }) {
+  const enriched = breakReasons
+    .map(r => ({
+      ...r,
+      habitName: habits.find(h => h.id === r.habit_id)?.name || 'Silinmiş Alışkanlık',
+    }))
+    .sort((a, b) => b.break_date.localeCompare(a.break_date))
+
+  if (enriched.length === 0) {
+    return (
+      <div className="text-center py-16 text-ink-muted">
+        <p className="text-sm">Henüz kırılma kaydı yok.</p>
+      </div>
+    )
+  }
+
+  const now          = new Date()
+  const thisMonth    = format(now, 'yyyy-MM')
+  const lastMonth    = format(new Date(now.getFullYear(), now.getMonth() - 1, 1), 'yyyy-MM')
+  const thisMonthCnt = enriched.filter(r => r.break_date.startsWith(thisMonth)).length
+  const lastMonthCnt = enriched.filter(r => r.break_date.startsWith(lastMonth)).length
+
+  const dowCounts = Array(7).fill(0)
+  enriched.forEach(r => { dowCounts[parseISO(r.break_date).getDay()]++ })
+  const maxDow = dowCounts.indexOf(Math.max(...dowCounts))
+  const dowPct = enriched.length > 0 ? Math.round((dowCounts[maxDow] / enriched.length) * 100) : 0
+
+  const habitCounts = {}
+  enriched.forEach(r => { habitCounts[r.habit_id] = (habitCounts[r.habit_id] || 0) + 1 })
+  const topEntry     = Object.entries(habitCounts).sort(([, a], [, b]) => b - a)[0]
+  const topHabitName = topEntry ? (habits.find(h => h.id === topEntry[0])?.name || '—') : '—'
+  const topHabitCnt  = topEntry?.[1] ?? 0
+
+  const byMonth = {}
+  enriched.forEach(r => {
+    const mk = r.break_date.slice(0, 7)
+    if (!byMonth[mk]) byMonth[mk] = []
+    byMonth[mk].push(r)
+  })
+  const monthKeys = Object.keys(byMonth).sort((a, b) => b.localeCompare(a))
+
+  const lbl = { fontSize: 10, color: '#444444', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: 8 }
+
+  return (
+    <div className="space-y-5">
+      <h2 className="text-2xl font-semibold text-ink-primary">Kırılma Arşivi</h2>
+
+      {/* Pattern Analysis */}
+      <div className="flex gap-3 flex-wrap">
+        <div className="bg-surface-card/80 border border-border-subtle p-4 flex-1 min-w-[140px]" style={{ borderRadius: 4 }}>
+          <p style={lbl}>Zor Gün</p>
+          <p className="text-sm font-semibold text-ink-primary">{dowCounts[maxDow] > 0 ? `${DAY_NAMES_FULL[maxDow]} günleri` : '—'}</p>
+          {dowCounts[maxDow] > 0 && <p className="text-xs text-ink-muted mt-1">Kırılmaların %{dowPct}'i bu günde</p>}
+        </div>
+        <div className="bg-surface-card/80 border border-border-subtle p-4 flex-1 min-w-[140px]" style={{ borderRadius: 4 }}>
+          <p style={lbl}>Bu Ay / Geçen Ay</p>
+          <p className="text-sm font-semibold text-ink-primary">{thisMonthCnt} / {lastMonthCnt}</p>
+          <p className="text-xs text-ink-muted mt-1">
+            {thisMonthCnt < lastMonthCnt ? 'Geçen aya göre iyileşme' : thisMonthCnt > lastMonthCnt ? 'Bu ay daha fazla kırılma' : 'Aynı seviye'}
+          </p>
+        </div>
+        <div className="bg-surface-card/80 border border-border-subtle p-4 flex-1 min-w-[140px]" style={{ borderRadius: 4 }}>
+          <p style={lbl}>En Çok Kırılan</p>
+          <p className="text-sm font-semibold text-ink-primary truncate">{topHabitName}</p>
+          {topHabitCnt > 0 && <p className="text-xs text-ink-muted mt-1">{topHabitCnt} kırılma</p>}
+        </div>
+      </div>
+
+      {/* Break history grouped by month */}
+      <div className="space-y-6">
+        {monthKeys.map(mk => {
+          const [yr, mo] = mk.split('-')
+          const monthLabel = `${TR_MONTHS_FULL[parseInt(mo) - 1]} ${yr}`
+          return (
+            <div key={mk}>
+              <p style={{ fontSize: 9, color: '#333333', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: 8 }}>
+                {monthLabel}
+              </p>
+              <div className="space-y-2">
+                {byMonth[mk].map((r, i) => (
+                  <div key={`${r.habit_id}-${r.break_date}-${i}`}
+                    className="bg-surface-card/80 border border-border-subtle p-4"
+                    style={{ borderLeft: '2px solid rgba(185,28,28,0.4)', borderRadius: 4 }}>
+                    <p className="text-sm font-semibold text-white mb-1">{r.habitName}</p>
+                    <p style={{ fontSize: 12, color: '#888888', marginBottom: 4 }}>
+                      {format(parseISO(r.break_date), 'd MMMM yyyy, EEEE', { locale: tr })}
+                    </p>
+                    <p style={{ fontSize: 12, color: '#888888', fontStyle: 'italic', lineHeight: 1.5 }}>{r.reason}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
 // ─── Main component ───────────────────────────────────────────────────────────
 
 export default function Habits() {

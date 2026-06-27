@@ -225,18 +225,31 @@ function BookCard({ book, onClick }) {
 export default function Books() {
   const { user }   = useAuth()
   const navigate   = useNavigate()
-  const [books,     setBooks]     = useState([])
-  const [loading,   setLoading]   = useState(true)
-  const [showModal, setShowModal] = useState(false)
+  const [books,      setBooks]      = useState([])
+  const [loading,    setLoading]    = useState(true)
+  const [fetchError, setFetchError] = useState(null)
+  const [showModal,  setShowModal]  = useState(false)
 
   useEffect(() => { loadBooks() }, [user.id]) // eslint-disable-line
 
   async function loadBooks() {
-    const { data } = await supabase
-      .from('books').select('*').eq('user_id', user.id)
-      .order('created_at', { ascending: false })
-    setBooks(data || [])
-    setLoading(false)
+    try {
+      const { data, error } = await supabase
+        .from('books').select('*').eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+      if (error) {
+        console.error('[Books] Supabase fetch error:', error)
+        setFetchError(error.message)
+      } else {
+        setBooks(data || [])
+        setFetchError(null)
+      }
+    } catch (err) {
+      console.error('[Books] Unexpected error:', err)
+      setFetchError(err.message)
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (

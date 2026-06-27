@@ -26,8 +26,9 @@ function AppRoutes() {
   const { user } = useAuth()
   return (
     <Routes>
-      <Route path="/login" element={user ? <Navigate to="/habits" replace /> : <Login />} />
-      <Route path="/" element={<Navigate to="/habits" replace />} />
+      <Route path="/login" element={user ? <Navigate to="/dashboard" replace /> : <Login />} />
+      <Route path="/" element={<Navigate to="/dashboard" replace />} />
+      <Route path="/dashboard" element={<PrivateRoute><Layout><Dashboard /></Layout></PrivateRoute>} />
       <Route path="/habits" element={<PrivateRoute><Layout><Habits /></Layout></PrivateRoute>} />
       <Route path="/todos" element={<PrivateRoute><Layout><Todos /></Layout></PrivateRoute>} />
       <Route path="/journal" element={<PrivateRoute><Layout><Journal /></Layout></PrivateRoute>} />

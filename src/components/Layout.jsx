@@ -259,11 +259,11 @@ function AddictionPanel({ user, open, onClose, expanded }) {
 
   return (
     <div style={{
-      position: 'fixed', top: 32, left: 64, width: 280, bottom: 0,
+      position: 'fixed', top: 32, left: expanded ? 220 : 64, width: 280, bottom: 0,
       background: '#0d0d0d', borderRight: '1px solid rgba(255,255,255,0.06)',
-      zIndex: 45, overflowY: 'auto',
+      zIndex: 60, overflowY: 'auto',
       transform: open ? 'translateX(0)' : 'translateX(-100%)',
-      transition: 'transform 250ms ease',
+      transition: 'transform 250ms ease, left 250ms ease',
     }}>
       <div style={{ padding: '20px 16px' }}>
 

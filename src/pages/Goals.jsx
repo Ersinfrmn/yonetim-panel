@@ -537,6 +537,33 @@ export default function Goals() {
                   )}
                 </div>
               )}
+
+              {/* BAĞLI GÖREVLER */}
+              <div className="mt-3 pt-3 border-t border-border-subtle">
+                <p className="text-[10px] font-medium text-ink-muted uppercase tracking-[0.15em] mb-2">Bağlı Görevler</p>
+                {(linkedTodosMap[goal.id] || []).length === 0 ? (
+                  <p className="text-xs text-ink-muted">Bu hedefe bağlı görev yok.</p>
+                ) : (
+                  <div className="space-y-1.5">
+                    {(linkedTodosMap[goal.id] || []).map(task => (
+                      <div key={task.id} className="flex items-center gap-2">
+                        <div style={{
+                          width: 12, height: 12, borderRadius: 2, flexShrink: 0,
+                          border: task.completed ? 'none' : '1px solid rgba(255,255,255,0.15)',
+                          background: task.completed ? '#444444' : 'transparent',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        }}>
+                          {task.completed && <span style={{ fontSize: 7, color: '#fff', lineHeight: 1 }}>✓</span>}
+                        </div>
+                        <span className={`text-xs ${task.completed ? 'text-ink-muted line-through' : 'text-ink-secondary'}`}>
+                          {task.title}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
             </div>
           )
         })}

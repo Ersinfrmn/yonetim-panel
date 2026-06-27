@@ -358,17 +358,24 @@ export default function Journal() {
       </div>
 
       {/* ── Mood selector ─────────────────────────────────────────────────── */}
-      <div className="flex items-center gap-3 mb-4">
-        <span className="text-xs text-ink-muted shrink-0">Bugün nasılsın?</span>
-        <div className="flex gap-1">
+      <div className="mb-4">
+        <p style={{ fontSize: 10, color: '#444444', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: 8 }}>
+          Bugünün Ruh Hali
+        </p>
+        <div className="flex items-center gap-1.5">
           {MOOD_EMOJIS.map((emoji, i) => (
-            <button key={i} onClick={() => handleMoodSelect(i + 1)}
+            <button
+              key={i}
+              onClick={() => handleMoodSelect(i + 1)}
               title={['Kötü', 'Üzgün', 'Nötr', 'İyi', 'Harika'][i]}
-              className={`text-xl w-9 h-9 rounded-lg transition-all ${
-                mood === i + 1
-                  ? 'bg-primary-500/20 scale-110 ring-2 ring-primary-400'
-                  : 'hover:bg-white/10 opacity-50 hover:opacity-100'
-              }`}>
+              style={{
+                width: 32, height: 32, borderRadius: 4, fontSize: 18,
+                border: mood === i + 1 ? '1px solid #b91c1c' : '1px solid rgba(255,255,255,0.06)',
+                background: mood === i + 1 ? 'rgba(185,28,28,0.1)' : 'transparent',
+                transition: 'border-color 150ms, background 150ms',
+                cursor: 'pointer',
+              }}
+            >
               {emoji}
             </button>
           ))}

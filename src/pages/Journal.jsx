@@ -8,6 +8,7 @@ import {
   ImagePlus, X, Loader2,
 } from 'lucide-react'
 import toast from 'react-hot-toast'
+import { awardXP } from '../utils/xp'
 import {
   LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer,
 } from 'recharts'

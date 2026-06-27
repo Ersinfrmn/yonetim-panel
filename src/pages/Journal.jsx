@@ -463,7 +463,7 @@ export default function Journal() {
               <>
                 <ImagePlus
                   size={40}
-                  className={`mb-1 transition-colors ${dragging ? 'text-primary-400' : 'text-ink-muted'}`}
+                  className={`mb-1 transition-colors ${dragging ? 'text-primary-400' : 'text-white/20'}`}
                 />
                 <p className="text-sm font-semibold text-ink-secondary text-center">
                   {dragging ? 'Bırakın!' : 'Günlük görselinizi yükleyin'}

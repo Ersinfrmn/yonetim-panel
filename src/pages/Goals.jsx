@@ -387,8 +387,7 @@ export default function Goals() {
           const cat      = getCat(goal.category)
           const statusCfg = STATUS_CONFIG[goal.status] || STATUS_CONFIG.active
           const daysInfo = getDaysInfo(goal.target_date)
-          const progress = goal.progress ?? 0
-          const celebrated = goal.milestones || []
+          const progress = calcProgress(goal)
 
           return (
             <div

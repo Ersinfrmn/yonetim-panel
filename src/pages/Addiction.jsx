@@ -66,13 +66,25 @@ export default function Addiction() {
   }, [quitDate])
 
   async function loadData() {
+    // Fast path: restore from localStorage immediately (no network wait)
+    const cached = localStorage.getItem('quit_datetime')
+    if (cached) setQuitDate(cached)
+
     const today = new Date().toISOString().split('T')[0]
     const { data: tracker } = await supabase
       .from('addiction_tracker')
       .select('quit_date')
       .eq('user_id', user.id)
       .single()
-    if (tracker) setQuitDate(tracker.quit_date)
+
+    if (tracker?.quit_date) {
+      // Authoritative value from DB — keep localStorage in sync
+      setQuitDate(tracker.quit_date)
+      localStorage.setItem('quit_datetime', tracker.quit_date)
+    } else if (!cached) {
+      // No data anywhere — ensure state is clear
+      setQuitDate(null)
+    }
 
     const { data: journal } = await supabase
       .from('addiction_journal')

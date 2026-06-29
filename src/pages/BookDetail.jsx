@@ -186,6 +186,88 @@ export default function BookDetail() {
             KAYDET
           </button>
         </div>
+
+        {/* Image upload section */}
+        <div style={{ marginTop: 28 }}>
+          <p style={{ fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase', color: '#b91c1c', margin: '0 0 12px' }}>
+            GÖRSELLER
+          </p>
+
+          {/* Upload zone */}
+          <label
+            style={{
+              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+              gap: 8, padding: '24px 16px', cursor: uploading ? 'not-allowed' : 'pointer',
+              border: '1px dashed rgba(255,255,255,0.2)', borderRadius: 4,
+              background: 'rgba(255,255,255,0.02)',
+              transition: 'border-color 150ms, background 150ms',
+            }}
+            onMouseEnter={e => {
+              if (uploading) return
+              e.currentTarget.style.borderColor = '#b91c1c'
+              e.currentTarget.style.background  = 'rgba(185,28,28,0.08)'
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.borderColor = 'rgba(255,255,255,0.2)'
+              e.currentTarget.style.background  = 'rgba(255,255,255,0.02)'
+            }}
+          >
+            {uploading ? (
+              <span style={{ fontSize: 11, color: '#b91c1c', letterSpacing: '0.05em' }}>Yükleniyor...</span>
+            ) : (
+              <>
+                <Image size={22} style={{ color: 'rgba(255,255,255,0.3)' }} />
+                <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', textAlign: 'center' }}>
+                  Görsel ekle (ekran görüntüsü, fotoğraf)
+                </span>
+              </>
+            )}
+            <input
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              multiple
+              disabled={uploading}
+              onChange={e => {
+                if (e.target.files?.length) uploadImages(Array.from(e.target.files))
+                e.target.value = ''
+              }}
+              style={{ display: 'none' }}
+            />
+          </label>
+
+          {/* Image grid */}
+          {noteImages.length > 0 && (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, marginTop: 12 }}>
+              {noteImages.map(url => (
+                <div
+                  key={url}
+                  style={{ position: 'relative', aspectRatio: '1', overflow: 'hidden' }}
+                  onMouseEnter={() => setHoveredImg(url)}
+                  onMouseLeave={() => setHoveredImg(null)}
+                >
+                  <img
+                    src={url} alt=""
+                    style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                  />
+                  <button
+                    onClick={() => deleteImage(url)}
+                    style={{
+                      position: 'absolute', top: 4, right: 4,
+                      width: 24, height: 24, borderRadius: 2,
+                      background: 'rgba(0,0,0,0.7)', border: 'none',
+                      color: '#ffffff', cursor: 'pointer', padding: 0,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      opacity: hoveredImg === url ? 1 : 0,
+                      transition: 'opacity 150ms',
+                    }}
+                  >
+                    <X size={12} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Edit modal */}

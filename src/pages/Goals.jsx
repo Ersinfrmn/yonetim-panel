@@ -95,8 +95,6 @@ export default function Goals() {
   const [showTemplates, setShowTemplates] = useState(false)
   const [form, setForm] = useState(EMPTY_FORM)
   const [linkedTodosMap, setLinkedTodosMap] = useState({})
-  const progressTimers = useRef({})
-  const celebratedRef = useRef({})
 
   useEffect(() => {
     Promise.all([

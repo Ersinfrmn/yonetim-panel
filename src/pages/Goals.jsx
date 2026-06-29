@@ -462,33 +462,6 @@ export default function Goals() {
                   ))}
                 </div>
 
-                {/* Slider */}
-                <input
-                  type="range"
-                  min={0}
-                  max={100}
-                  value={progress}
-                  onChange={e => handleProgressChange(goal, parseInt(e.target.value))}
-                  className="w-full cursor-pointer accent-primary-600"
-                  style={{ height: 4, marginTop: 2 }}
-                />
-
-                {/* Earned milestone badges */}
-                {celebrated.length > 0 && (
-                  <div className="flex gap-1.5 mt-1 flex-wrap">
-                    {celebrated
-                      .slice()
-                      .sort((a, b) => parseInt(a) - parseInt(b))
-                      .map(m => (
-                        <span
-                          key={m}
-                          className="text-xs px-1.5 py-0.5 rounded-full bg-status-warning/10 text-status-warning"
-                        >
-                          {MILESTONES[m]?.icon} {m}%
-                        </span>
-                      ))}
-                  </div>
-                )}
               </div>
 
               {/* Footer: date + countdown */}

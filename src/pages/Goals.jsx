@@ -152,37 +152,6 @@ export default function Goals() {
     if (data) setGoals(g => g.map(x => x.id === goal.id ? data : x))
   }
 
-  function handleProgressChange(goal, newPct) {
-    // Read from ref first — it's updated synchronously between onChange events,
-    // unlike state which re-renders asynchronously and would cause duplicate toasts.
-    // Fall back to DB milestones on first interaction with this goal.
-    const already = celebratedRef.current[goal.id] ?? (goal.milestones || [])
-    const newCelebrated = [...already]
-
-    for (const [t, msg] of Object.entries(MILESTONES)) {
-      const threshold = parseInt(t)
-      if (newPct >= threshold && !already.includes(String(threshold))) {
-        toast(msg.text, { icon: msg.icon, duration: 4000 })
-        newCelebrated.push(String(threshold))
-      }
-    }
-
-    // Write back to ref immediately so the next onChange tick sees updated milestones
-    celebratedRef.current[goal.id] = newCelebrated
-
-    // Optimistic state update
-    setGoals(g => g.map(x => x.id === goal.id ? { ...x, progress: newPct, milestones: newCelebrated } : x))
-
-    // Debounce Supabase write (600ms)
-    clearTimeout(progressTimers.current[goal.id])
-    progressTimers.current[goal.id] = setTimeout(async () => {
-      const patch = { progress: newPct, milestones: newCelebrated }
-      if (newPct === 100) patch.status = 'completed'
-      const { data } = await supabase.from('goals').update(patch).eq('id', goal.id).select().single()
-      if (data) setGoals(g => g.map(x => x.id === goal.id ? data : x))
-    }, 600)
-  }
-
   function applyTemplate(tmpl) {
     setForm({ title: tmpl.title, description: tmpl.description, category: tmpl.category, target_date: '', template: tmpl.key })
     setShowTemplates(false)

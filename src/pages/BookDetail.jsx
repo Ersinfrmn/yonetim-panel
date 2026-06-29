@@ -14,7 +14,10 @@ export default function BookDetail() {
   const [notes,    setNotes]    = useState('')
   const [loading,  setLoading]  = useState(true)
   const [saveMsg,  setSaveMsg]  = useState('')
-  const [showEdit, setShowEdit] = useState(false)
+  const [showEdit,   setShowEdit]   = useState(false)
+  const [noteImages, setNoteImages] = useState([])
+  const [uploading,  setUploading]  = useState(false)
+  const [hoveredImg, setHoveredImg] = useState(null)
 
   useEffect(() => { loadBook() }, [id]) // eslint-disable-line
 

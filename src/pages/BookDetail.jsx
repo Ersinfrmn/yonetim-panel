@@ -27,6 +27,7 @@ export default function BookDetail() {
     if (!data) { navigate('/books'); return }
     setBook(data)
     setNotes(data.content || '')
+    setNoteImages(data.note_images || [])
     setLoading(false)
   }
 

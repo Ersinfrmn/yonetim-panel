@@ -207,14 +207,9 @@ export default function Addiction() {
           ) : (
             <div style={{ textAlign: 'center' }}>
               <div style={{ fontSize: 64, fontWeight: 700, color: '#ffffff', lineHeight: 1 }}>{elapsed.days}</div>
-              <div style={{ ...lbl, marginBottom: 20, marginTop: 4 }}>GÜN</div>
-              <div style={{ display: 'flex', justifyContent: 'center', gap: 24, marginBottom: 16 }}>
-                {[['SA', elapsed.hours], ['DK', elapsed.minutes], ['SN', elapsed.seconds]].map(([label, val]) => (
-                  <div key={label} style={{ textAlign: 'center' }}>
-                    <div style={{ fontSize: 28, fontWeight: 600, color: '#ffffff' }}>{pad(val)}</div>
-                    <div style={{ fontSize: 9, letterSpacing: '0.1em', color: '#444444' }}>{label}</div>
-                  </div>
-                ))}
+              <div style={{ ...lbl, marginBottom: 16, marginTop: 4 }}>GÜN</div>
+              <div style={{ fontSize: 20, fontWeight: 600, color: '#cccccc', marginBottom: 16 }}>
+                {pad(elapsed.hours)} saat {pad(elapsed.minutes)} dakika
               </div>
               <div style={{ fontSize: 11, color: '#444444', marginBottom: 12 }}>Sigarasız geçen süre</div>
               <button onClick={handleReset} style={{ background: 'none', border: 'none', color: '#333333', fontSize: 10, cursor: 'pointer' }}>

@@ -52,11 +52,11 @@ export default function Addiction() {
   useEffect(() => {
     if (quitDate) {
       intervalRef.current = setInterval(() => {
-        const diff = Date.now() - new Date(quitDate).getTime()
+        const diff = Math.max(0, Date.now() - new Date(quitDate).getTime())
         const totalSeconds = Math.floor(diff / 1000)
         setElapsed({
-          days: Math.floor(totalSeconds / 86400),
-          hours: Math.floor((totalSeconds % 86400) / 3600),
+          days:    Math.floor(totalSeconds / 86400),
+          hours:   Math.floor((totalSeconds % 86400) / 3600),
           minutes: Math.floor((totalSeconds % 3600) / 60),
           seconds: totalSeconds % 60,
         })

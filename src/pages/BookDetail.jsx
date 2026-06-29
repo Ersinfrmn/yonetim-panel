@@ -38,6 +38,36 @@ export default function BookDetail() {
     setTimeout(() => setSaveMsg(''), 2500)
   }
 
+  async function uploadImages(files) {
+    setUploading(true)
+    const newUrls = []
+    for (const file of files) {
+      const path = `notes/${id}/${Date.now()}-${file.name.replace(/\s+/g, '_')}`
+      const { error: upErr } = await supabase.storage.from('book-covers').upload(path, file)
+      if (upErr) { toast.error('Görsel yüklenemedi'); continue }
+      const { data: urlData } = supabase.storage.from('book-covers').getPublicUrl(path)
+      newUrls.push(urlData.publicUrl)
+    }
+    if (newUrls.length > 0) {
+      setNoteImages(prev => {
+        const updated = [...prev, ...newUrls]
+        supabase.from('books').update({ note_images: updated }).eq('id', id)
+        return updated
+      })
+    }
+    setUploading(false)
+  }
+
+  async function deleteImage(url) {
+    const path = url.split('/book-covers/')[1]
+    if (path) await supabase.storage.from('book-covers').remove([decodeURIComponent(path)])
+    setNoteImages(prev => {
+      const updated = prev.filter(u => u !== url)
+      supabase.from('books').update({ note_images: updated }).eq('id', id)
+      return updated
+    })
+  }
+
   async function deleteBook() {
     if (!confirm('Bu kitabı silmek istediğinize emin misiniz?')) return
     if (book.cover_url) {

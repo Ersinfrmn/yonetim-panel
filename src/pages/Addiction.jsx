@@ -97,8 +97,13 @@ export default function Addiction() {
 
   async function handleStart() {
     if (!inputDate) return
-    await supabase.from('addiction_tracker').upsert({ user_id: user.id, quit_date: inputDate, addiction_name: 'Sigara' })
-    setQuitDate(inputDate)
+    // Convert local datetime-local string to UTC ISO so Supabase stores it correctly.
+    // Without this, a UTC+3 user entering "14:30" gets stored as 14:30 UTC,
+    // making the calculated diff negative by their offset.
+    const isoDate = new Date(inputDate).toISOString()
+    localStorage.setItem('quit_datetime', isoDate)
+    await supabase.from('addiction_tracker').upsert({ user_id: user.id, quit_date: isoDate, addiction_name: 'Sigara' })
+    setQuitDate(isoDate)
   }
 
   async function handleReset() {

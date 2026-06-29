@@ -54,13 +54,6 @@ const STATUS_CONFIG = {
   paused:       { label: 'Beklemede',  bg: 'bg-white/5',    text: 'text-ink-secondary' },
 }
 
-const MILESTONES = {
-  25:  { icon: '🎉', text: '%25 tamamlandı — harika başlangıç!' },
-  50:  { icon: '🔥', text: 'Yarı yoldasın — devam et!' },
-  75:  { icon: '⚡', text: '%75 tamam — bitiş çizgisi görünüyor!' },
-  100: { icon: '🏆', text: 'HEDEFİ TAMAMLADIN — tebrikler!' },
-}
-
 const EMPTY_FORM = { title: '', description: '', category: 'personal', target_date: '', template: '' }
 const today = format(new Date(), 'yyyy-MM-dd')
 

@@ -108,6 +108,7 @@ export default function Addiction() {
 
   async function handleReset() {
     if (!confirm('Sayacı sıfırlamak istediğinize emin misiniz?')) return
+    localStorage.removeItem('quit_datetime')
     await supabase.from('addiction_tracker').delete().eq('user_id', user.id)
     setQuitDate(null)
     setElapsed({ days: 0, hours: 0, minutes: 0, seconds: 0 })

@@ -2,14 +2,9 @@ import { useState, useEffect, useRef } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
 import {
-  Play, Pause, RotateCcw, Settings, Maximize2, Minimize2,
-  ChevronDown, ChevronUp, X,
+  Play, Pause, RotateCcw, Settings, Volume2, ChevronDown, X,
 } from 'lucide-react'
-import {
-  BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell,
-} from 'recharts'
-import { format, subDays } from 'date-fns'
-import { tr } from 'date-fns/locale'
+import { format } from 'date-fns'
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -20,22 +15,32 @@ const SUGGESTIONS = [
   { emoji: '🚶', text: 'Ayağa kalk ve 1 dakika yürü' },
 ]
 
-const R    = 110               // ring radius px
-const CIRC = 2 * Math.PI * R  // circumference ≈ 691
+const AMBIENT_SOUNDS = [
+  { key: 'none',     label: 'Hiçbiri',     url: null },
+  { key: 'fire',     label: 'Ateş',        url: 'https://majgjnqcehxhcepchmta.supabase.co/storage/v1/object/public/ambient-sounds/campfire-02.wav' },
+  { key: 'cafe',     label: 'Kafe',        url: 'https://majgjnqcehxhcepchmta.supabase.co/storage/v1/object/public/ambient-sounds/coffee-shop-ambience.mp3' },
+  { key: 'rain',     label: 'Yağmur',     url: 'https://majgjnqcehxhcepchmta.supabase.co/storage/v1/object/public/ambient-sounds/heavy_rain_.mp3' },
+  { key: 'wind',     label: 'Rüzgar',     url: 'https://majgjnqcehxhcepchmta.supabase.co/storage/v1/object/public/ambient-sounds/strong-wind.wav' },
+  { key: 'nature',   label: 'Vahşi Doğa', url: 'https://majgjnqcehxhcepchmta.supabase.co/storage/v1/object/public/ambient-sounds/wild-nature.wav' },
+  { key: 'mountain', label: 'Dağ Rüzgarı', url: 'https://majgjnqcehxhcepchmta.supabase.co/storage/v1/object/public/ambient-sounds/wind-in-mountain-1267.wav' },
+]
+
+const R    = 110
+const CIRC = 2 * Math.PI * R
 
 // ── Web Audio sound engine ────────────────────────────────────────────────────
 
 function createSound(type, volume = 0.8) {
   try {
     const AudioContext = window.AudioContext || window.webkitAudioContext
-    const ctx = new AudioContext()
+    const ctx      = new AudioContext()
     const gainNode = ctx.createGain()
     gainNode.gain.setValueAtTime(volume, ctx.currentTime)
     gainNode.connect(ctx.destination)
 
     switch (type) {
       case 'alarm': {
-        [0, 0.3, 0.6, 0.9, 1.2, 1.5].forEach((time, i) => {
+        ;[0, 0.3, 0.6, 0.9, 1.2, 1.5].forEach((time, i) => {
           const osc = ctx.createOscillator()
           osc.connect(gainNode)
           osc.frequency.setValueAtTime(i % 2 === 0 ? 880 : 660, ctx.currentTime + time)
@@ -45,7 +50,7 @@ function createSound(type, volume = 0.8) {
         break
       }
       case 'beep': {
-        [0, 0.2, 0.4].forEach(time => {
+        ;[0, 0.2, 0.4].forEach(time => {
           const osc = ctx.createOscillator()
           osc.connect(gainNode)
           osc.type = 'square'
@@ -56,7 +61,7 @@ function createSound(type, volume = 0.8) {
         break
       }
       case 'zen': {
-        const osc = ctx.createOscillator()
+        const osc     = ctx.createOscillator()
         const envGain = ctx.createGain()
         osc.connect(envGain)
         envGain.connect(ctx.destination)
@@ -70,11 +75,11 @@ function createSound(type, volume = 0.8) {
         break
       }
       case 'digital': {
-        [0, 0.15, 0.3, 0.45].forEach((time, i) => {
+        ;[0, 0.15, 0.3, 0.45].forEach((time, i) => {
           const osc = ctx.createOscillator()
           osc.connect(gainNode)
           osc.type = 'sawtooth'
-          osc.frequency.setValueAtTime(800 - (i * 150), ctx.currentTime + time)
+          osc.frequency.setValueAtTime(800 - i * 150, ctx.currentTime + time)
           osc.start(ctx.currentTime + time)
           osc.stop(ctx.currentTime + time + 0.12)
         })
@@ -88,9 +93,41 @@ function createSound(type, volume = 0.8) {
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-const p2  = n => String(n).padStart(2, '0')
-const fmt = s => `${p2(Math.floor(s / 60))}:${p2(s % 60)}`
+const p2   = n => String(n).padStart(2, '0')
+const fmt  = s => `${p2(Math.floor(s / 60))}:${p2(s % 60)}`
 const pick = (arr, n) => [...arr].sort(() => Math.random() - 0.5).slice(0, n)
+
+// ── Shared card styles ────────────────────────────────────────────────────────
+
+const CARD = {
+  background:   'rgba(255,255,255,0.03)',
+  border:       '1px solid rgba(255,255,255,0.06)',
+  borderRadius: 4,
+  padding:      16,
+}
+
+const SECTION_LABEL = {
+  display:       'block',
+  fontSize:      9,
+  letterSpacing: '0.2em',
+  textTransform: 'uppercase',
+  color:         '#b91c1c',
+  margin:        '0 0 10px',
+}
+
+const CTRL_BTN = {
+  display:      'flex',
+  alignItems:   'center',
+  gap:          5,
+  background:   'none',
+  border:       '1px solid rgba(255,255,255,0.07)',
+  borderRadius: 4,
+  color:        '#555555',
+  padding:      '6px 12px',
+  fontSize:     11,
+  cursor:       'pointer',
+  fontFamily:   'inherit',
+}
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
@@ -111,57 +148,57 @@ export default function Pomodoro() {
     } catch {}
     return { focus: 25, short: 5, long: 15, soundType: 'alarm', soundVolume: 0.8 }
   }
-  const [cfg, setCfg]         = useState(initCfg)
-  const [draft, setDraft]     = useState(initCfg)
+  const [cfg,     setCfg]     = useState(initCfg)
+  const [draft,   setDraft]   = useState(initCfg)
   const [showCfg, setShowCfg] = useState(false)
 
   // Timer — phase: 'idle' | 'focus' | 'paused' | 'break' | 'cdown'
   const [phase,  setPhase]  = useState('idle')
   const [secs,   setSecs]   = useState(() => initCfg().focus * 60)
   const [total,  setTotal]  = useState(() => initCfg().focus * 60)
-  const [pCount, setPCount] = useState(0)   // 0-3, resets after 4th
-  const [dayIdx, setDayIdx] = useState(1)   // session number today
+  const [pCount, setPCount] = useState(0)
+  const [dayIdx, setDayIdx] = useState(1)
 
   // Countdown
-  const [cdown,   setCdown]   = useState(null)   // 3 / 2 / 1 / 0 / null
-  const [cTarget, setCTarget] = useState(null)   // 'focus' | 'break'
+  const [cdown,   setCdown]   = useState(null)
+  const [cTarget, setCTarget] = useState(null)
 
   // UI
-  const [focusMode,      setFocusMode]      = useState(false)
   const [suggestions,    setSuggestions]    = useState([])
   const [showTaskPicker, setShowTaskPicker] = useState(false)
   const [taskSearch,     setTaskSearch]     = useState('')
 
   // Linking
-  const [tasks,       setTasks]       = useState([])
-  const [habits,      setHabits]      = useState([])
-  const [linkedTask,  setLinkedTask]  = useState(null)
-  const [linkedHabit, setLinkedHabit] = useState(null)
+  const [tasks,      setTasks]      = useState([])
+  const [linkedTask, setLinkedTask] = useState(null)
 
-  // Weekly report
-  const [sessions,   setSessions]   = useState([])
-  const [showReport, setShowReport] = useState(false)
-  const [loadingRpt, setLoadingRpt] = useState(false)
+  // Today's sessions
+  const [todaySessions, setTodaySessions] = useState([])
+
+  // Ambient sound
+  const [activeSoundKey,  setActiveSoundKey]  = useState('none')
+  const [pendingSoundKey, setPendingSoundKey] = useState('none')
+  const [ambientVolume,   setAmbientVolume]   = useState(0.5)
+  const [showSoundModal,  setShowSoundModal]  = useState(false)
+  const audioRef = useRef(null)
 
   // ── Refs (keep stale closures honest across intervals / timeouts) ──────────
-  const intervalRef     = useRef(null)
-  const sessionIdRef    = useRef(null)
-  const onEndRef        = useRef(null)
-  const phaseRef        = useRef('idle')
-  const pCountRef       = useRef(0)
-  const cfgRef          = useRef(cfg)
-  const linkedTaskRef   = useRef(null)
-  const linkedHabitRef  = useRef(null)
-  const dayIdxRef       = useRef(1)
+  const intervalRef   = useRef(null)
+  const sessionIdRef  = useRef(null)
+  const onEndRef      = useRef(null)
+  const phaseRef      = useRef('idle')
+  const pCountRef     = useRef(0)
+  const cfgRef        = useRef(cfg)
+  const linkedTaskRef = useRef(null)
+  const dayIdxRef     = useRef(1)
 
-  phaseRef.current       = phase
-  pCountRef.current      = pCount
-  cfgRef.current         = cfg
-  linkedTaskRef.current  = linkedTask
-  linkedHabitRef.current = linkedHabit
-  dayIdxRef.current      = dayIdx
+  phaseRef.current      = phase
+  pCountRef.current     = pCount
+  cfgRef.current        = cfg
+  linkedTaskRef.current = linkedTask
+  dayIdxRef.current     = dayIdx
 
-  // ── Load tasks, habits, today's session count ──────────────────────────────
+  // ── Load tasks and today's session count ───────────────────────────────────
 
   useEffect(() => {
     const today = format(new Date(), 'yyyy-MM-dd')
@@ -169,27 +206,26 @@ export default function Pomodoro() {
       supabase.from('tasks').select('id,title,pomodoro_count')
         .eq('user_id', user.id).eq('completed', false)
         .order('created_at', { ascending: false }),
-      supabase.from('habits').select('id,name')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false }),
       supabase.from('pomodoro_sessions')
         .select('id', { count: 'exact' })
         .eq('user_id', user.id)
         .gte('started_at', `${today}T00:00:00`),
-    ]).then(([{ data: t }, { data: h }, { count }]) => {
+    ]).then(([{ data: t }, { count }]) => {
       setTasks(t || [])
-      setHabits(h || [])
       setDayIdx((count || 0) + 1)
     })
-  }, [user.id])
+    loadTodaySessions()
+  }, [user.id]) // eslint-disable-line
 
-  // ── Escape → exit focus mode ───────────────────────────────────────────────
-
-  useEffect(() => {
-    const h = e => { if (e.key === 'Escape') setFocusMode(false) }
-    window.addEventListener('keydown', h)
-    return () => window.removeEventListener('keydown', h)
-  }, [])
+  async function loadTodaySessions() {
+    const today = format(new Date(), 'yyyy-MM-dd')
+    const { data } = await supabase
+      .from('pomodoro_sessions').select('*')
+      .eq('user_id', user.id).eq('was_completed', true)
+      .gte('started_at', `${today}T00:00:00`)
+      .order('started_at', { ascending: true })
+    setTodaySessions(data || [])
+  }
 
   // ── Timer tick ─────────────────────────────────────────────────────────────
 
@@ -201,7 +237,6 @@ export default function Pomodoro() {
       setSecs(prev => {
         if (prev <= 1) {
           clearInterval(intervalRef.current)
-          // setTimeout keeps us off the setState stack; ref ensures fresh closure
           setTimeout(() => onEndRef.current?.(), 0)
           return 0
         }
@@ -217,7 +252,6 @@ export default function Pomodoro() {
   useEffect(() => {
     if (cdown === null) return
     if (cdown === 0) {
-      // Effect re-ran with fresh cdown + cTarget → closures are current
       if (cTarget === 'break') beginBreak()
       else beginFocus()
       setCdown(null)
@@ -230,7 +264,6 @@ export default function Pomodoro() {
 
   // ── Phase-end handler (called from interval via ref) ───────────────────────
 
-  // Reassigned every render so it always sees current state through refs
   onEndRef.current = async function onPhaseEnd() {
     const curPhase  = phaseRef.current
     const curPCount = pCountRef.current
@@ -249,7 +282,7 @@ export default function Pomodoro() {
 
       if (sessionIdRef.current) {
         await supabase.from('pomodoro_sessions').update({
-          completed_at: new Date().toISOString(),
+          completed_at:  new Date().toISOString(),
           was_completed: true,
         }).eq('id', sessionIdRef.current)
         sessionIdRef.current = null
@@ -265,8 +298,7 @@ export default function Pomodoro() {
           ))
         }
 
-        // Silently refresh report data if panel is open
-        loadSessions(true)
+        loadTodaySessions()
       }
 
       setPhase('cdown'); setCTarget('break'); setCdown(3)
@@ -286,8 +318,8 @@ export default function Pomodoro() {
 
     const { data } = await supabase.from('pomodoro_sessions').insert({
       user_id:          user.id,
-      task_id:          linkedTaskRef.current?.id  || null,
-      habit_id:         linkedHabitRef.current?.id || null,
+      task_id:          linkedTaskRef.current?.id || null,
+      habit_id:         null,
       started_at:       new Date().toISOString(),
       duration_minutes: cfgRef.current.focus,
       was_completed:    false,
@@ -297,20 +329,19 @@ export default function Pomodoro() {
   }
 
   function beginBreak() {
-    // pCountRef.current was already updated in onPhaseEnd before countdown started
     const isLong = pCountRef.current === 0
     const dur    = (isLong ? cfgRef.current.long : cfgRef.current.short) * 60
     setSecs(dur); setTotal(dur); setPhase('break')
   }
 
-  function pauseFocus() { clearInterval(intervalRef.current); setPhase('paused') }
+  function pauseFocus()  { clearInterval(intervalRef.current); setPhase('paused') }
   function resumeFocus() { setPhase('focus') }
 
   async function stopAll() {
     clearInterval(intervalRef.current)
     if (sessionIdRef.current) {
       await supabase.from('pomodoro_sessions').update({
-        completed_at: new Date().toISOString(),
+        completed_at:  new Date().toISOString(),
         was_completed: false,
       }).eq('id', sessionIdRef.current)
       sessionIdRef.current = null
@@ -340,19 +371,33 @@ export default function Pomodoro() {
     setShowCfg(false)
   }
 
-  // ── Weekly report ──────────────────────────────────────────────────────────
+  // ── Ambient audio ──────────────────────────────────────────────────────────
 
-  async function loadSessions(silent = false) {
-    if (!silent) setLoadingRpt(true)
-    const from = format(subDays(new Date(), 6), 'yyyy-MM-dd')
-    const { data } = await supabase
-      .from('pomodoro_sessions').select('*')
-      .eq('user_id', user.id)
-      .gte('started_at', `${from}T00:00:00`)
-      .order('started_at', { ascending: true })
-    setSessions(data || [])
-    if (!silent) setLoadingRpt(false)
-  }
+  useEffect(() => {
+    const sound = AMBIENT_SOUNDS.find(s => s.key === activeSoundKey)
+    if (!sound?.url) {
+      if (audioRef.current) { audioRef.current.pause(); audioRef.current = null }
+      return
+    }
+    if (!audioRef.current || audioRef.current._key !== activeSoundKey) {
+      if (audioRef.current) audioRef.current.pause()
+      const audio  = new Audio(sound.url)
+      audio.loop   = true
+      audio.volume = ambientVolume
+      audio._key   = activeSoundKey
+      audioRef.current = audio
+    }
+    if (phase === 'focus') audioRef.current.play().catch(() => {})
+    else                   audioRef.current.pause()
+  }, [activeSoundKey, phase]) // eslint-disable-line
+
+  useEffect(() => {
+    if (audioRef.current) audioRef.current.volume = ambientVolume
+  }, [ambientVolume])
+
+  useEffect(() => () => {
+    if (audioRef.current) { audioRef.current.pause(); audioRef.current = null }
+  }, [])
 
   // ── Derived ────────────────────────────────────────────────────────────────
 
@@ -362,13 +407,12 @@ export default function Pomodoro() {
   const ringColor  = isBreakish ? '#10b981' : '#b91c1c'
 
   const phaseLabel =
-    phase === 'idle'                               ? 'HAZIR' :
-    phase === 'focus'                              ? 'ODAK' :
-    phase === 'paused'                             ? 'DURAKLATILDI' :
+    phase === 'idle'                               ? 'HAZIR'         :
+    phase === 'focus'                              ? 'ODAK'          :
+    phase === 'paused'                             ? 'DURAKLATILDI'  :
     phase === 'break'                              ? (pCount === 0 ? 'UZUN MOLA' : 'KISA MOLA') :
     cTarget === 'break'                            ? 'MOLA BAŞLIYOR' : 'ODAK BAŞLIYOR'
 
-  // Show suggestions during break AND countdown back to focus (so user has time to read)
   const showSuggest = suggestions.length > 0 &&
     (phase === 'break' || (phase === 'cdown' && cTarget === 'focus') ||
      (phase === 'cdown' && cTarget === 'break'))
@@ -377,334 +421,82 @@ export default function Pomodoro() {
     .filter(t => t.title.toLowerCase().includes(taskSearch.toLowerCase()))
     .slice(0, 7)
 
-  // Report chart data
-  const chartData = Array.from({ length: 7 }, (_, i) => {
-    const d  = subDays(new Date(), 6 - i)
-    const ds = format(d, 'yyyy-MM-dd')
-    return {
-      day:   format(d, 'EEEEEE', { locale: tr }),
-      count: sessions.filter(s => s.was_completed && s.started_at?.startsWith(ds)).length,
-    }
-  })
+  const todayMinutes = todaySessions.reduce((acc, s) => acc + (s.duration_minutes || 0), 0)
+  const activeSound  = AMBIENT_SOUNDS.find(s => s.key === activeSoundKey) ?? AMBIENT_SOUNDS[0]
 
-  const hourCounts = Array.from({ length: 24 }, (_, h) => ({
-    hour: h,
-    count: sessions.filter(s =>
-      s.was_completed && s.completed_at &&
-      new Date(s.completed_at).getHours() === h
-    ).length,
-  }))
-  const maxH     = Math.max(...hourCounts.map(h => h.count), 1)
-  const peakHour = hourCounts.reduce((a, b) => b.count > a.count ? b : a, hourCounts[0])
-  const totalMin = sessions.filter(s => s.was_completed)
-    .reduce((s, r) => s + (r.duration_minutes || 0), 0)
-  const weekCount = sessions.filter(s => s.was_completed).length
-
-  // ── Ring + inner content ───────────────────────────────────────────────────
-
-  const ringJSX = (
-    <div className="relative" style={{ width: 260, height: 260 }}>
-      <svg width="260" height="260" viewBox="0 0 260 260" className="absolute inset-0">
-        {/* Track */}
-        <circle cx="130" cy="130" r={R} fill="none"
-          stroke="rgba(255,255,255,0.05)" strokeWidth="12" />
-        {/* Progress — rotate so origin = 12 o'clock */}
-        <circle cx="130" cy="130" r={R} fill="none"
-          stroke={ringColor} strokeWidth="12" strokeLinecap="round"
-          strokeDasharray={CIRC} strokeDashoffset={dashOffset}
-          transform="rotate(-90 130 130)"
-          style={{ transition: 'stroke-dashoffset 0.6s linear, stroke 0.5s ease' }}
-        />
-        {/* Tick marks at 25 / 50 / 75 % */}
-        {[0.25, 0.5, 0.75].map(pct => {
-          const a = 2 * Math.PI * pct - Math.PI / 2
-          return (
-            <circle key={pct}
-              cx={130 + R * Math.cos(a)} cy={130 + R * Math.sin(a)} r="3"
-              fill={progress >= pct ? 'rgba(255,255,255,0.6)' : 'rgba(255,255,255,0.12)'}
-            />
-          )
-        })}
-      </svg>
-      <div className="absolute inset-0 flex flex-col items-center justify-center select-none">
-        <span className="text-[10px] uppercase tracking-[0.2em] text-primary-400 mb-1 font-bold">
-          {phaseLabel}
-        </span>
-        {phase === 'cdown'
-          ? <span className="text-8xl font-bold text-ink-primary tabular-nums leading-none">{cdown}</span>
-          : <span className="text-7xl font-bold text-ink-primary tabular-nums leading-none tracking-tight">
-              {fmt(secs)}
-            </span>
-        }
-        <span className="text-xs text-ink-muted mt-2">
-          {phase === 'idle'                    && `${cfg.focus} dk odak`}
-          {(phase === 'focus' || phase === 'paused') && `🍅 ${pCount + 1} / 4`}
-          {phase === 'break'                   && (pCount === 0 ? 'uzun mola' : 'kısa mola')}
-        </span>
-      </div>
-    </div>
-  )
-
-  const controlsJSX = (
-    <div className="flex items-center gap-3 mt-3">
-      {phase === 'idle' && (
-        <button onClick={beginFocus}
-          className="w-full flex items-center justify-center gap-2 px-9 py-3.5 bg-primary-500 hover:bg-primary-600 active:scale-95 text-white rounded-sm text-base font-bold uppercase tracking-wider transition-all">
-          <Play size={16} fill="currentColor" /> Başla
-        </button>
-      )}
-      {phase === 'focus' && (<>
-        <button onClick={pauseFocus}
-          className="flex items-center gap-2 px-6 py-3 bg-white/10 hover:bg-white/15 active:scale-95 text-white rounded-2xl text-sm font-medium transition-all">
-          <Pause size={15} /> Duraklat
-        </button>
-        <button onClick={stopAll} className="p-3 text-ink-muted hover:text-status-error transition-colors">
-          <RotateCcw size={15} />
-        </button>
-      </>)}
-      {phase === 'paused' && (<>
-        <button onClick={resumeFocus}
-          className="flex items-center gap-2 px-6 py-3 bg-primary-500 hover:bg-primary-600 active:scale-95 text-white rounded-2xl text-sm font-medium transition-all">
-          <Play size={15} fill="currentColor" /> Devam
-        </button>
-        <button onClick={stopAll} className="p-3 text-ink-muted hover:text-status-error transition-colors">
-          <RotateCcw size={15} />
-        </button>
-      </>)}
-      {phase === 'break' && (
-        <button onClick={skipBreak}
-          className="flex items-center gap-2 px-6 py-3 bg-emerald-700 hover:bg-emerald-600 active:scale-95 text-white rounded-2xl text-sm font-medium transition-all">
-          Molayı Bitir
-        </button>
-      )}
-    </div>
-  )
-
-  // ── Focus Mode overlay (full screen) ───────────────────────────────────────
-
-  if (focusMode) {
-    return (
-      <div className="fixed inset-0 z-50 bg-surface flex flex-col items-center justify-center">
-        <button onClick={() => setFocusMode(false)}
-          className="absolute top-5 right-5 p-2 text-ink-muted hover:text-ink-primary transition-colors rounded-lg">
-          <Minimize2 size={20} />
-        </button>
-        {linkedTask && (
-          <p className="text-ink-muted text-xs mb-6 px-4 py-1.5 bg-surface-card/60 rounded-full max-w-xs truncate">
-            📌 {linkedTask.title}
-          </p>
-        )}
-        {ringJSX}
-        {controlsJSX}
-        {showSuggest && (
-          <div className="mt-8 flex flex-col gap-3 max-w-xs w-full px-4">
-            {suggestions.map((s, i) => (
-              <div key={i} className="flex items-center gap-4 p-4 bg-surface-card/80 backdrop-blur-md rounded-xl border border-border-subtle">
-                <span className="text-3xl">{s.emoji}</span>
-                <p className="text-sm text-ink-secondary">{s.text}</p>
-              </div>
-            ))}
-          </div>
-        )}
-        <p className="absolute bottom-5 text-ink-muted text-xs">ESC — çık</p>
-      </div>
-    )
-  }
-
-  // ── Main layout ────────────────────────────────────────────────────────────
+  // ── Render ─────────────────────────────────────────────────────────────────
 
   return (
-    <div className="max-w-lg mx-auto">
+    <>
+      <div style={{ display: 'flex', gap: 32, alignItems: 'flex-start', flexWrap: 'wrap' }}>
 
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold tracking-widest uppercase text-ink-primary">Pomodoro</h2>
-        <div className="flex gap-1">
-          <button
-            onClick={() => { setDraft({ ...cfg }); setShowCfg(s => !s) }}
-            className={`p-2 rounded-lg transition-colors ${showCfg
-              ? 'bg-white/10 text-ink-primary'
-              : 'text-ink-muted hover:text-ink-primary'}`}
-          >
-            <Settings size={18} />
-          </button>
-          <button
-            onClick={() => setFocusMode(true)}
-            className="p-2 text-ink-muted hover:text-ink-primary rounded-lg transition-colors"
-          >
-            <Maximize2 size={18} />
-          </button>
-        </div>
-      </div>
+        {/* ── Main / center area ────────────────────────────────────────── */}
+        <div style={{ flex: 1, minWidth: 280, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
 
-      {/* Settings panel */}
-      {showCfg && (
-        <div className="mb-5 p-4 bg-surface-card/80 backdrop-blur-md border border-border-subtle rounded-xl hover:border-border-glow transition-colors duration-200">
-          <p className="text-sm font-semibold text-ink-primary mb-3">Süre Ayarları</p>
-          <div className="flex gap-3">
-            {[
-              { k: 'focus', l: 'Odak (dk)' },
-              { k: 'short', l: 'Kısa Mola' },
-              { k: 'long',  l: 'Uzun Mola' },
-            ].map(({ k, l }) => (
-              <div key={k} className="flex-1">
-                <label className="text-xs text-ink-muted block mb-1">{l}</label>
-                <input type="number" min={1} max={99} value={draft[k]}
-                  onChange={e => setDraft(d => ({ ...d, [k]: parseInt(e.target.value) || 1 }))}
-                  className="w-full px-3 py-2 rounded-xl border border-border-subtle bg-white/5 text-ink-primary text-sm text-center focus:outline-none focus:ring-2 focus:ring-primary-500"
-                />
-              </div>
-            ))}
-          </div>
-          {/* ── Ses Ayarları ─────────────────────────────────────────── */}
-          <div className="mt-5 pt-4 border-t border-border-subtle">
-            <p className="text-[10px] font-medium text-ink-muted uppercase tracking-[0.15em] mb-3">Ses Ayarları</p>
-
-            {/* Sound type selector */}
-            <p className="text-xs text-ink-muted mb-1.5">Ses Türü</p>
-            <div className="flex gap-1.5 mb-4">
-              {[
-                { value: 'alarm',   label: 'Alarm'   },
-                { value: 'beep',    label: 'Bip'     },
-                { value: 'zen',     label: 'Zen'     },
-                { value: 'digital', label: 'Dijital' },
-              ].map(({ value, label }) => {
-                const active = draft.soundType === value
-                return (
-                  <div key={value} className="flex-1 flex">
-                    <button
-                      onClick={() => setDraft(d => ({ ...d, soundType: value }))}
-                      style={{
-                        flex: 1, padding: '5px 0', fontSize: 11, cursor: 'pointer',
-                        borderRadius: '6px 0 0 6px',
-                        border: active ? '1px solid #b91c1c' : '1px solid rgba(255,255,255,0.08)',
-                        borderRight: 'none',
-                        background: active ? 'rgba(185,28,28,0.15)' : 'transparent',
-                        color: active ? '#ffffff' : '#888888',
-                        transition: 'all 150ms',
-                      }}
-                    >{label}</button>
-                    <button
-                      onClick={() => createSound(value, draft.soundVolume)}
-                      title="Önizle"
-                      className="hover:text-white transition-colors"
-                      style={{
-                        padding: '5px 6px', fontSize: 9, cursor: 'pointer',
-                        borderRadius: '0 6px 6px 0',
-                        border: active ? '1px solid #b91c1c' : '1px solid rgba(255,255,255,0.08)',
-                        borderLeft: '1px solid rgba(255,255,255,0.06)',
-                        background: 'transparent', color: '#666666',
-                      }}
-                    >▶</button>
-                  </div>
-                )
-              })}
-            </div>
-
-            {/* Volume slider */}
-            <div className="flex items-center justify-between mb-1.5">
-              <p className="text-[10px] font-medium text-ink-muted uppercase tracking-[0.15em]">Ses Seviyesi</p>
-              <span className="text-xs font-semibold text-ink-secondary">
-                {Math.round(draft.soundVolume * 100)}%
-              </span>
-            </div>
-            <input
-              type="range" min={0.1} max={1.0} step={0.1}
-              value={draft.soundVolume}
-              onChange={e => setDraft(d => ({ ...d, soundVolume: parseFloat(e.target.value) }))}
-              className="w-full"
-              style={{ accentColor: '#b91c1c' }}
-            />
+          {/* Page title */}
+          <div style={{ width: '100%', marginBottom: 24 }}>
+            <h2 className="text-2xl font-bold tracking-widest uppercase text-ink-primary">Pomodoro</h2>
           </div>
 
-          <div className="flex gap-2 mt-4">
-            <button onClick={saveCfg}
-              className="flex-1 bg-primary-500 hover:bg-primary-600 text-white py-2 rounded-xl text-sm font-medium transition-colors">
-              Kaydet
-            </button>
-            <button onClick={() => setShowCfg(false)}
-              className="px-4 py-2 rounded-xl border border-border-subtle text-ink-secondary text-sm transition-colors hover:bg-white/5">
-              İptal
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* ── Timer card ──────────────────────────────────────────────────────── */}
-      <div className="mb-5 bg-surface-card/80 backdrop-blur-md border border-border-subtle rounded-xl py-8 px-6 flex flex-col items-center hover:border-border-glow transition-colors duration-200">
-        {linkedTask && (
-          <p className="text-ink-muted text-xs mb-4 px-3 py-1 bg-white/5 rounded-full max-w-[220px] truncate">
-            📌 {linkedTask.title}
-          </p>
-        )}
-        {ringJSX}
-        {controlsJSX}
-        <button onClick={() => setFocusMode(true)}
-          className="mt-5 flex items-center gap-1.5 text-xs text-white/40 hover:text-white/70 transition-colors">
-          <Maximize2 size={11} /> Odak Modu
-        </button>
-      </div>
-
-      {/* ── Break suggestions ────────────────────────────────────────────────── */}
-      {showSuggest && (
-        <div className="mb-5 space-y-2">
-          {suggestions.map((s, i) => (
-            <div key={i}
-              className="flex items-center gap-4 p-4 bg-status-success/10 border border-status-success/20 rounded-xl"
-              style={{ animation: 'pomFadeIn 0.4s ease both', animationDelay: `${i * 80}ms` }}
-            >
-              <span className="text-3xl shrink-0">{s.emoji}</span>
-              <p className="text-sm text-status-success font-medium">{s.text}</p>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* ── Task / Habit linking (only when not mid-session) ─────────────────── */}
-      {(phase === 'idle' || phase === 'paused') && (
-        <div className="mb-5 bg-surface-card/80 backdrop-blur-md border border-border-subtle rounded-xl hover:border-border-glow transition-colors duration-200 p-4">
-          <p className="text-[11px] font-semibold text-ink-secondary uppercase tracking-widest mb-3">
-            Bağlantı
-          </p>
-
-          {/* Task searchable dropdown */}
-          <div className="mb-2 relative">
+          {/* Task selector */}
+          <div style={{ width: '100%', marginBottom: 28, position: 'relative' }}>
             <button
               onClick={() => setShowTaskPicker(v => !v)}
-              className="w-full flex items-center justify-between px-3 py-2.5 rounded-sm border border-white/10 bg-white/5 text-sm hover:bg-white/10 transition-colors"
+              style={{
+                width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                padding: '10px 14px', background: 'rgba(255,255,255,0.03)',
+                border: '1px solid rgba(255,255,255,0.08)', borderRadius: 4,
+                color: linkedTask ? '#ffffff' : '#555555', fontSize: 13,
+                cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left',
+              }}
             >
-              <span className={linkedTask ? 'text-ink-primary' : 'text-ink-muted'}>
-                {linkedTask ? `📌 ${linkedTask.title}` : 'Görev seç (opsiyonel)'}
+              <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {linkedTask ? `📌 ${linkedTask.title}` : 'Lütfen bir görev seçin...'}
               </span>
               {linkedTask
-                ? <X size={14} className="text-ink-muted hover:text-status-error shrink-0"
+                ? <X size={14} style={{ color: '#555', flexShrink: 0, marginLeft: 8 }}
                     onClick={e => { e.stopPropagation(); setLinkedTask(null) }} />
-                : <ChevronDown size={14} className="text-ink-muted shrink-0" />
+                : <ChevronDown size={14} style={{ color: '#555', flexShrink: 0, marginLeft: 8 }} />
               }
             </button>
 
             {showTaskPicker && (
-              <div className="absolute z-20 mt-1 w-full bg-surface-card border border-border-subtle rounded-xl overflow-hidden">
-                <div className="p-2 border-b border-border-subtle">
+              <div style={{
+                position: 'absolute', zIndex: 20, top: 'calc(100% + 4px)', left: 0, right: 0,
+                background: '#0d0d0d', border: '1px solid rgba(255,255,255,0.08)',
+                borderRadius: 4, overflow: 'hidden',
+              }}>
+                <div style={{ padding: '8px 8px 4px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
                   <input
                     autoFocus
                     placeholder="Görev ara..."
                     value={taskSearch}
                     onChange={e => setTaskSearch(e.target.value)}
-                    className="w-full px-3 py-1.5 rounded-lg bg-white/5 text-sm text-ink-primary placeholder-ink-muted focus:outline-none"
+                    style={{
+                      width: '100%', padding: '6px 10px', background: 'rgba(255,255,255,0.04)',
+                      border: 'none', borderRadius: 3, color: '#ffffff', fontSize: 12,
+                      fontFamily: 'inherit', outline: 'none', boxSizing: 'border-box',
+                    }}
                   />
                 </div>
-                <div className="max-h-44 overflow-y-auto">
+                <div style={{ maxHeight: 180, overflowY: 'auto' }}>
                   {filteredTasks.length === 0
-                    ? <p className="text-xs text-ink-muted text-center py-4">Görev bulunamadı</p>
+                    ? <p style={{ fontSize: 11, color: '#444', textAlign: 'center', padding: 16, margin: 0 }}>
+                        Görev bulunamadı
+                      </p>
                     : filteredTasks.map(t => (
                         <button key={t.id}
                           onClick={() => { setLinkedTask(t); setShowTaskPicker(false); setTaskSearch('') }}
-                          className="w-full text-left px-3 py-2 text-sm text-ink-primary hover:bg-white/5 flex items-center justify-between transition-colors"
+                          style={{
+                            width: '100%', textAlign: 'left', padding: '9px 14px', background: 'none',
+                            border: 'none', color: '#cccccc', fontSize: 13, cursor: 'pointer',
+                            display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                            fontFamily: 'inherit',
+                          }}
                         >
-                          <span className="truncate">{t.title}</span>
+                          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.title}</span>
                           {(t.pomodoro_count || 0) > 0 && (
-                            <span className="text-xs text-ink-muted ml-2 shrink-0">
+                            <span style={{ fontSize: 10, color: '#555', marginLeft: 8, flexShrink: 0 }}>
                               🍅 {t.pomodoro_count}
                             </span>
                           )}
@@ -716,117 +508,425 @@ export default function Pomodoro() {
             )}
           </div>
 
-          {/* Habit select */}
-          <select
-            value={linkedHabit?.id || ''}
-            onChange={e => setLinkedHabit(habits.find(h => h.id === e.target.value) || null)}
-            className="w-full px-3 py-2.5 rounded-sm border border-white/10 bg-white/5 text-sm text-ink-secondary focus:outline-none focus:ring-1 focus:ring-primary-500"
-          >
-            <option value="">Alışkanlık seç (opsiyonel)</option>
-            {habits.map(h => <option key={h.id} value={h.id}>{h.name}</option>)}
-          </select>
+          {/* Timer ring */}
+          <div className="relative" style={{ width: 260, height: 260 }}>
+            <svg width="260" height="260" viewBox="0 0 260 260" className="absolute inset-0">
+              <circle cx="130" cy="130" r={R} fill="none"
+                stroke="rgba(255,255,255,0.05)" strokeWidth="12" />
+              <circle cx="130" cy="130" r={R} fill="none"
+                stroke={ringColor} strokeWidth="12" strokeLinecap="round"
+                strokeDasharray={CIRC} strokeDashoffset={dashOffset}
+                transform="rotate(-90 130 130)"
+                style={{ transition: 'stroke-dashoffset 0.6s linear, stroke 0.5s ease' }}
+              />
+              {[0.25, 0.5, 0.75].map(pct => {
+                const a = 2 * Math.PI * pct - Math.PI / 2
+                return (
+                  <circle key={pct}
+                    cx={130 + R * Math.cos(a)} cy={130 + R * Math.sin(a)} r="3"
+                    fill={progress >= pct ? 'rgba(255,255,255,0.6)' : 'rgba(255,255,255,0.12)'}
+                  />
+                )
+              })}
+            </svg>
+            <div className="absolute inset-0 flex flex-col items-center justify-center select-none">
+              <span style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.2em', color: '#b91c1c', marginBottom: 4, fontWeight: 700 }}>
+                {phaseLabel}
+              </span>
+              {phase === 'cdown'
+                ? <span className="text-8xl font-bold text-ink-primary tabular-nums leading-none">{cdown}</span>
+                : <span className="text-7xl font-bold text-ink-primary tabular-nums leading-none tracking-tight">
+                    {fmt(secs)}
+                  </span>
+              }
+              <span style={{ fontSize: 12, color: '#444444', marginTop: 8 }}>
+                {phase === 'idle'                           && `${cfg.focus} dk odak`}
+                {(phase === 'focus' || phase === 'paused') && `🍅 ${pCount + 1} / 4`}
+                {phase === 'break'                          && (pCount === 0 ? 'uzun mola' : 'kısa mola')}
+              </span>
+            </div>
+          </div>
+
+          {/* Break suggestions */}
+          {showSuggest && (
+            <div style={{ width: '100%', marginTop: 20, display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {suggestions.map((s, i) => (
+                <div key={i} style={{
+                  display: 'flex', alignItems: 'center', gap: 12, padding: 12,
+                  background: 'rgba(16,185,129,0.08)', border: '1px solid rgba(16,185,129,0.15)',
+                  borderRadius: 4, animation: 'pomFadeIn 0.4s ease both', animationDelay: `${i * 80}ms`,
+                }}>
+                  <span style={{ fontSize: 24, flexShrink: 0 }}>{s.emoji}</span>
+                  <p style={{ fontSize: 13, color: '#10b981', margin: 0 }}>{s.text}</p>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Primary action button */}
+          <div style={{ width: '100%', marginTop: 24, display: 'flex', gap: 8, justifyContent: 'center' }}>
+            {phase === 'idle' && (
+              <button onClick={beginFocus} style={{
+                flex: 1, maxWidth: 260, padding: '14px 24px',
+                background: '#b91c1c', border: 'none', borderRadius: 4,
+                color: '#ffffff', fontSize: 13, fontWeight: 700, letterSpacing: '0.12em',
+                textTransform: 'uppercase', cursor: 'pointer', fontFamily: 'inherit',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+              }}>
+                <Play size={15} fill="currentColor" /> BAŞLA
+              </button>
+            )}
+            {phase === 'focus' && (<>
+              <button onClick={pauseFocus} style={{
+                flex: 1, maxWidth: 200, padding: '14px 24px',
+                background: '#b91c1c', border: 'none', borderRadius: 4,
+                color: '#ffffff', fontSize: 13, fontWeight: 700, letterSpacing: '0.12em',
+                textTransform: 'uppercase', cursor: 'pointer', fontFamily: 'inherit',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+              }}>
+                <Pause size={15} /> DURAKLAT
+              </button>
+              <button onClick={stopAll} style={{
+                padding: '14px', background: 'none', border: '1px solid rgba(255,255,255,0.06)',
+                borderRadius: 4, color: '#444444', cursor: 'pointer',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}>
+                <RotateCcw size={15} />
+              </button>
+            </>)}
+            {phase === 'paused' && (<>
+              <button onClick={resumeFocus} style={{
+                flex: 1, maxWidth: 200, padding: '14px 24px',
+                background: '#b91c1c', border: 'none', borderRadius: 4,
+                color: '#ffffff', fontSize: 13, fontWeight: 700, letterSpacing: '0.12em',
+                textTransform: 'uppercase', cursor: 'pointer', fontFamily: 'inherit',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+              }}>
+                <Play size={15} fill="currentColor" /> DEVAM ET
+              </button>
+              <button onClick={stopAll} style={{
+                padding: '14px', background: 'none', border: '1px solid rgba(255,255,255,0.06)',
+                borderRadius: 4, color: '#444444', cursor: 'pointer',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}>
+                <RotateCcw size={15} />
+              </button>
+            </>)}
+            {phase === 'break' && (
+              <button onClick={skipBreak} style={{
+                flex: 1, maxWidth: 260, padding: '14px 24px',
+                background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.25)',
+                borderRadius: 4, color: '#10b981', fontSize: 13, fontWeight: 700,
+                letterSpacing: '0.12em', textTransform: 'uppercase',
+                cursor: 'pointer', fontFamily: 'inherit',
+              }}>
+                Molayı Bitir
+              </button>
+            )}
+            {phase === 'cdown' && (
+              <button disabled style={{
+                flex: 1, maxWidth: 260, padding: '14px 24px',
+                background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)',
+                borderRadius: 4, color: '#333333', fontSize: 13, fontWeight: 700,
+                letterSpacing: '0.12em', textTransform: 'uppercase',
+                cursor: 'not-allowed', fontFamily: 'inherit',
+              }}>
+                {cTarget === 'break' ? 'Mola Başlıyor' : 'Odak Başlıyor'}
+              </button>
+            )}
+          </div>
+
+          {/* Two small controls */}
+          <div style={{ display: 'flex', gap: 10, marginTop: 16 }}>
+            <button
+              onClick={() => { setDraft({ ...cfg }); setShowCfg(true) }}
+              style={CTRL_BTN}
+            >
+              <Settings size={12} /> Zamanlayıcı Türü
+            </button>
+            <button
+              onClick={() => { setPendingSoundKey(activeSoundKey); setShowSoundModal(true) }}
+              style={{
+                ...CTRL_BTN,
+                color:       activeSoundKey !== 'none' ? '#b91c1c' : '#555555',
+                borderColor: activeSoundKey !== 'none' ? 'rgba(185,28,28,0.3)' : 'rgba(255,255,255,0.07)',
+              }}
+            >
+              <Volume2 size={12} />
+              {activeSoundKey !== 'none' ? activeSound.label : 'Arka Plan Sesi'}
+            </button>
+          </div>
+
         </div>
-      )}
 
-      {/* ── Weekly report (collapsible) ──────────────────────────────────────── */}
-      <div className="bg-surface-card/80 backdrop-blur-md border border-border-subtle rounded-xl hover:border-border-glow transition-colors duration-200 overflow-hidden">
-        <button
-          onClick={() => {
-            const next = !showReport
-            setShowReport(next)
-            if (next && sessions.length === 0) loadSessions()
-          }}
-          className="w-full flex items-center justify-between px-4 py-3.5 text-sm font-semibold text-ink-primary hover:bg-white/5 transition-colors"
-        >
-          <span>📊 Bu Haftanın Odak Özeti</span>
-          {showReport ? <ChevronUp size={16} className="text-primary-400" /> : <ChevronDown size={16} className="text-primary-400" />}
-        </button>
+        {/* ── Right panel ───────────────────────────────────────────────── */}
+        <div style={{ width: 280, flexShrink: 0, display: 'flex', flexDirection: 'column', gap: 12 }}>
 
-        {showReport && (
-          <div className="border-t border-border-subtle px-4 pb-5">
-            {loadingRpt ? (
-              <div className="flex justify-center py-10">
-                <div className="w-5 h-5 border-2 border-primary-500 border-t-transparent rounded-full animate-spin" />
-              </div>
-            ) : (<>
+          {/* Bugünün Odaklanma Süresi */}
+          <div style={CARD}>
+            <span style={SECTION_LABEL}>Bugünün Odaklanma Süresi</span>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
+              <span style={{ fontSize: 48, fontWeight: 700, color: '#b91c1c', lineHeight: 1 }}>
+                {todayMinutes}
+              </span>
+              <span style={{ fontSize: 11, color: '#444444', letterSpacing: '0.1em' }}>DAKİKA</span>
+            </div>
+          </div>
 
-              {/* Stat cards */}
-              <div className="grid grid-cols-3 gap-3 pt-4 mb-5">
-                {[
-                  { label: 'Pomodoro', value: String(weekCount) },
-                  { label: 'Odak Süresi', value: `${Math.floor(totalMin / 60)}s ${totalMin % 60}dk` },
-                  { label: 'Zirve Saat', value: peakHour.count > 0 ? `${p2(peakHour.hour)}:00` : '—' },
-                ].map(({ label, value }) => (
-                  <div key={label} className="bg-white/5 rounded-xl p-3 text-center">
-                    <p className="text-[10px] text-ink-muted mb-0.5">{label}</p>
-                    <p className="text-base font-bold text-ink-primary leading-tight">{value}</p>
-                  </div>
-                ))}
-              </div>
+          {/* Bugün */}
+          <div style={CARD}>
+            <span style={SECTION_LABEL}>Bugün</span>
+            {linkedTask
+              ? <p style={{ fontSize: 13, color: '#cccccc', margin: 0, lineHeight: 1.5 }}>
+                  {linkedTask.title}
+                </p>
+              : <p style={{ fontSize: 12, color: '#2a2a2a', margin: 0, textAlign: 'center', padding: '4px 0' }}>
+                  Görev Yok
+                </p>
+            }
+          </div>
 
-              {/* Bar chart — daily pomodoros */}
-              <div className="mb-5">
-                <p className="text-xs text-ink-muted mb-2">Günlük Pomodoro</p>
-                <ResponsiveContainer width="100%" height={90}>
-                  <BarChart data={chartData} margin={{ top: 0, right: 0, left: -28, bottom: 0 }}>
-                    <XAxis dataKey="day"
-                      tick={{ fontSize: 11, fill: '#888888' }} axisLine={false} tickLine={false} />
-                    <YAxis
-                      tick={{ fontSize: 11, fill: '#888888' }} axisLine={false} tickLine={false}
-                      allowDecimals={false} />
-                    <Tooltip
-                      contentStyle={{ background: '#111111', border: 'none', borderRadius: 4, fontSize: 12 }}
-                      itemStyle={{ color: '#ffffff' }}
-                      labelStyle={{ color: '#888888' }}
-                      formatter={v => [v, 'Pomodoro']}
-                    />
-                    <Bar dataKey="count" radius={[4, 4, 0, 0]}>
-                      {chartData.map((_, i) => (
-                        <Cell key={i} fill={i === 6 ? '#b91c1c' : 'rgba(185,28,28,0.25)'} />
-                      ))}
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-
-              {/* Hour heatmap */}
-              <div>
-                <p className="text-xs text-ink-muted mb-2">Saat Yoğunluğu (0–23)</p>
-                <div className="flex gap-0.5">
-                  {hourCounts.map(({ hour, count }) => (
-                    <div key={hour} className="flex-1 group relative">
-                      <div
-                        className="h-5 rounded-sm"
-                        style={{
-                          backgroundColor: count === 0
-                            ? 'rgba(255,255,255,0.03)'
-                            : `rgba(185,28,28,${0.15 + (count / maxH) * 0.8})`,
-                          transition: 'background-color 0.2s',
-                        }}
-                      />
-                      <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 hidden group-hover:block z-10 bg-surface-card text-ink-primary text-[10px] px-1.5 py-0.5 rounded whitespace-nowrap pointer-events-none">
-                        {p2(hour)}:00 · {count}
-                      </div>
+          {/* Bugünün Odaklanma Süresi Kayıtları */}
+          <div style={CARD}>
+            <span style={SECTION_LABEL}>Bugünün Odaklanma Süresi Kayıtları</span>
+            {todaySessions.length === 0
+              ? <p style={{ fontSize: 11, color: '#2a2a2a', margin: 0, textAlign: 'center', padding: '8px 0' }}>
+                  Henüz kayıt yok
+                </p>
+              : (
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                  {todaySessions.map((s, i) => (
+                    <div key={s.id} style={{
+                      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                      padding: '7px 0',
+                      borderBottom: i < todaySessions.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none',
+                    }}>
+                      <span style={{ fontSize: 10, color: '#3a3a3a', fontWeight: 700, letterSpacing: '0.05em', minWidth: 20 }}>
+                        #{i + 1}
+                      </span>
+                      <span style={{ fontSize: 12, color: '#888888' }}>
+                        {s.completed_at ? format(new Date(s.completed_at), 'HH:mm') : '—'}
+                      </span>
+                      <span style={{ fontSize: 11, color: '#555555' }}>
+                        {s.duration_minutes} dk
+                      </span>
                     </div>
                   ))}
                 </div>
-                <div className="flex justify-between text-[10px] text-ink-muted mt-1 px-0.5">
-                  <span>00</span><span>06</span><span>12</span><span>18</span><span>23</span>
-                </div>
-              </div>
-
-            </>)}
+              )
+            }
           </div>
-        )}
+
+        </div>
+
       </div>
 
-      {/* Suggestion fade-in keyframe */}
+      {/* ── Settings modal ─────────────────────────────────────────────── */}
+      {showCfg && (
+        <div
+          onClick={e => e.target === e.currentTarget && setShowCfg(false)}
+          style={{
+            position: 'fixed', inset: 0, zIndex: 200,
+            background: 'rgba(0,0,0,0.85)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24,
+          }}
+        >
+          <div style={{
+            background: '#0d0d0d', border: '1px solid rgba(255,255,255,0.1)',
+            borderRadius: 4, padding: 24, width: '100%', maxWidth: 400, position: 'relative',
+          }}>
+            <button onClick={() => setShowCfg(false)} style={{
+              position: 'absolute', top: 16, right: 16,
+              background: 'none', border: 'none', color: '#444444', cursor: 'pointer', padding: 0,
+            }}>
+              <X size={18} />
+            </button>
+
+            <p style={{ fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase', color: '#444444', margin: '0 0 20px' }}>
+              ZAMANLAYICI TÜRÜ
+            </p>
+
+            <div style={{ display: 'flex', gap: 12, marginBottom: 20 }}>
+              {[
+                { k: 'focus', l: 'Odak (dk)' },
+                { k: 'short', l: 'Kısa Mola' },
+                { k: 'long',  l: 'Uzun Mola' },
+              ].map(({ k, l }) => (
+                <div key={k} style={{ flex: 1 }}>
+                  <label style={{ fontSize: 10, color: '#555555', display: 'block', marginBottom: 6, letterSpacing: '0.05em' }}>
+                    {l}
+                  </label>
+                  <input type="number" min={1} max={99} value={draft[k]}
+                    onChange={e => setDraft(d => ({ ...d, [k]: parseInt(e.target.value) || 1 }))}
+                    style={{
+                      width: '100%', padding: '8px', borderRadius: 4,
+                      border: '1px solid rgba(255,255,255,0.08)',
+                      background: '#111111', color: '#ffffff', fontSize: 14,
+                      textAlign: 'center', fontFamily: 'inherit', outline: 'none',
+                      boxSizing: 'border-box',
+                    }}
+                  />
+                </div>
+              ))}
+            </div>
+
+            <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: 16, marginBottom: 20 }}>
+              <p style={{ fontSize: 9, letterSpacing: '0.15em', textTransform: 'uppercase', color: '#444444', margin: '0 0 12px' }}>
+                Ses Ayarları
+              </p>
+
+              <p style={{ fontSize: 11, color: '#555555', margin: '0 0 8px' }}>Ses Türü</p>
+              <div style={{ display: 'flex', gap: 6, marginBottom: 16 }}>
+                {[
+                  { value: 'alarm',   label: 'Alarm'   },
+                  { value: 'beep',    label: 'Bip'     },
+                  { value: 'zen',     label: 'Zen'     },
+                  { value: 'digital', label: 'Dijital' },
+                ].map(({ value, label }) => {
+                  const active = draft.soundType === value
+                  return (
+                    <button key={value}
+                      onClick={() => setDraft(d => ({ ...d, soundType: value }))}
+                      style={{
+                        flex: 1, padding: '6px 0', fontSize: 11, cursor: 'pointer',
+                        borderRadius: 4,
+                        border: active ? '1px solid #b91c1c' : '1px solid rgba(255,255,255,0.08)',
+                        background: active ? 'rgba(185,28,28,0.15)' : 'transparent',
+                        color: active ? '#ffffff' : '#888888',
+                        fontFamily: 'inherit', transition: 'all 150ms',
+                      }}
+                    >
+                      {label}
+                    </button>
+                  )
+                })}
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+                <span style={{ fontSize: 11, color: '#555555' }}>Ses Seviyesi</span>
+                <span style={{ fontSize: 11, color: '#888888' }}>{Math.round(draft.soundVolume * 100)}%</span>
+              </div>
+              <input type="range" min={0.1} max={1.0} step={0.1}
+                value={draft.soundVolume}
+                onChange={e => setDraft(d => ({ ...d, soundVolume: parseFloat(e.target.value) }))}
+                style={{ width: '100%', accentColor: '#b91c1c' }}
+              />
+            </div>
+
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button onClick={() => setShowCfg(false)} style={{
+                flex: 1, padding: '8px 0', background: 'none',
+                border: '1px solid rgba(255,255,255,0.08)', borderRadius: 4,
+                color: '#888888', fontSize: 11, cursor: 'pointer', fontFamily: 'inherit',
+              }}>
+                İptal
+              </button>
+              <button onClick={saveCfg} style={{
+                flex: 2, padding: '8px 0', background: '#b91c1c', border: 'none',
+                borderRadius: 4, color: '#ffffff', fontSize: 11, fontWeight: 700,
+                letterSpacing: '0.1em', cursor: 'pointer', fontFamily: 'inherit',
+              }}>
+                KAYDET
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Ambient sound modal ────────────────────────────────────────── */}
+      {showSoundModal && (
+        <div
+          onClick={e => e.target === e.currentTarget && setShowSoundModal(false)}
+          style={{
+            position: 'fixed', inset: 0, zIndex: 200,
+            background: 'rgba(0,0,0,0.85)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24,
+          }}
+        >
+          <div style={{
+            background: '#0d0d0d', border: '1px solid rgba(255,255,255,0.1)',
+            borderRadius: 4, padding: 24, width: '100%', maxWidth: 360, position: 'relative',
+          }}>
+            <button onClick={() => setShowSoundModal(false)} style={{
+              position: 'absolute', top: 16, right: 16,
+              background: 'none', border: 'none', color: '#444444', cursor: 'pointer', padding: 0,
+            }}>
+              <X size={18} />
+            </button>
+
+            <p style={{ fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase', color: '#444444', margin: '0 0 20px' }}>
+              ARKA PLAN SESİ
+            </p>
+
+            {/* Volume slider */}
+            <div style={{ marginBottom: 20 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+                <span style={{ fontSize: 11, color: '#666666', letterSpacing: '0.05em' }}>Ses Seviyesi</span>
+                <span style={{ fontSize: 11, color: '#888888' }}>{Math.round(ambientVolume * 100)}%</span>
+              </div>
+              <input type="range" min={0} max={1} step={0.05}
+                value={ambientVolume}
+                onChange={e => setAmbientVolume(parseFloat(e.target.value))}
+                style={{ width: '100%', accentColor: '#b91c1c' }}
+              />
+            </div>
+
+            {/* Sound list */}
+            <div style={{
+              display: 'flex', flexDirection: 'column', marginBottom: 20,
+              border: '1px solid rgba(255,255,255,0.06)', borderRadius: 4, overflow: 'hidden',
+            }}>
+              {AMBIENT_SOUNDS.map((s, i) => {
+                const selected = pendingSoundKey === s.key
+                return (
+                  <button key={s.key}
+                    onClick={() => setPendingSoundKey(s.key)}
+                    style={{
+                      padding: '12px 16px', background: 'none', border: 'none',
+                      borderLeft: selected ? '2px solid #b91c1c' : '2px solid transparent',
+                      borderBottom: i < AMBIENT_SOUNDS.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none',
+                      textAlign: 'left', cursor: 'pointer', fontFamily: 'inherit',
+                      color: selected ? '#b91c1c' : '#888888',
+                      fontSize: 13, transition: 'background 150ms',
+                    }}
+                    onMouseEnter={e => { if (!selected) e.currentTarget.style.background = 'rgba(255,255,255,0.05)' }}
+                    onMouseLeave={e => { e.currentTarget.style.background = 'none' }}
+                  >
+                    {s.label}
+                  </button>
+                )
+              })}
+            </div>
+
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button onClick={() => setShowSoundModal(false)} style={{
+                flex: 1, padding: '8px 0', background: 'none',
+                border: '1px solid rgba(255,255,255,0.08)', borderRadius: 4,
+                color: '#888888', fontSize: 11, cursor: 'pointer', fontFamily: 'inherit',
+              }}>
+                İptal
+              </button>
+              <button
+                onClick={() => { setActiveSoundKey(pendingSoundKey); setShowSoundModal(false) }}
+                style={{
+                  flex: 2, padding: '8px 0', background: '#b91c1c', border: 'none',
+                  borderRadius: 4, color: '#ffffff', fontSize: 11, fontWeight: 700,
+                  letterSpacing: '0.1em', cursor: 'pointer', fontFamily: 'inherit',
+                }}
+              >
+                ONAYLA
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <style>{`
         @keyframes pomFadeIn {
           from { opacity: 0; transform: translateY(8px); }
           to   { opacity: 1; transform: none; }
         }
       `}</style>
-    </div>
+    </>
   )
 }

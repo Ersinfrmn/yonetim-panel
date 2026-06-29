@@ -129,9 +129,9 @@ export default function Goals() {
       .select().single()
     if (error) { console.error('addGoal:', error); toast.error('Hedef eklenemedi'); return }
 
-    // Patch new columns (category, progress, milestones, template) — requires migration;
+    // Patch new columns (category, milestones, template) — requires migration;
     // silently skipped if migration hasn't been run yet
-    const ext = { category: form.category, template: form.template || null, progress: 0, milestones: [] }
+    const ext = { category: form.category, template: form.template || null, milestones: [] }
     const { data: patched } = await supabase.from('goals').update(ext).eq('id', data.id).select().single()
 
     setGoals(g => [patched ?? data, ...g])

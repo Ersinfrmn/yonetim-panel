@@ -74,7 +74,7 @@ export default function Stats() {
           .select('started_at,completed_at,was_completed,completed')
           .eq('user_id', user.id),
         supabase.from('goals')
-          .select('id,title,status,target_date,created_at,start_date:created_at')
+          .select('id,title,status,target_date,created_at')
           .eq('user_id', user.id)
           .neq('status', 'completed'),
       ])

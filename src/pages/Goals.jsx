@@ -377,7 +377,7 @@ export default function Goals() {
           const cat      = getCat(goal.category)
           const statusCfg = STATUS_CONFIG[goal.status] || STATUS_CONFIG.active
           const daysInfo = getDaysInfo(goal.target_date)
-          const progress = calcProgress(goal)
+          const progress = calculateGoalProgress(goal, linkedTodosMap[goal.id] || [])
 
           return (
             <div

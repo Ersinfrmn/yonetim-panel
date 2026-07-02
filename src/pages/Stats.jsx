@@ -393,7 +393,7 @@ export default function Stats() {
           ) : (
             <div className="space-y-4">
               {extras.goals.map(goal => {
-                const pct   = goal.progress ?? 0
+                const pct   = calculateGoalProgress(goal, extras.linkedTasksMap[goal.id] || [])
                 const color = pColor(pct)
                 return (
                   <div key={goal.id}>

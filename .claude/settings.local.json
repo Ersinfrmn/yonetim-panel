@@ -20,7 +20,20 @@
       "Bash(cat vercel.json)",
       "Bash(ls .vercel)",
       "Bash(npx vercel *)",
-      "Bash(git check-ignore *)"
+      "Bash(git check-ignore *)",
+      "Read(//Users/ersinferman/**)",
+      "Read(//Users/ersinferman/Library/Application Support/**)",
+      "Read(//Users/ersinferman/.config/**)",
+      "Bash(env)",
+      "Bash(security find-generic-password *)",
+      "mcp__claude-in-chrome__tabs_context_mcp",
+      "Bash(open -a \"Google Chrome\")",
+      "Bash(ls /Applications | grep -iE \"chrome|arc|edge|brave|firefox|safari|dia\" ; ls ~/Applications 2>/dev/null | grep -iE \"chrome|arc|edge|brave\")",
+      "Bash(open -a \"Brave Browser\")",
+      "Bash(curl -s -o /dev/null -w '%{http_code}\\\\n' 'https://majgjnqcehxhcepchmta.supabase.co/rest/v1/tasks?select=id,goal_id&limit=1' -H 'apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1hamdqbnFjZWh4aGNlcGNobXRhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MjE2NDEsImV4cCI6MjA5Nzk5NzY0MX0.W3Kr-p8tzBeOS8FGToTeItSsL5aOhXUOw0_AIYr_cuI' -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1hamdqbnFjZWh4aGNlcGNobXRhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MjE2NDEsImV4cCI6MjA5Nzk5NzY0MX0.W3Kr-p8tzBeOS8FGToTeItSsL5aOhXUOw0_AIYr_cuI')",
+      "Bash(curl -s -o /dev/null -w '%{http_code}\\\\n' 'https://majgjnqcehxhcepchmta.supabase.co/rest/v1/goals?select=id,progress,category,created_at&limit=1' -H 'apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1hamdqbnFjZWh4aGNlcGNobXRhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MjE2NDEsImV4cCI6MjA5Nzk5NzY0MX0.W3Kr-p8tzBeOS8FGToTeItSsL5aOhXUOw0_AIYr_cuI' -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1hamdqbnFjZWh4aGNlcGNobXRhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MjE2NDEsImV4cCI6MjA5Nzk5NzY0MX0.W3Kr-p8tzBeOS8FGToTeItSsL5aOhXUOw0_AIYr_cuI')",
+      "Bash(curl -s -o /dev/null -w '%{http_code}\\\\n' 'https://majgjnqcehxhcepchmta.supabase.co/rest/v1/pomodoro_sessions?select=id,was_completed,completed,completed_at,started_at,duration_minutes&limit=1' -H 'apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1hamdqbnFjZWh4aGNlcGNobXRhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MjE2NDEsImV4cCI6MjA5Nzk5NzY0MX0.W3Kr-p8tzBeOS8FGToTeItSsL5aOhXUOw0_AIYr_cuI' -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1hamdqbnFjZWh4aGNlcGNobXRhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MjE2NDEsImV4cCI6MjA5Nzk5NzY0MX0.W3Kr-p8tzBeOS8FGToTeItSsL5aOhXUOw0_AIYr_cuI')",
+      "Bash(curl -s -o /dev/null -w '%{http_code}\\\\n' 'https://majgjnqcehxhcepchmta.supabase.co/rest/v1/weekly_plans?select=id&limit=1' -H 'apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1hamdqbnFjZWh4aGNlcGNobXRhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MjE2NDEsImV4cCI6MjA5Nzk5NzY0MX0.W3Kr-p8tzBeOS8FGToTeItSsL5aOhXUOw0_AIYr_cuI' -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1hamdqbnFjZWh4aGNlcGNobXRhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MjE2NDEsImV4cCI6MjA5Nzk5NzY0MX0.W3Kr-p8tzBeOS8FGToTeItSsL5aOhXUOw0_AIYr_cuI')"
     ]
   },
   "hooks": {

@@ -1,6 +1,9 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
+import { useLoadOnce } from '../lib/useLoadOnce'
+import { calculateGoalProgress } from '../lib/goalProgress'
+import { isSessionCompleted, sessionDay } from '../lib/dateUtils'
 import { subDays, format, parseISO, startOfWeek, startOfMonth } from 'date-fns'
 import { tr } from 'date-fns/locale'
 import {

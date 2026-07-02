@@ -86,7 +86,7 @@ export default function Goals() {
   const [form, setForm] = useState(EMPTY_FORM)
   const [linkedTodosMap, setLinkedTodosMap] = useState({})
 
-  useEffect(() => {
+  useLoadOnce(() => {
     Promise.all([
       supabase.from('goals').select('*').eq('user_id', user.id).order('created_at', { ascending: false }),
       supabase.from('tasks').select('id, title, completed, goal_id').eq('user_id', user.id).not('goal_id', 'is', null),
@@ -100,7 +100,7 @@ export default function Goals() {
       setLinkedTodosMap(map)
       setLoading(false)
     })
-  }, [])
+  }, [user.id])
 
   // ── CRUD ──────────────────────────────────────────────────────────────────
 

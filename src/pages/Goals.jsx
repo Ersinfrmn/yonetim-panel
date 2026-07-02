@@ -74,18 +74,6 @@ function getDaysInfo(target_date) {
   return { label: `${days} gün kaldı`, color: 'text-ink-muted' }
 }
 
-function calcProgress(goal) {
-  const startStr = goal.start_date || goal.created_at
-  const endStr   = goal.target_date
-  if (!startStr || !endStr) return 0
-  const start = new Date(startStr).getTime()
-  const end   = new Date(endStr).getTime()
-  const now   = Date.now()
-  if (now >= end)   return 100
-  if (now <= start) return 0
-  return Math.round(((now - start) / (end - start)) * 100)
-}
-
 // ─── Component ───────────────────────────────────────────────────────────────
 
 export default function Goals() {

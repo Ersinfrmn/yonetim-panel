@@ -51,9 +51,10 @@ export default function Stats() {
   const [extras,        setExtras]        = useState(null)
   const [habitMoodCorr, setHabitMoodCorr] = useState(null)
 
-  // ── Existing data load (unchanged) ────────────────────────────────────────
+  // ── Data load — each table fetched exactly once, all sections computed
+  //    from the same result set ─────────────────────────────────────────────
 
-  useEffect(() => {
+  useLoadOnce(() => {
     async function load() {
       const today = new Date()
       const [
@@ -61,13 +62,21 @@ export default function Stats() {
         { data: habitLogs },
         { data: tasks },
         { data: journals },
-        { data: pomodoros },
+        { data: sessions },
+        { data: goals },
       ] = await Promise.all([
         supabase.from('habits').select('id,name,target_days').eq('user_id', user.id),
-        supabase.from('habit_logs').select('*').eq('user_id', user.id).eq('completed', true),
+        supabase.from('habit_logs').select('habit_id,date').eq('user_id', user.id).eq('completed', true),
         supabase.from('tasks').select('*').eq('user_id', user.id),
-        supabase.from('journal_entries').select('date').eq('user_id', user.id),
-        supabase.from('pomodoro_sessions').select('*').eq('user_id', user.id).eq('completed', true),
+        supabase.from('journal_entries').select('date,mood').eq('user_id', user.id),
+        // Catch both old (completed) and new (was_completed) sessions
+        supabase.from('pomodoro_sessions')
+          .select('started_at,completed_at,was_completed,completed')
+          .eq('user_id', user.id),
+        supabase.from('goals')
+          .select('id,title,status,target_date,created_at,start_date:created_at')
+          .eq('user_id', user.id)
+          .neq('status', 'completed'),
       ])
 
       const last7 = Array.from({ length: 7 }, (_, i) => {
@@ -95,9 +104,11 @@ export default function Stats() {
       let cur = today
       while (journalDates.has(fmt(cur))) { journalStreak++; cur = subDays(cur, 1) }
 
-      const todayStr = fmt(today)
-      const pomoToday = (pomodoros || []).filter(p => p.started_at?.startsWith(todayStr)).length
-      const pomoWeek  = (pomodoros || []).filter(p => p.started_at && parseISO(p.started_at) >= weekStart).length
+      const todayStr      = fmt(today)
+      const weekStartStr  = fmt(weekStart)
+      const doneSessions  = (sessions || []).filter(isSessionCompleted)
+      const pomoToday = doneSessions.filter(s => sessionDay(s) === todayStr).length
+      const pomoWeek  = doneSessions.filter(s => { const d = sessionDay(s); return d && d >= weekStartStr }).length
 
       const last30 = Array.from({ length: 30 }, (_, i) => {
         const d   = subDays(today, 29 - i)
@@ -110,51 +121,19 @@ export default function Stats() {
       }).filter((_, i) => i % 5 === 4)
 
       setData({ last7, last30, tasksThisWeek, tasksThisMonth, journalStreak, pomoToday, pomoWeek, habitCount: (habits || []).length })
-    }
-    load()
-  }, [])
-
-  // ── New extras data load ──────────────────────────────────────────────────
-
-  useEffect(() => {
-    async function loadExtras() {
-      const today       = new Date()
-      const ago30       = format(subDays(today, 29), 'yyyy-MM-dd')
-
-      const [
-        { data: goals },
-        { data: moodEntries },
-        { data: recentLogs },
-        { data: pomoDone },
-      ] = await Promise.all([
-        supabase.from('goals')
-          .select('id,title,progress,status,target_date,category')
-          .eq('user_id', user.id)
-          .neq('status', 'completed'),
-        supabase.from('journal_entries')
-          .select('date,mood')
-          .eq('user_id', user.id)
-          .gte('date', ago30)
-          .not('mood', 'is', null),
-        supabase.from('habit_logs')
-          .select('date')
-          .eq('user_id', user.id)
-          .eq('completed', true)
-          .gte('date', ago30),
-        // Catch both old (completed) and new (was_completed) sessions
-        supabase.from('pomodoro_sessions')
-          .select('started_at,completed_at,was_completed,completed')
-          .eq('user_id', user.id),
-      ])
 
       // ── Habit × Mood correlation ──────────────────────────────────────────
 
+      const ago30       = fmt(subDays(today, 29))
+      const moodEntries = (journals || []).filter(j => j.mood != null && j.date >= ago30)
+      const recentLogs  = (habitLogs || []).filter(l => l.date >= ago30)
+
       const habitCountByDate = {}
-      ;(recentLogs || []).forEach(l => {
+      recentLogs.forEach(l => {
         habitCountByDate[l.date] = (habitCountByDate[l.date] || 0) + 1
       })
 
-      const rawPts = (moodEntries || []).map(e => ({
+      const rawPts = moodEntries.map(e => ({
         x: habitCountByDate[e.date] || 0,
         y: e.mood,
       }))
@@ -171,10 +150,8 @@ export default function Stats() {
       // ── Best pomodoro day ─────────────────────────────────────────────────
 
       const dateMap = {}
-      ;(pomoDone || []).forEach(s => {
-        const isCompleted = s.was_completed === true || s.completed === true
-        if (!isCompleted) return
-        const dateStr = (s.completed_at || s.started_at)?.split('T')[0]
+      doneSessions.forEach(s => {
+        const dateStr = sessionDay(s)
         if (dateStr) dateMap[dateStr] = (dateMap[dateStr] || 0) + 1
       })
 
@@ -182,32 +159,27 @@ export default function Stats() {
         ? Object.entries(dateMap).reduce((a, b) => b[1] > a[1] ? b : a)
         : null
 
+      // ── Linked tasks per goal (shared progress calculation) ───────────────
+
+      const linkedTasksMap = {}
+      ;(tasks || []).forEach(t => {
+        if (!t.goal_id) return
+        if (!linkedTasksMap[t.goal_id]) linkedTasksMap[t.goal_id] = []
+        linkedTasksMap[t.goal_id].push(t)
+      })
+
       setExtras({
         goals:           goals || [],
+        linkedTasksMap,
         correlationData,
         hasEnoughCorr:   rawPts.length >= 5,
         bestDay:         bestDay ? { date: bestDay[0], count: bestDay[1] } : null,
       })
-    }
-    loadExtras()
-  }, [user.id])
 
-  // ── Per-habit mood correlation ────────────────────────────────────────────
-
-  useEffect(() => {
-    async function loadHabitMood() {
-      const [
-        { data: habits },
-        { data: logs },
-        { data: journals },
-      ] = await Promise.all([
-        supabase.from('habits').select('id, name').eq('user_id', user.id),
-        supabase.from('habit_logs').select('habit_id, date').eq('user_id', user.id).eq('completed', true),
-        supabase.from('journal_entries').select('date, mood').eq('user_id', user.id).not('mood', 'is', null),
-      ])
+      // ── Per-habit mood correlation ────────────────────────────────────────
 
       const moodByDate = {}
-      ;(journals || []).forEach(j => { moodByDate[j.date] = j.mood })
+      ;(journals || []).forEach(j => { if (j.mood != null) moodByDate[j.date] = j.mood })
 
       const moodDates = Object.keys(moodByDate)
       if (moodDates.length < 5) {
@@ -216,7 +188,7 @@ export default function Stats() {
       }
 
       const logsByHabit = {}
-      ;(logs || []).forEach(l => {
+      ;(habitLogs || []).forEach(l => {
         if (!logsByHabit[l.habit_id]) logsByHabit[l.habit_id] = new Set()
         logsByHabit[l.habit_id].add(l.date)
       })
@@ -234,7 +206,7 @@ export default function Stats() {
 
       setHabitMoodCorr({ hasEnough: true, items })
     }
-    loadHabitMood()
+    load()
   }, [user.id])
 
   // ── CSV export ────────────────────────────────────────────────────────────

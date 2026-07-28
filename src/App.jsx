@@ -9,8 +9,6 @@ import Habits from './pages/Habits'
 import Todos from './pages/Todos'
 import Journal from './pages/Journal'
 import Goals from './pages/Goals'
-import Pomodoro from './pages/Pomodoro'
-import Stats from './pages/Stats'
 import WeeklyPlan from './pages/WeeklyPlan'
 import Addiction from './pages/Addiction'
 import Books from './pages/Books'
@@ -44,8 +42,6 @@ function AnimatedRoutes() {
                 <Route path="/todos"     element={<Todos />} />
                 <Route path="/journal"   element={<Journal />} />
                 <Route path="/goals"     element={<Goals />} />
-                <Route path="/pomodoro"  element={<Pomodoro />} />
-                <Route path="/stats"       element={<Stats />} />
                 <Route path="/weekly-plan" element={<WeeklyPlan />} />
                 <Route path="/addiction"   element={<Addiction />} />
                 <Route path="/books"       element={<Books />} />

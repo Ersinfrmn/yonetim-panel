@@ -19,8 +19,6 @@ export default function Login() {
             'Akıllı görev listesi',
             'Günlük journal',
             'Hedef takibi',
-            'Pomodoro zamanlayıcı',
-            'İstatistik paneli',
           ].map(f => (
             <div key={f} className="flex items-center gap-2 text-sm text-ink-secondary">
               <div className="w-1.5 h-1.5 rounded-full bg-primary-500 shrink-0" />

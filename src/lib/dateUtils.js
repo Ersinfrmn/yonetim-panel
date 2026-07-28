@@ -1,6 +1,6 @@
 import { format, parseISO } from 'date-fns'
 
-// Shared day-boundary helpers. All daily stats (pomodoro, habits, tasks,
+// Shared day-boundary helpers. All daily stats (habits, tasks,
 // journal) use the user's local timezone (Europe/Istanbul in practice) —
 // date-fns `format` renders in the browser's local timezone.
 
@@ -25,10 +25,3 @@ export function endOfTodayISO() {
   return new Date(n.getFullYear(), n.getMonth(), n.getDate() + 1).toISOString()
 }
 
-// A pomodoro session counts as completed under both the old (`completed`)
-// and new (`was_completed`) schema flags.
-export const isSessionCompleted = s => s.was_completed === true || s.completed === true
-
-// The local calendar day a session belongs to (completion time, falling back
-// to start time).
-export const sessionDay = s => localDayOf(s.completed_at || s.started_at)

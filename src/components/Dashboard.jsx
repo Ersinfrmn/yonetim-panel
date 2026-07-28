@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Flame, CheckSquare, Timer, BookOpen, Zap, X } from 'lucide-react'
+import { Flame, CheckSquare, BookOpen, Zap, X } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
 import { format, subDays, parseISO, startOfWeek } from 'date-fns'
@@ -73,7 +73,7 @@ function StatCard({ icon: Icon, title, primary, secondary, error }) {
 
 // ─── Momentum Ring ────────────────────────────────────────────────────────────
 
-function MomentumRing({ score, habitScore, taskScore, pomoScore }) {
+function MomentumRing({ score, habitScore, taskScore }) {
   const color = '#b91c1c'
   const dash  = Math.min(score / 100, 1) * RING_CIRC
 
@@ -102,11 +102,10 @@ function MomentumRing({ score, habitScore, taskScore, pomoScore }) {
           </text>
         </svg>
 
-        <div className="w-full grid grid-cols-3 gap-2 mt-4 pt-4 border-t border-border-subtle">
+        <div className="w-full grid grid-cols-2 gap-2 mt-4 pt-4 border-t border-border-subtle">
           {[
             { label: 'Alışkanlık', val: habitScore, max: 40 },
             { label: 'Görev',      val: taskScore,  max: 30 },
-            { label: 'Pomodoro',   val: pomoScore,  max: 30 },
           ].map(({ label, val, max }) => (
             <div key={label} className="text-center">
               <p className="text-sm font-bold text-ink-primary">
@@ -136,7 +135,6 @@ export default function Dashboard() {
   const [d, setD] = useState({
     habits: [], todayLogs: [], weekLogs: [],
     todayTasks: [], weekTasks: [],
-    todayPomos: [], weekPomos: [],
     journal: null,
   })
   const [errs, setErrs] = useState({})
@@ -149,14 +147,12 @@ export default function Dashboard() {
 
   useEffect(() => {
     async function load() {
-      const [r0, r1, r2, r3, r4] = await Promise.allSettled([
+      const [r0, r1, r2, r3] = await Promise.allSettled([
         supabase.from('habits').select('*').eq('user_id', user.id),
         supabase.from('habit_logs').select('habit_id,date,completed')
           .eq('user_id', user.id).gte('date', sevenAgo).lte('date', todayStr),
         supabase.from('tasks').select('id,title,completed,due_date,priority')
           .eq('user_id', user.id).gte('due_date', sevenAgo).lte('due_date', todayStr),
-        supabase.from('pomodoro_sessions').select('id,was_completed,completed,started_at,completed_at,duration_minutes')
-          .eq('user_id', user.id).or('was_completed.eq.true,completed.eq.true').gte('started_at', sevenAgo),
         supabase.from('journal_entries').select('id,date,content,images')
           .eq('user_id', user.id).eq('date', todayStr).limit(1),
       ])
@@ -164,13 +160,7 @@ export default function Dashboard() {
       const habits   = r0.status === 'fulfilled' ? (r0.value.data || []) : []
       const allLogs  = r1.status === 'fulfilled' ? (r1.value.data || []) : []
       const allTasks = r2.status === 'fulfilled' ? (r2.value.data || []) : []
-      const allPomos = r3.status === 'fulfilled' ? (r3.value.data || []) : []
-      const journal  = r4.status === 'fulfilled' ? (r4.value.data?.[0] || null) : null
-
-      const todayPomos = allPomos.filter(p => {
-        const ts = p.completed_at || p.started_at
-        return ts ? fmt(parseISO(ts)) === todayStr : false
-      })
+      const journal  = r3.status === 'fulfilled' ? (r3.value.data?.[0] || null) : null
 
       setD({
         habits,
@@ -178,15 +168,12 @@ export default function Dashboard() {
         weekLogs:   allLogs,
         todayTasks: allTasks.filter(t => t.due_date === todayStr),
         weekTasks:  allTasks,
-        todayPomos,
-        weekPomos:  allPomos,
         journal,
       })
       setErrs({
         habits:   r0.status === 'rejected' || r1.status === 'rejected',
         tasks:    r2.status === 'rejected',
-        pomodoro: r3.status === 'rejected',
-        journal:  r4.status === 'rejected',
+        journal:  r3.status === 'rejected',
       })
       setLoading(false)
     }
@@ -206,8 +193,6 @@ export default function Dashboard() {
   const pendingTodayTasks   = d.todayTasks.filter(t => !t.completed)
   const highPriorityTask    = pendingTodayTasks.find(t => t.priority === 'high')
 
-  const todayPomoCount = d.todayPomos.length
-  const todayPomoMins  = d.todayPomos.reduce((s, p) => s + (p.duration_minutes ?? 25), 0)
   const journalHasContent = d.journal && (d.journal.images?.length > 0 || d.journal.content?.trim())
 
   // Momentum
@@ -222,8 +207,7 @@ export default function Dashboard() {
   }
   const habitScore    = habitExpected > 0 ? Math.round((habitDone / habitExpected) * 40) : 0
   const taskScore     = d.weekTasks.length > 0 ? Math.round((d.weekTasks.filter(t => t.completed).length / d.weekTasks.length) * 30) : 0
-  const pomoScore     = Math.round(Math.min(d.weekPomos.length / 28, 1) * 30)
-  const momentumScore = habitScore + taskScore + pomoScore
+  const momentumScore = habitScore + taskScore
 
   // Action
   let action
@@ -231,8 +215,6 @@ export default function Dashboard() {
     action = { emoji: '🚨', text: highPriorityTask.title, sub: 'Yüksek öncelikli görev — bugün bitirilmeli', href: '/todos', btn: 'Görevlere git' }
   } else if (incompleteHabits.length > 0) {
     action = { emoji: '🔥', text: incompleteHabits[0].name, sub: `${incompleteHabits.length} alışkanlık tamamlanmayı bekliyor`, href: '/habits', btn: 'Alışkanlıklara git' }
-  } else if (todayPomoCount < 4) {
-    action = { emoji: '🍅', text: `Pomodoro zamanı — henüz ${todayPomoCount} pomodoro tamamladın`, sub: `${4 - todayPomoCount} oturum daha önerilir`, href: '/pomodoro', btn: "Pomodoro'ya git" }
   } else {
     action = { emoji: '🎉', text: 'Harika! Bugünkü hedeflerini tamamladın', sub: null, href: null, btn: null }
   }
@@ -309,7 +291,7 @@ export default function Dashboard() {
           <div className="space-y-4">
 
             {/* ── Section 1: Günün Özeti ─────────────────────────────────── */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
               <StatCard
                 icon={Flame}
                 title="Alışkanlıklar"
@@ -323,13 +305,6 @@ export default function Dashboard() {
                 primary={`${completedTodayTasks.length} tamamlandı bugün`}
                 secondary={pendingTodayTasks.length > 0 ? `${pendingTodayTasks.length} görev bekliyor` : d.todayTasks.length === 0 ? 'Bugün görev yok' : 'Tümü bitti ✅'}
                 error={errs.tasks}
-              />
-              <StatCard
-                icon={Timer}
-                title="Pomodoro"
-                primary={`${todayPomoCount} oturum — ${todayPomoMins} dk`}
-                secondary={todayPomoCount >= 4 ? 'Günlük hedefe ulaşıldı 🎯' : `${4 - todayPomoCount} oturum daha önerilir`}
-                error={errs.pomodoro}
               />
               <StatCard
                 icon={BookOpen}
@@ -369,7 +344,6 @@ export default function Dashboard() {
                   score={momentumScore}
                   habitScore={habitScore}
                   taskScore={taskScore}
-                  pomoScore={pomoScore}
                 />
               </div>
 
@@ -500,13 +474,6 @@ export default function Dashboard() {
                           </div>
                         ))}
                       </div>
-                      <button
-                        onClick={() => { closeModal(); navigate('/pomodoro') }}
-                        className="w-full h-12 bg-primary-500 hover:bg-primary-600 text-white font-semibold transition-colors mb-3"
-                        style={{ borderRadius: 2, fontSize: 15 }}
-                      >
-                        Pomodoro Başlat →
-                      </button>
                       <button onClick={closeModal} className="w-full text-center text-xs text-ink-muted hover:text-white transition-colors py-1">
                         Kapat
                       </button>

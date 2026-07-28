@@ -191,3 +191,32 @@ alter table tasks add column if not exists pomodoro_count integer default 0;
 -- Values: 0=Sunday, 1=Monday, 2=Tuesday, 3=Wednesday, 4=Thursday, 5=Friday, 6=Saturday
 -- Default {0,1,2,3,4,5,6} means every day — existing habits are unaffected.
 alter table habits add column if not exists target_days integer[] default '{0,1,2,3,4,5,6}';
+
+-- 18. SHADOW WORK SECTIONS
+create table if not exists shadow_work_sections (
+  id          uuid primary key default gen_random_uuid(),
+  user_id     uuid references auth.users(id) on delete cascade not null,
+  title       text not null,
+  description text default '',
+  order_index integer default 0,
+  created_at  timestamptz default now()
+);
+alter table shadow_work_sections enable row level security;
+create policy "Users manage own shadow_work_sections" on shadow_work_sections
+  using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+-- 19. SHADOW WORK TASKS
+create table if not exists shadow_work_tasks (
+  id           uuid primary key default gen_random_uuid(),
+  section_id   uuid references shadow_work_sections(id) on delete cascade not null,
+  user_id      uuid references auth.users(id) on delete cascade not null,
+  title        text not null,
+  notes        text default '',
+  status       text check (status in ('todo', 'in_progress', 'done')) default 'todo',
+  order_index  integer default 0,
+  created_at   timestamptz default now(),
+  completed_at timestamptz
+);
+alter table shadow_work_tasks enable row level security;
+create policy "Users manage own shadow_work_tasks" on shadow_work_tasks
+  using (auth.uid() = user_id) with check (auth.uid() = user_id);

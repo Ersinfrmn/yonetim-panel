@@ -13,6 +13,7 @@ import WeeklyPlan from './pages/WeeklyPlan'
 import Addiction from './pages/Addiction'
 import Books from './pages/Books'
 import BookDetail from './pages/BookDetail'
+import ShadowWork from './pages/ShadowWork'
 
 function PrivateRoute({ children }) {
   const { user, loading } = useAuth()
@@ -42,10 +43,11 @@ function AnimatedRoutes() {
                 <Route path="/todos"     element={<Todos />} />
                 <Route path="/journal"   element={<Journal />} />
                 <Route path="/goals"     element={<Goals />} />
-                <Route path="/weekly-plan" element={<WeeklyPlan />} />
-                <Route path="/addiction"   element={<Addiction />} />
-                <Route path="/books"       element={<Books />} />
-                <Route path="/books/:id"   element={<BookDetail />} />
+                <Route path="/weekly-plan"  element={<WeeklyPlan />} />
+                <Route path="/addiction"    element={<Addiction />} />
+                <Route path="/books"        element={<Books />} />
+                <Route path="/books/:id"    element={<BookDetail />} />
+                <Route path="/shadow-work"  element={<ShadowWork />} />
               </Routes>
             </div>
           </Layout>

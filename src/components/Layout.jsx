@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { NavLink, useNavigate, useLocation } from 'react-router-dom'
 import {
   Home, Repeat, CheckSquare, BookOpen, Target,
-  LogOut, CalendarDays, ShieldOff, X, Library,
+  LogOut, CalendarDays, ShieldOff, X, Library, Brain,
 } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 
@@ -68,10 +68,11 @@ const GROUPS = [
   {
     label: 'TAKİP',
     items: [
-      { to: '/todos',    icon: CheckSquare, label: 'Görevler'      },
-      { to: '/habits',   icon: Repeat,      label: 'Alışkanlıklar' },
-      { to: '/journal',  icon: BookOpen,    label: 'Günlük'        },
-      { to: '/books',    icon: Library,     label: 'Kitaplar'      },
+      { to: '/todos',       icon: CheckSquare, label: 'Görevler'      },
+      { to: '/habits',      icon: Repeat,      label: 'Alışkanlıklar' },
+      { to: '/journal',     icon: BookOpen,    label: 'Günlük'        },
+      { to: '/books',       icon: Library,     label: 'Kitaplar'      },
+      { to: '/shadow-work', icon: Brain,       label: 'Shadow Work'   },
     ],
   },
 ]

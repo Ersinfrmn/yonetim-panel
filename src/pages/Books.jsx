@@ -238,14 +238,12 @@ export default function Books() {
         .from('books').select('*').eq('user_id', user.id)
         .order('created_at', { ascending: false })
       if (error) {
-        console.error('[Books] Supabase fetch error:', error)
         setFetchError(error.message)
       } else {
         setBooks(data || [])
         setFetchError(null)
       }
     } catch (err) {
-      console.error('[Books] Unexpected error:', err)
       setFetchError(err.message)
     } finally {
       setLoading(false)
@@ -256,9 +254,9 @@ export default function Books() {
     <div>
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-        <p style={{ fontSize: 24, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#ffffff', margin: 0 }}>
+        <h2 style={{ fontSize: 24, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#ffffff', margin: 0 }}>
           KİTAPLAR
-        </p>
+        </h2>
         <button
           onClick={() => setShowModal(true)}
           style={{ display: 'flex', alignItems: 'center', gap: 6, background: '#b91c1c', border: 'none', borderRadius: 2, color: '#fff', padding: '6px 14px', fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', cursor: 'pointer', fontFamily: 'inherit' }}
@@ -279,7 +277,11 @@ export default function Books() {
             Tekrar Dene
           </button>
         </div>
-      ) : loading ? null : books.length === 0 ? (
+      ) : loading ? (
+        <div className="flex justify-center py-20">
+          <div className="w-6 h-6 rounded-full border-2 border-primary-500 border-t-transparent animate-spin" />
+        </div>
+      ) : books.length === 0 ? (
         <div style={{ textAlign: 'center', padding: '80px 20px' }}>
           <Library size={64} strokeWidth={1.5} style={{ color: 'rgba(255,255,255,0.1)', display: 'block', margin: '0 auto 16px' }} />
           <p style={{ fontSize: 11, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)', marginBottom: 20 }}>Henüz kitap eklenmedi</p>

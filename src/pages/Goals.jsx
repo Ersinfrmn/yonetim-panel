@@ -117,7 +117,7 @@ export default function Goals() {
         status: 'in-progress',
       })
       .select().single()
-    if (error) { console.error('addGoal:', error); toast.error('Hedef eklenemedi'); return }
+    if (error) { toast.error('Hedef eklenemedi'); return }
 
     // Patch new columns (category, milestones, template) — requires migration;
     // silently skipped if migration hasn't been run yet
@@ -138,7 +138,7 @@ export default function Goals() {
   async function updateStatus(goal, status) {
     const patch = { status }
     const { data, error } = await supabase.from('goals').update(patch).eq('id', goal.id).select().single()
-    if (error) { console.error('updateStatus:', error); return }
+    if (error) { toast.error('Durum güncellenemedi'); return }
     if (data) setGoals(g => g.map(x => x.id === goal.id ? data : x))
   }
 

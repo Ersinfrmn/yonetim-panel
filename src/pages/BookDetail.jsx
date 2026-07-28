@@ -49,11 +49,9 @@ export default function BookDetail() {
       newUrls.push(urlData.publicUrl)
     }
     if (newUrls.length > 0) {
-      setNoteImages(prev => {
-        const updated = [...prev, ...newUrls]
-        supabase.from('books').update({ note_images: updated }).eq('id', id)
-        return updated
-      })
+      const updated = [...noteImages, ...newUrls]
+      setNoteImages(updated)
+      await supabase.from('books').update({ note_images: updated }).eq('id', id)
     }
     setUploading(false)
   }
@@ -61,11 +59,9 @@ export default function BookDetail() {
   async function deleteImage(url) {
     const path = url.split('/book-covers/')[1]
     if (path) await supabase.storage.from('book-covers').remove([decodeURIComponent(path)])
-    setNoteImages(prev => {
-      const updated = prev.filter(u => u !== url)
-      supabase.from('books').update({ note_images: updated }).eq('id', id)
-      return updated
-    })
+    const updated = noteImages.filter(u => u !== url)
+    setNoteImages(updated)
+    await supabase.from('books').update({ note_images: updated }).eq('id', id)
   }
 
   async function deleteBook() {

@@ -94,7 +94,6 @@ const emptyForm = () => ({
 
 const DAY_HEADERS = ['Paz', 'Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cts']
 const MONTH_TR    = ['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık']
-const WEEK_SHORT  = ['Paz', 'Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cts']
 
 function pillBg(task) {
   if (task.priority === 'high')   return 'bg-red-900/40 text-red-300'
@@ -567,7 +566,7 @@ function CalendarView({ tasks, onToggle }) {
                   {/* Column header */}
                   <div className={`py-2 px-1 text-center shrink-0 ${todayDay ? 'bg-primary-600' : 'bg-white/5'}`}>
                     <p className={`text-[10px] font-bold uppercase tracking-wider ${todayDay ? 'text-primary-200' : 'text-ink-muted'}`}>
-                      {WEEK_SHORT[day.getDay()]}
+                      {DAY_HEADERS[day.getDay()]}
                     </p>
                     <p className={`text-lg font-bold leading-none mt-0.5 ${todayDay ? 'text-white' : 'text-ink-primary'}`}>
                       {day.getDate()}

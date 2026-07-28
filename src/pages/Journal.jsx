@@ -49,7 +49,7 @@ export default function Journal() {
   const [images,         setImages]         = useState([])
   const [uploading,      setUploading]      = useState(false)
   const [uploadProgress, setUploadProgress] = useState(0)
-  const [saving,         setSaving]         = useState(false)   // eslint-disable-line no-unused-vars
+  const [saving,         setSaving]         = useState(false)
   const [showSummary,    setShowSummary]    = useState(false)
   const [summaryPeriod,  setSummaryPeriod]  = useState(7)
   const [dragging,       setDragging]       = useState(false)

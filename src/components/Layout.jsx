@@ -68,11 +68,10 @@ const GROUPS = [
   {
     label: 'TAKİP',
     items: [
-      { to: '/todos',       icon: CheckSquare, label: 'Görevler'      },
-      { to: '/habits',      icon: Repeat,      label: 'Alışkanlıklar' },
-      { to: '/journal',     icon: BookOpen,    label: 'Günlük'        },
-      { to: '/books',       icon: Library,     label: 'Kitaplar'      },
-      { to: '/shadow-work', icon: Brain,       label: 'Shadow Work'   },
+      { to: '/todos',   icon: CheckSquare, label: 'Görevler'      },
+      { to: '/habits',  icon: Repeat,      label: 'Alışkanlıklar' },
+      { to: '/journal', icon: BookOpen,    label: 'Günlük'        },
+      { to: '/books',   icon: Library,     label: 'Kitaplar'      },
     ],
   },
 ]
@@ -216,6 +215,20 @@ export default function Layout({ children }) {
               </div>
             ))}
           </nav>
+
+          {/* Shadow Work */}
+          <button
+            onClick={() => navigate('/shadow-work')}
+            style={{
+              width: 64, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center',
+              flexShrink: 0, cursor: 'pointer', border: 'none', transition: 'color 150ms',
+              background: location.pathname === '/shadow-work' ? 'rgba(255,255,255,0.04)' : 'none',
+              borderLeft: location.pathname === '/shadow-work' ? '2px solid #b91c1c' : '2px solid transparent',
+              color: location.pathname === '/shadow-work' ? '#b91c1c' : '#444444',
+            }}
+          >
+            <Brain size={20} strokeWidth={1.5} />
+          </button>
 
           {/* Addiction tracker */}
           <button
